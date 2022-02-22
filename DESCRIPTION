@@ -1,0 +1,31 @@
+Package: lsirm12pl
+Type: Package
+Title: Latent Space Item Response Model
+Version: 1.0.0
+Date: 2022-02-13
+Authors@R: c(person("Dongyoung", "Go", role = c("aut"),
+                     email = "dongyoung.gr@yonsei.ac.kr"),
+              person("Jina", "Park", role = c("aut", "cre"),
+                     email = "pja0707@yonsei.ac.kr"),       
+              person("Ickhoon", "Jin", role = c("ctb"),
+                     email = "ijin@yonsei.ac.kr"),
+              person("Minjeong", "Jeon", role = "ctb",
+                     email = "mjjeon@ucla.edu"))
+Maintainer: Jina Park <pja0707@yonsei.ac.kr>
+Description: Analysis of dichotomous and continuous response data using latent factor by both 1PL LSIRM and 2PL LSIRM as described in Jeon et al. (2021) <doi:10.1007/s11336-021-09762-5>. It includes original 1PL LSIRM and 2PL LSIRM provided for binary response data and its extension for continuous response data. Bayesian model selection with spike-and-slab prior and method for dealing data with missing value under missing at random, missing completely at random are also supported. Various diagnostic plots are available to inspect the latent space and summary of estimated parameters.
+License: GPL-3
+Imports: Rcpp (>= 1.0.5), MCMCpack, ggplot2, GPArotation
+LinkingTo: Rcpp, RcppArmadillo
+Encoding: UTF-8
+RoxygenNote: 7.1.2
+Suggests: knitr
+Depends: R (>= 3.1.0)
+LazyData: true
+NeedsCompilation: yes
+Packaged: 2022-02-22 08:25:23 UTC; jina
+Author: Dongyoung Go [aut],
+  Jina Park [aut, cre],
+  Ickhoon Jin [ctb],
+  Minjeong Jeon [ctb]
+Repository: CRAN
+Date/Publication: 2022-02-22 19:50:05 UTC
