@@ -7,7 +7,7 @@
 #' @param ndim Numeric; dimension of latent space. default value is 2.
 #' @param niter Numeric; number of iterations to run MCMC sampling. default value is 15000.
 #' @param nburn Numeric; number of initial, pre-thinning, MCMC iterations to discard. default value is 2500.
-#' @param nthin Numeric;number of thinning, MCMC iterations to discard. default value is 5.
+#' @param nthin Numeric; number of thinning, MCMC iterations to discard. default value is 5.
 #' @param nprint Numeric; MCMC samples is displayed during execution of MCMC chain for each \code{nprint}. default value is 500.
 #' @param jump_beta Numeric; jumping rule of the proposal density for beta. default value is 0.4.
 #' @param jump_theta Numeric; jumping rule of the proposal density for theta. default value is 1.0.

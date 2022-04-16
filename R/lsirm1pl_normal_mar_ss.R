@@ -119,6 +119,7 @@ lsirm1pl_normal_mar_ss = function(data, ndim = 2, niter = 15000, nburn = 2500, n
   sigma.estimate = mean(output$sigma)
   gamma.estimate = mean(output$gamma)
   imp.estimate = apply(output$impute, 2, mean)
+  
   pi.estimate = mean(output$pi)
   xi.estimate = mean(output$xi)
   

@@ -70,7 +70,7 @@ plot_latent = function(lsrm_result, rotation=FALSE) {
   
     ggplot() + 
     geom_point(data = df2, aes(x = axis1, y = axis2), size = 0.7) +
-    geom_text(data = df1, aes(x = axis1, y = axis2, label=1:nrow(df1)), color = "red", size = 2.5, fontface = "bold") +
+    geom_text(data = df1, aes(x = axis1, y = axis2, label=1:nrow(df1)), color = "red", size = 4, fontface = "bold") +
     xlim(axis_range)+ylim(axis_range) + coord_cartesian(expand = FALSE) + theme_bw() + 
     # geom_point(size = 2,alpha=1,shape=16) + 
     theme(plot.margin = unit(c(1,1,1,1), "cm"),

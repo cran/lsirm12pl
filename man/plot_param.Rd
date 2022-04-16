@@ -11,7 +11,7 @@ plot_param(data, lsrm_result, option, missing = 99)
 
 \item{lsrm_result}{List; The output list obtained by any lsrm function.}
 
-\item{option}{character; If value is "beta", draw the boxplot for the posterior samples of beta. If value is "theta", draw the distribution of the theta estimates per total test score for the \code{data}.}
+\item{option}{character; If value is "beta", draw the boxplot for the posterior samples of beta. If value is "theta", draw the distribution of the theta estimates per total test score for the \code{data}. If value is "alpha", draw the boxplot for the posterior samples of alpha. The "alpha" is only available for 2pl LSIRM.}
 
 \item{missing}{Numeric; a number to replace missing values. default value is 99.}
 }

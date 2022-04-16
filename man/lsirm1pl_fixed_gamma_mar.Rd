@@ -32,7 +32,7 @@ lsirm1pl_fixed_gamma_mar(
 
 \item{nburn}{Numeric; number of initial, pre-thinning, MCMC iterations to discard. default value is 2500.}
 
-\item{nthin}{Numeric;number of thinning, MCMC iterations to discard. default value is 5.}
+\item{nthin}{Numeric; number of thinning, MCMC iterations to discard. default value is 5.}
 
 \item{nprint}{Numeric; MCMC samples is displayed during execution of MCMC chain for each \code{nprint}. default value is 500.}
 

@@ -90,6 +90,7 @@ intrm2pl_normal_mar = function(data, ndim = 2, niter = 15000, nburn = 2500, nthi
   sigma.estimate = mean(output$sigma)
   delta.estimate = matrix(NA,nrow(data),ncol(data))
   imp.estimate = apply(output$impute, 2, mean)
+  
   nsample <- nrow(data)
   nitem <- ncol(data)
   

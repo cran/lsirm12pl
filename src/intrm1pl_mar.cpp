@@ -175,7 +175,7 @@ Rcpp::List intrm1pl_mar_cpp(arma::mat data,
     //sigma_theta update with gibbs
     post_a = 2 * pr_a_theta  + nsample;
     post_b = pr_b_theta;
-    for(j = 0; j < nsample; j++) post_b += std::pow((oldtheta(j) - pr_mean_theta), 2.0)/2;
+    for(j = 0; j < nsample; j++) post_b += std::pow((oldtheta(j) - pr_mean_theta), 2.0) / 2;
     // pr_sd_theta = std::sqrt(post_b * (1.0 / R::rchisq(post_a)));
     pr_sd_theta = std::sqrt(2 * post_b *(1.0 /  R::rchisq(post_a)));
 

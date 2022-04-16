@@ -6,7 +6,8 @@
 #' @name lsirm12pl
 #' @importFrom Rcpp evalCpp 
 #' @importFrom MCMCpack procrustes
-#' @import ggplot2 GPArotation
+#' @importFrom grDevices boxplot.stats
+#' @import ggplot2 GPArotation dplyr 
 #' @useDynLib lsirm12pl
 #' 
 NULL

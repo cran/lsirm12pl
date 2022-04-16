@@ -111,6 +111,7 @@ lsirm2pl_normal_fixed_gamma_mar = function(data, ndim = 2, niter = 15000, nburn 
   sigma_estimate = mean(output$sigma)
   imp.estimate = apply(output$impute, 2, mean)
   
+  
   return(list(beta_estimate  = beta.estimate,
               theta_estimate = theta.estimate,
               sigma_theta_estimate    = sigma_theta.estimate,
