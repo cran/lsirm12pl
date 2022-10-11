@@ -36,22 +36,30 @@
 #' @details \code{twopl} models the probability of correct response by respondent \eqn{j} to item \eqn{i} with item effect \eqn{\beta_i}, respondent effect \eqn{\theta_j}. For 2pl model, the the item effect is assumed to have additional discrimination parameter \eqn{\alpha_i} multiplied by \eqn{\theta_j}: \deqn{logit(P(Y_{j,i} = 1|\theta_j,\beta_i, \alpha_i))=\theta_j * \alpha_i+\beta_i}
 #' 
 #' @examples 
+#' \donttest{
 #' # generate example item response matrix
 #' data     <- matrix(rbinom(500, size = 1, prob = 0.5),ncol=10,nrow=50)
 #' 
 #' result <- twopl(data)
-#' 
+#' }
 #' @export
 twopl = function(data, niter = 15000, nburn = 2500, nthin = 5, nprint = 500,
                  jump_beta = 0.4, jump_theta = 1.0, jump_alpha = 1.0,
                  pr_mean_beta = 0, pr_sd_beta = 1.0, pr_mean_theta = 0,
                  pr_mean_alpha = 0.5, pr_sd_alpha = 1.0, pr_a_theta = 0.001, pr_b_theta = 0.001){
   
-  output <- two_pl(data, niter, nburn, nthin, nprint,
+  if(is.data.frame(data)){
+    cname = colnames(data)
+  }else{
+    cname = paste("item", 1:ncol(data), sep=" ")
+  }
+  
+  output <- two_pl(as.matrix(data), niter, nburn, nthin, nprint,
                    jump_beta, jump_theta, jump_alpha,
                    pr_mean_beta, pr_sd_beta, pr_mean_theta,
                    pr_mean_alpha, pr_sd_alpha, pr_a_theta, pr_b_theta)
   
+  mcmc.inf = list(nburn=nburn, niter=niter, nthin=nthin)
   nsample <- nrow(data)
   nitem <- ncol(data)
   
@@ -60,7 +68,13 @@ twopl = function(data, niter = 15000, nburn = 2500, nthin = 5, nprint = 500,
   alpha.estimate = apply(output$alpha, 2, mean)
   sigma_theta.estimate = mean(output$sigma_theta)
   
-  return(list(beta_estimate  = beta.estimate,
+  beta.summary = data.frame(cbind(apply(output$beta, 2, mean), t(apply(output$beta, 2, function(x) quantile(x, probs = c(0.025, 0.975))))))
+  colnames(beta.summary) <- c("Estimate", "2.5%", "97.5%")
+  rownames(beta.summary) <- cname
+  
+  result <- list(mcmc_inf = mcmc.inf,
+              beta_estimate  = beta.estimate,
+              beta_summary = beta.summary,
               theta_estimate = theta.estimate,
               sigma_theta_estimate    = sigma_theta.estimate,
               alpha_estimate = alpha.estimate,
@@ -70,5 +84,8 @@ twopl = function(data, niter = 15000, nburn = 2500, nthin = 5, nprint = 500,
               alpha          = output$alpha,
               accept_beta    = output$accept_beta,
               accept_theta   = output$accept_theta,
-              accept_alpha   = output$accept_alpha))
+              accept_alpha   = output$accept_alpha)
+  class(result) = "lsirm"
+  
+  return(result)
 }

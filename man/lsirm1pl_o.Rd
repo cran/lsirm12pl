@@ -64,6 +64,10 @@ lsirm1pl_o(
 }
 \value{
 \code{lsirm1pl_o} returns an object of  list containing the following components:
+ \item{data}{data frame or matrix containing the variables in the model.}
+ \item{bic}{Numeric value with the corresponding BIC.}
+ \item{mcmc_inf}{number of mcmc iteration, burn-in periods, and thinning intervals.}
+ \item{map_inf}{value of log maximum a posterior and iteration number which have log maximum a posterior.}
  \item{beta_estimate}{posterior estimation of beta.}
  \item{theta_estimate}{posterior estimation of theta.}
  \item{sigma_theta_estimate}{posterior estimation of standard deviation of theta.}
@@ -83,7 +87,7 @@ lsirm1pl_o(
  \item{accept_gamma}{accept ratio of gamma.}
 }
 \description{
-\link{lsirm1pl_o} is used to fit 1pl LSIRM model. 
+\link{lsirm1pl_o} is used to fit 1pl LSIRM model.
 \link{lsirm1pl_o} factorizes item response matrix into column-wise item effect, row-wise respondent effect and further embeds interaction effect in a latent space. The resulting latent space provides an interaction map that represents interactions between respondents and items.
 }
 \details{
@@ -97,7 +101,6 @@ data     <- matrix(rbinom(500, size = 1, prob = 0.5),ncol=10,nrow=50)
 lsirm_result <- lsirm1pl_o(data)
 
 # The code following can achieve the same result.
-lsirm_result <- lsirm1pl(data, spikenslab = FALSE, fixed_gamma = FALSE)
+lsirm_result <- lsirm(data ~ lsirm1pl(spikenslab = FALSE, fixed_gamma = FALSE))
 }
-
 }

@@ -20,7 +20,7 @@ lsirm1pl_fixed_gamma_mar(
   pr_mean_theta = 0,
   pr_a_theta = 0.001,
   pr_b_theta = 0.001,
-  missing = 99
+  missing.val = 99
 )
 }
 \arguments{
@@ -54,10 +54,15 @@ lsirm1pl_fixed_gamma_mar(
 
 \item{pr_b_theta}{Numeric; scale parameter of inverse gamma prior for variance of theta. default value is 0.001.}
 
-\item{missing}{Numeric; a number to replace missing values. default value is 99.}
+\item{missing.val}{Numeric; a number to replace missing values. default value is 99.}
 }
 \value{
 \code{lsirm1pl_fixed_gamma_mar} returns an object of  list containing the following components:
+ \item{data}{data frame or matrix containing the variables in the model.}
+ \item{missing.val}{a number to replace missing values.}
+ \item{bic}{Numeric value with the corresponding BIC.}
+ \item{mcmc_inf}{number of mcmc iteration, burn-in periods, and thinning intervals.}
+ \item{map_inf}{value of log maximum a posterior and iteration number which have log maximum a posterior.}
  \item{beta_estimate}{posterior estimation of beta.}
  \item{theta_estimate}{posterior estimation of theta.}
  \item{sigma_theta_estimate}{posterior estimation of standard deviation of theta.}
@@ -76,7 +81,7 @@ lsirm1pl_fixed_gamma_mar(
  \item{accept_z}{accept ratio of z.}
 }
 \description{
-\link{lsirm1pl_fixed_gamma_mar} is used to fit LSIRM model with gamma fixed to 1 in incomplete data assumed to be missing at random. 
+\link{lsirm1pl_fixed_gamma_mar} is used to fit LSIRM model with gamma fixed to 1 in incomplete data assumed to be missing at random.
 \link{lsirm1pl_fixed_gamma_mar} factorizes item response matrix into column-wise item effect, row-wise respondent effect and further embeds interaction effect in a latent space, while considering the missing element under the assumption of missing at random. The resulting latent space provides an interaction map that represents interactions between respondents and items.
 }
 \details{
@@ -91,14 +96,14 @@ data     <- matrix(rbinom(500, size = 1, prob = 0.5),ncol=10,nrow=50)
 missing_mat     <- matrix(rbinom(500, size = 1, prob = 0.2),ncol=10,nrow=50)
 
 # make missing value with missing indicator matrix
-data[missing_mat==1] <- 99 
+data[missing_mat==1] <- 99
 
 lsirm_result <- lsirm1pl_fixed_gamma_mar(data)
 
 # The code following can achieve the same result.
-lsirm_result <- lsirm1pl(data, spikenslab = FALSE, fixed_gamma = TRUE, missing_data = 'mar')
+lsirm_result <- lsirm(data ~ lsirm1pl(spikenslab = FALSE, fixed_gamma = TRUE,
+missing_data = "mar", missing.val = 99))
 }
-
 }
 \references{
 Little, R. J., & Rubin, D. B. (2019). Statistical analysis with missing data (Vol. 793). John Wiley & Sons.

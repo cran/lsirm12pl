@@ -29,22 +29,30 @@
 #' @details \code{onepl} models the probability of correct response by respondent \eqn{j} to item \eqn{i} with item effect \eqn{\beta_i}, respondent effect \eqn{\theta_j}: \deqn{logit(P(Y_{j,i} = 1|\theta_j,\beta_i))=\theta_j+\beta_i}
 #' 
 #' @examples 
+#' \donttest{
 #' # generate example item response matrix
 #' data     <- matrix(rbinom(500, size = 1, prob = 0.5),ncol=10,nrow=50)
 #' 
 #' result <- onepl(data)
-#' 
+#' }
 #' @export
 onepl = function(data, niter = 15000, nburn = 2500, nthin = 5, nprint = 500,
                  jump_beta = 0.4, jump_theta = 1.0, 
                  pr_mean_beta = 0, pr_sd_beta = 1.0, pr_mean_theta = 0, 
                  pr_a_theta = 0.001, pr_b_theta = 0.001){
   
-  output <- onepl_cpp(data, niter, nburn, nthin, nprint,
+  if(is.data.frame(data)){
+    cname = colnames(data)
+  }else{
+    cname = paste("item", 1:ncol(data), sep=" ")
+  }
+  
+  output <- onepl_cpp(as.matrix(data), niter, nburn, nthin, nprint,
                       jump_beta, jump_theta, 
                       pr_mean_beta, pr_sd_beta, pr_mean_theta, 
                       pr_a_theta, pr_b_theta)
   
+  mcmc.inf = list(nburn=nburn, niter=niter, nthin=nthin)
   nsample <- nrow(data)
   nitem <- ncol(data)
   
@@ -52,12 +60,21 @@ onepl = function(data, niter = 15000, nburn = 2500, nthin = 5, nprint = 500,
   theta.estimate = apply(output$theta, 2, mean)
   sigma_theta.estimate = mean(output$sigma_theta)
   
-  return(list(beta_estimate  = beta.estimate,
+  beta.summary = data.frame(cbind(apply(output$beta, 2, mean), t(apply(output$beta, 2, function(x) quantile(x, probs = c(0.025, 0.975))))))
+  colnames(beta.summary) <- c("Estimate", "2.5%", "97.5%")
+  rownames(beta.summary) <- cname
+  
+  result <- list(mcmc_inf = mcmc.inf,
+              beta_estimate  = beta.estimate,
+              beta_summary = beta.summary,
               theta_estimate = theta.estimate,
               sigma_theta_estimate    = sigma_theta.estimate,
               beta           = output$beta,
               theta          = output$theta,
               theta_sd       = output$sigma_theta,
               accept_beta    = output$accept_beta,
-              accept_theta   = output$accept_theta))
+              accept_theta   = output$accept_theta)
+  class(result) = "lsirm"
+  
+  return(result)            
 }

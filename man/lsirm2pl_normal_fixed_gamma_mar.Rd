@@ -25,7 +25,7 @@ lsirm2pl_normal_fixed_gamma_mar(
   pr_b_theta = 0.001,
   pr_a_eps = 0.001,
   pr_b_eps = 0.001,
-  missing = 99
+  missing.val = 99
 )
 }
 \arguments{
@@ -69,10 +69,15 @@ lsirm2pl_normal_fixed_gamma_mar(
 
 \item{pr_b_eps}{Numeric; scale parameter of inverse gamma prior for variance of data likelihood default value is 0.001.}
 
-\item{missing}{Numeric; a number to replace missing values. default value is 99.}
+\item{missing.val}{Numeric; a number to replace missing values. default value is 99.}
 }
 \value{
 \code{lsirm2pl_normal_fixed_gamma_mar} returns an object of  list containing the following components:
+ \item{data}{data frame or matrix containing the variables in the model.}
+ \item{missing.val}{a number to replace missing values.}
+ \item{bic}{Numeric value with the corresponding BIC.}
+ \item{mcmc_inf}{number of mcmc iteration, burn-in periods, and thinning intervals.}
+ \item{map_inf}{value of log maximum a posterior and iteration number which have log maximum a posterior.}
  \item{beta_estimate}{posterior estimation of beta.}
  \item{theta_estimate}{posterior estimation of theta.}
  \item{sigma_theta_estimate}{posterior estimation of standard deviation of theta.}
@@ -96,7 +101,7 @@ lsirm2pl_normal_fixed_gamma_mar(
  \item{accept_alpha}{accept ratio of alpha.}
 }
 \description{
-\link{lsirm2pl_normal_fixed_gamma_mar} is used to fit 2pl LSIRM model with gamma fixed to 1 for continuous variable in incomplete data assumed to be missing at random. 
+\link{lsirm2pl_normal_fixed_gamma_mar} is used to fit 2pl LSIRM model with gamma fixed to 1 for continuous variable in incomplete data assumed to be missing at random.
 
 \link{lsirm2pl_normal_fixed_gamma_mar} factorizes item response matrix into column-wise item effect, row-wise respondent effect and further embeds interaction effect in a latent space, while considering the missing element under the assumption of missing at random. Unlike 1pl model, 2pl model assumes the item effect can vary according to respondent, allowing additional parameter multiplied with respondent effect. The resulting latent space provides an interaction map that represents interactions between respondents and items.
 }
@@ -111,12 +116,12 @@ data     <- matrix(rnorm(500, mean = 0, sd = 1),ncol=10,nrow=50)
 missing_mat     <- matrix(rbinom(500, size = 1, prob = 0.2),ncol=10,nrow=50)
 
 # make missing value with missing indicator matrix
-data[missing_mat==1] <- 99 
+data[missing_mat==1] <- 99
 
 lsirm_result <- lsirm2pl_normal_fixed_gamma_mar(data)
 
 # The code following can achieve the same result.
-lsirm_result <- lsirm2pl_normal(data, spikenslab = FALSE, fixed_gamma = TRUE,
-                                missing_data = "mar")
+lsirm_result <- lsirm(data ~ lsirm2pl(spikenslab = FALSE, fixed_gamma = TRUE,
+                      missing_data = "mar"))
 
 }

@@ -75,9 +75,10 @@ Unlike 1pl model, 2pl model assumes the item effect can vary according to respon
 \code{twopl} models the probability of correct response by respondent \eqn{j} to item \eqn{i} with item effect \eqn{\beta_i}, respondent effect \eqn{\theta_j}. For 2pl model, the the item effect is assumed to have additional discrimination parameter \eqn{\alpha_i} multiplied by \eqn{\theta_j}: \deqn{logit(P(Y_{j,i} = 1|\theta_j,\beta_i, \alpha_i))=\theta_j * \alpha_i+\beta_i}
 }
 \examples{
+\donttest{
 # generate example item response matrix
 data     <- matrix(rbinom(500, size = 1, prob = 0.5),ncol=10,nrow=50)
 
 result <- twopl(data)
-
+}
 }

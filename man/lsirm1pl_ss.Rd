@@ -76,6 +76,10 @@ lsirm1pl_ss(
 }
 \value{
 \code{lsirm1pl_ss} returns an object of  list containing the following components:
+ \item{data}{data frame or matrix containing the variables in the model.}
+ \item{bic}{Numeric value with the corresponding BIC.}
+ \item{mcmc_inf}{number of mcmc iteration, burn-in periods, and thinning intervals.}
+ \item{map_inf}{value of log maximum a posterior and iteration number which have log maximum a posterior.}
  \item{beta_estimate}{posterior estimation of beta.}
  \item{theta_estimate}{posterior estimation of theta.}
  \item{sigma_theta_estimate}{posterior estimation of standard deviation of theta.}
@@ -110,9 +114,8 @@ data     <- matrix(rbinom(500, size = 1, prob = 0.5),ncol=10,nrow=50)
 lsirm_result <- lsirm1pl_ss(data)
 
 # The code following can achieve the same result.
-lsirm_result <- lsirm1pl(data, spikenslab = TRUE, fixed_gamma = FALSE)
+lsirm_result <- lsirm(data ~ lsirm1pl(spikenslab = TRUE, fixed_gamma = FALSE))
 }
- 
 }
 \references{
 Ishwaran, H., & Rao, J. S. (2005). Spike and slab variable selection: Frequentist and Bayesian strategies (Vol. 33). The Annals of Statistics

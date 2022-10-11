@@ -11,341 +11,79 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
-// intrm1pl_cpp
-Rcpp::List intrm1pl_cpp(arma::mat data, const int niter, const int nburn, const int nthin, const int nprint, const double jump_beta, const double jump_theta, const double jump_delta, const double pr_mean_beta, const double pr_sd_beta, const double pr_mean_theta, const double pr_mean_delta, const double pr_sd_delta, const double pr_a_theta, const double pr_b_theta);
-RcppExport SEXP _lsirm12pl_intrm1pl_cpp(SEXP dataSEXP, SEXP niterSEXP, SEXP nburnSEXP, SEXP nthinSEXP, SEXP nprintSEXP, SEXP jump_betaSEXP, SEXP jump_thetaSEXP, SEXP jump_deltaSEXP, SEXP pr_mean_betaSEXP, SEXP pr_sd_betaSEXP, SEXP pr_mean_thetaSEXP, SEXP pr_mean_deltaSEXP, SEXP pr_sd_deltaSEXP, SEXP pr_a_thetaSEXP, SEXP pr_b_thetaSEXP) {
+// log_likelihood_cpp
+Rcpp::List log_likelihood_cpp(arma::mat data, const int ndim, arma::mat beta_est, arma::mat theta_est, const double gamma_est, arma::mat z_est, arma::mat w_est, const double missing);
+RcppExport SEXP _lsirm12pl_log_likelihood_cpp(SEXP dataSEXP, SEXP ndimSEXP, SEXP beta_estSEXP, SEXP theta_estSEXP, SEXP gamma_estSEXP, SEXP z_estSEXP, SEXP w_estSEXP, SEXP missingSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< arma::mat >::type data(dataSEXP);
-    Rcpp::traits::input_parameter< const int >::type niter(niterSEXP);
-    Rcpp::traits::input_parameter< const int >::type nburn(nburnSEXP);
-    Rcpp::traits::input_parameter< const int >::type nthin(nthinSEXP);
-    Rcpp::traits::input_parameter< const int >::type nprint(nprintSEXP);
-    Rcpp::traits::input_parameter< const double >::type jump_beta(jump_betaSEXP);
-    Rcpp::traits::input_parameter< const double >::type jump_theta(jump_thetaSEXP);
-    Rcpp::traits::input_parameter< const double >::type jump_delta(jump_deltaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_mean_beta(pr_mean_betaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_sd_beta(pr_sd_betaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_mean_theta(pr_mean_thetaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_mean_delta(pr_mean_deltaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_sd_delta(pr_sd_deltaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_a_theta(pr_a_thetaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_b_theta(pr_b_thetaSEXP);
-    rcpp_result_gen = Rcpp::wrap(intrm1pl_cpp(data, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_delta, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_mean_delta, pr_sd_delta, pr_a_theta, pr_b_theta));
-    return rcpp_result_gen;
-END_RCPP
-}
-// intrm1pl_mar_cpp
-Rcpp::List intrm1pl_mar_cpp(arma::mat data, const int niter, const int nburn, const int nthin, const int nprint, const double jump_beta, const double jump_theta, const double jump_delta, const double pr_mean_beta, const double pr_sd_beta, const double pr_mean_theta, const double pr_mean_delta, const double pr_sd_delta, const double pr_a_theta, const double pr_b_theta, const double missing);
-RcppExport SEXP _lsirm12pl_intrm1pl_mar_cpp(SEXP dataSEXP, SEXP niterSEXP, SEXP nburnSEXP, SEXP nthinSEXP, SEXP nprintSEXP, SEXP jump_betaSEXP, SEXP jump_thetaSEXP, SEXP jump_deltaSEXP, SEXP pr_mean_betaSEXP, SEXP pr_sd_betaSEXP, SEXP pr_mean_thetaSEXP, SEXP pr_mean_deltaSEXP, SEXP pr_sd_deltaSEXP, SEXP pr_a_thetaSEXP, SEXP pr_b_thetaSEXP, SEXP missingSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::mat >::type data(dataSEXP);
-    Rcpp::traits::input_parameter< const int >::type niter(niterSEXP);
-    Rcpp::traits::input_parameter< const int >::type nburn(nburnSEXP);
-    Rcpp::traits::input_parameter< const int >::type nthin(nthinSEXP);
-    Rcpp::traits::input_parameter< const int >::type nprint(nprintSEXP);
-    Rcpp::traits::input_parameter< const double >::type jump_beta(jump_betaSEXP);
-    Rcpp::traits::input_parameter< const double >::type jump_theta(jump_thetaSEXP);
-    Rcpp::traits::input_parameter< const double >::type jump_delta(jump_deltaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_mean_beta(pr_mean_betaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_sd_beta(pr_sd_betaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_mean_theta(pr_mean_thetaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_mean_delta(pr_mean_deltaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_sd_delta(pr_sd_deltaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_a_theta(pr_a_thetaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_b_theta(pr_b_thetaSEXP);
+    Rcpp::traits::input_parameter< const int >::type ndim(ndimSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type beta_est(beta_estSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type theta_est(theta_estSEXP);
+    Rcpp::traits::input_parameter< const double >::type gamma_est(gamma_estSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type z_est(z_estSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type w_est(w_estSEXP);
     Rcpp::traits::input_parameter< const double >::type missing(missingSEXP);
-    rcpp_result_gen = Rcpp::wrap(intrm1pl_mar_cpp(data, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_delta, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_mean_delta, pr_sd_delta, pr_a_theta, pr_b_theta, missing));
+    rcpp_result_gen = Rcpp::wrap(log_likelihood_cpp(data, ndim, beta_est, theta_est, gamma_est, z_est, w_est, missing));
     return rcpp_result_gen;
 END_RCPP
 }
-// intrm1pl_mcar_cpp
-Rcpp::List intrm1pl_mcar_cpp(arma::mat data, const int niter, const int nburn, const int nthin, const int nprint, const double jump_beta, const double jump_theta, const double jump_delta, const double pr_mean_beta, const double pr_sd_beta, const double pr_mean_theta, const double pr_mean_delta, const double pr_sd_delta, const double pr_a_theta, const double pr_b_theta, const double missing);
-RcppExport SEXP _lsirm12pl_intrm1pl_mcar_cpp(SEXP dataSEXP, SEXP niterSEXP, SEXP nburnSEXP, SEXP nthinSEXP, SEXP nprintSEXP, SEXP jump_betaSEXP, SEXP jump_thetaSEXP, SEXP jump_deltaSEXP, SEXP pr_mean_betaSEXP, SEXP pr_sd_betaSEXP, SEXP pr_mean_thetaSEXP, SEXP pr_mean_deltaSEXP, SEXP pr_sd_deltaSEXP, SEXP pr_a_thetaSEXP, SEXP pr_b_thetaSEXP, SEXP missingSEXP) {
+// log_likelihood_normal_cpp
+Rcpp::List log_likelihood_normal_cpp(arma::mat data, const int ndim, arma::mat beta_est, arma::mat theta_est, const double gamma_est, arma::mat z_est, arma::mat w_est, const double sigma_est, const double missing);
+RcppExport SEXP _lsirm12pl_log_likelihood_normal_cpp(SEXP dataSEXP, SEXP ndimSEXP, SEXP beta_estSEXP, SEXP theta_estSEXP, SEXP gamma_estSEXP, SEXP z_estSEXP, SEXP w_estSEXP, SEXP sigma_estSEXP, SEXP missingSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< arma::mat >::type data(dataSEXP);
-    Rcpp::traits::input_parameter< const int >::type niter(niterSEXP);
-    Rcpp::traits::input_parameter< const int >::type nburn(nburnSEXP);
-    Rcpp::traits::input_parameter< const int >::type nthin(nthinSEXP);
-    Rcpp::traits::input_parameter< const int >::type nprint(nprintSEXP);
-    Rcpp::traits::input_parameter< const double >::type jump_beta(jump_betaSEXP);
-    Rcpp::traits::input_parameter< const double >::type jump_theta(jump_thetaSEXP);
-    Rcpp::traits::input_parameter< const double >::type jump_delta(jump_deltaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_mean_beta(pr_mean_betaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_sd_beta(pr_sd_betaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_mean_theta(pr_mean_thetaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_mean_delta(pr_mean_deltaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_sd_delta(pr_sd_deltaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_a_theta(pr_a_thetaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_b_theta(pr_b_thetaSEXP);
+    Rcpp::traits::input_parameter< const int >::type ndim(ndimSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type beta_est(beta_estSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type theta_est(theta_estSEXP);
+    Rcpp::traits::input_parameter< const double >::type gamma_est(gamma_estSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type z_est(z_estSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type w_est(w_estSEXP);
+    Rcpp::traits::input_parameter< const double >::type sigma_est(sigma_estSEXP);
     Rcpp::traits::input_parameter< const double >::type missing(missingSEXP);
-    rcpp_result_gen = Rcpp::wrap(intrm1pl_mcar_cpp(data, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_delta, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_mean_delta, pr_sd_delta, pr_a_theta, pr_b_theta, missing));
+    rcpp_result_gen = Rcpp::wrap(log_likelihood_normal_cpp(data, ndim, beta_est, theta_est, gamma_est, z_est, w_est, sigma_est, missing));
     return rcpp_result_gen;
 END_RCPP
 }
-// intrm1pl_normal_cpp
-Rcpp::List intrm1pl_normal_cpp(arma::mat data, const int niter, const int nburn, const int nthin, const int nprint, const double jump_beta, const double jump_theta, const double jump_delta, const double pr_mean_beta, const double pr_sd_beta, const double pr_mean_theta, const double pr_mean_delta, const double pr_sd_delta, const double pr_a_eps, const double pr_b_eps, const double pr_a_theta, const double pr_b_theta);
-RcppExport SEXP _lsirm12pl_intrm1pl_normal_cpp(SEXP dataSEXP, SEXP niterSEXP, SEXP nburnSEXP, SEXP nthinSEXP, SEXP nprintSEXP, SEXP jump_betaSEXP, SEXP jump_thetaSEXP, SEXP jump_deltaSEXP, SEXP pr_mean_betaSEXP, SEXP pr_sd_betaSEXP, SEXP pr_mean_thetaSEXP, SEXP pr_mean_deltaSEXP, SEXP pr_sd_deltaSEXP, SEXP pr_a_epsSEXP, SEXP pr_b_epsSEXP, SEXP pr_a_thetaSEXP, SEXP pr_b_thetaSEXP) {
+// log_likelihood_normal2pl_cpp
+Rcpp::List log_likelihood_normal2pl_cpp(arma::mat data, const int ndim, arma::mat beta_est, arma::mat alpha_est, arma::mat theta_est, const double gamma_est, arma::mat z_est, arma::mat w_est, const double sigma_est, const double missing);
+RcppExport SEXP _lsirm12pl_log_likelihood_normal2pl_cpp(SEXP dataSEXP, SEXP ndimSEXP, SEXP beta_estSEXP, SEXP alpha_estSEXP, SEXP theta_estSEXP, SEXP gamma_estSEXP, SEXP z_estSEXP, SEXP w_estSEXP, SEXP sigma_estSEXP, SEXP missingSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< arma::mat >::type data(dataSEXP);
-    Rcpp::traits::input_parameter< const int >::type niter(niterSEXP);
-    Rcpp::traits::input_parameter< const int >::type nburn(nburnSEXP);
-    Rcpp::traits::input_parameter< const int >::type nthin(nthinSEXP);
-    Rcpp::traits::input_parameter< const int >::type nprint(nprintSEXP);
-    Rcpp::traits::input_parameter< const double >::type jump_beta(jump_betaSEXP);
-    Rcpp::traits::input_parameter< const double >::type jump_theta(jump_thetaSEXP);
-    Rcpp::traits::input_parameter< const double >::type jump_delta(jump_deltaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_mean_beta(pr_mean_betaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_sd_beta(pr_sd_betaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_mean_theta(pr_mean_thetaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_mean_delta(pr_mean_deltaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_sd_delta(pr_sd_deltaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_a_eps(pr_a_epsSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_b_eps(pr_b_epsSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_a_theta(pr_a_thetaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_b_theta(pr_b_thetaSEXP);
-    rcpp_result_gen = Rcpp::wrap(intrm1pl_normal_cpp(data, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_delta, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_mean_delta, pr_sd_delta, pr_a_eps, pr_b_eps, pr_a_theta, pr_b_theta));
-    return rcpp_result_gen;
-END_RCPP
-}
-// intrm1pl_normal_mar_cpp
-Rcpp::List intrm1pl_normal_mar_cpp(arma::mat data, const int niter, const int nburn, const int nthin, const int nprint, const double jump_beta, const double jump_theta, const double jump_delta, const double pr_mean_beta, const double pr_sd_beta, const double pr_mean_theta, const double pr_mean_delta, const double pr_sd_delta, const double pr_a_eps, const double pr_b_eps, const double pr_a_theta, const double pr_b_theta, const double missing);
-RcppExport SEXP _lsirm12pl_intrm1pl_normal_mar_cpp(SEXP dataSEXP, SEXP niterSEXP, SEXP nburnSEXP, SEXP nthinSEXP, SEXP nprintSEXP, SEXP jump_betaSEXP, SEXP jump_thetaSEXP, SEXP jump_deltaSEXP, SEXP pr_mean_betaSEXP, SEXP pr_sd_betaSEXP, SEXP pr_mean_thetaSEXP, SEXP pr_mean_deltaSEXP, SEXP pr_sd_deltaSEXP, SEXP pr_a_epsSEXP, SEXP pr_b_epsSEXP, SEXP pr_a_thetaSEXP, SEXP pr_b_thetaSEXP, SEXP missingSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::mat >::type data(dataSEXP);
-    Rcpp::traits::input_parameter< const int >::type niter(niterSEXP);
-    Rcpp::traits::input_parameter< const int >::type nburn(nburnSEXP);
-    Rcpp::traits::input_parameter< const int >::type nthin(nthinSEXP);
-    Rcpp::traits::input_parameter< const int >::type nprint(nprintSEXP);
-    Rcpp::traits::input_parameter< const double >::type jump_beta(jump_betaSEXP);
-    Rcpp::traits::input_parameter< const double >::type jump_theta(jump_thetaSEXP);
-    Rcpp::traits::input_parameter< const double >::type jump_delta(jump_deltaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_mean_beta(pr_mean_betaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_sd_beta(pr_sd_betaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_mean_theta(pr_mean_thetaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_mean_delta(pr_mean_deltaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_sd_delta(pr_sd_deltaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_a_eps(pr_a_epsSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_b_eps(pr_b_epsSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_a_theta(pr_a_thetaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_b_theta(pr_b_thetaSEXP);
+    Rcpp::traits::input_parameter< const int >::type ndim(ndimSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type beta_est(beta_estSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type alpha_est(alpha_estSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type theta_est(theta_estSEXP);
+    Rcpp::traits::input_parameter< const double >::type gamma_est(gamma_estSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type z_est(z_estSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type w_est(w_estSEXP);
+    Rcpp::traits::input_parameter< const double >::type sigma_est(sigma_estSEXP);
     Rcpp::traits::input_parameter< const double >::type missing(missingSEXP);
-    rcpp_result_gen = Rcpp::wrap(intrm1pl_normal_mar_cpp(data, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_delta, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_mean_delta, pr_sd_delta, pr_a_eps, pr_b_eps, pr_a_theta, pr_b_theta, missing));
+    rcpp_result_gen = Rcpp::wrap(log_likelihood_normal2pl_cpp(data, ndim, beta_est, alpha_est, theta_est, gamma_est, z_est, w_est, sigma_est, missing));
     return rcpp_result_gen;
 END_RCPP
 }
-// intrm1pl_normal_mcar_cpp
-Rcpp::List intrm1pl_normal_mcar_cpp(arma::mat data, const int niter, const int nburn, const int nthin, const int nprint, const double jump_beta, const double jump_theta, const double jump_delta, const double pr_mean_beta, const double pr_sd_beta, const double pr_mean_theta, const double pr_mean_delta, const double pr_sd_delta, const double pr_a_eps, const double pr_b_eps, const double pr_a_theta, const double pr_b_theta, const double missing);
-RcppExport SEXP _lsirm12pl_intrm1pl_normal_mcar_cpp(SEXP dataSEXP, SEXP niterSEXP, SEXP nburnSEXP, SEXP nthinSEXP, SEXP nprintSEXP, SEXP jump_betaSEXP, SEXP jump_thetaSEXP, SEXP jump_deltaSEXP, SEXP pr_mean_betaSEXP, SEXP pr_sd_betaSEXP, SEXP pr_mean_thetaSEXP, SEXP pr_mean_deltaSEXP, SEXP pr_sd_deltaSEXP, SEXP pr_a_epsSEXP, SEXP pr_b_epsSEXP, SEXP pr_a_thetaSEXP, SEXP pr_b_thetaSEXP, SEXP missingSEXP) {
+// log_likelihood_2pl_cpp
+Rcpp::List log_likelihood_2pl_cpp(arma::mat data, const int ndim, arma::mat beta_est, arma::mat alpha_est, arma::mat theta_est, const double gamma_est, arma::mat z_est, arma::mat w_est, const double missing);
+RcppExport SEXP _lsirm12pl_log_likelihood_2pl_cpp(SEXP dataSEXP, SEXP ndimSEXP, SEXP beta_estSEXP, SEXP alpha_estSEXP, SEXP theta_estSEXP, SEXP gamma_estSEXP, SEXP z_estSEXP, SEXP w_estSEXP, SEXP missingSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< arma::mat >::type data(dataSEXP);
-    Rcpp::traits::input_parameter< const int >::type niter(niterSEXP);
-    Rcpp::traits::input_parameter< const int >::type nburn(nburnSEXP);
-    Rcpp::traits::input_parameter< const int >::type nthin(nthinSEXP);
-    Rcpp::traits::input_parameter< const int >::type nprint(nprintSEXP);
-    Rcpp::traits::input_parameter< const double >::type jump_beta(jump_betaSEXP);
-    Rcpp::traits::input_parameter< const double >::type jump_theta(jump_thetaSEXP);
-    Rcpp::traits::input_parameter< const double >::type jump_delta(jump_deltaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_mean_beta(pr_mean_betaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_sd_beta(pr_sd_betaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_mean_theta(pr_mean_thetaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_mean_delta(pr_mean_deltaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_sd_delta(pr_sd_deltaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_a_eps(pr_a_epsSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_b_eps(pr_b_epsSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_a_theta(pr_a_thetaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_b_theta(pr_b_thetaSEXP);
+    Rcpp::traits::input_parameter< const int >::type ndim(ndimSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type beta_est(beta_estSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type alpha_est(alpha_estSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type theta_est(theta_estSEXP);
+    Rcpp::traits::input_parameter< const double >::type gamma_est(gamma_estSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type z_est(z_estSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type w_est(w_estSEXP);
     Rcpp::traits::input_parameter< const double >::type missing(missingSEXP);
-    rcpp_result_gen = Rcpp::wrap(intrm1pl_normal_mcar_cpp(data, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_delta, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_mean_delta, pr_sd_delta, pr_a_eps, pr_b_eps, pr_a_theta, pr_b_theta, missing));
-    return rcpp_result_gen;
-END_RCPP
-}
-// intrm2pl_cpp
-Rcpp::List intrm2pl_cpp(arma::mat data, const int niter, const int nburn, const int nthin, const int nprint, const double jump_beta, const double jump_theta, const double jump_alpha, const double jump_delta, const double pr_mean_beta, const double pr_sd_beta, const double pr_mean_theta, const double pr_mean_delta, const double pr_sd_delta, const double pr_mean_alpha, const double pr_sd_alpha, const double pr_a_theta, const double pr_b_theta);
-RcppExport SEXP _lsirm12pl_intrm2pl_cpp(SEXP dataSEXP, SEXP niterSEXP, SEXP nburnSEXP, SEXP nthinSEXP, SEXP nprintSEXP, SEXP jump_betaSEXP, SEXP jump_thetaSEXP, SEXP jump_alphaSEXP, SEXP jump_deltaSEXP, SEXP pr_mean_betaSEXP, SEXP pr_sd_betaSEXP, SEXP pr_mean_thetaSEXP, SEXP pr_mean_deltaSEXP, SEXP pr_sd_deltaSEXP, SEXP pr_mean_alphaSEXP, SEXP pr_sd_alphaSEXP, SEXP pr_a_thetaSEXP, SEXP pr_b_thetaSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::mat >::type data(dataSEXP);
-    Rcpp::traits::input_parameter< const int >::type niter(niterSEXP);
-    Rcpp::traits::input_parameter< const int >::type nburn(nburnSEXP);
-    Rcpp::traits::input_parameter< const int >::type nthin(nthinSEXP);
-    Rcpp::traits::input_parameter< const int >::type nprint(nprintSEXP);
-    Rcpp::traits::input_parameter< const double >::type jump_beta(jump_betaSEXP);
-    Rcpp::traits::input_parameter< const double >::type jump_theta(jump_thetaSEXP);
-    Rcpp::traits::input_parameter< const double >::type jump_alpha(jump_alphaSEXP);
-    Rcpp::traits::input_parameter< const double >::type jump_delta(jump_deltaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_mean_beta(pr_mean_betaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_sd_beta(pr_sd_betaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_mean_theta(pr_mean_thetaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_mean_delta(pr_mean_deltaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_sd_delta(pr_sd_deltaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_mean_alpha(pr_mean_alphaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_sd_alpha(pr_sd_alphaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_a_theta(pr_a_thetaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_b_theta(pr_b_thetaSEXP);
-    rcpp_result_gen = Rcpp::wrap(intrm2pl_cpp(data, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_delta, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_mean_delta, pr_sd_delta, pr_mean_alpha, pr_sd_alpha, pr_a_theta, pr_b_theta));
-    return rcpp_result_gen;
-END_RCPP
-}
-// intrm2pl_mar_cpp
-Rcpp::List intrm2pl_mar_cpp(arma::mat data, const int niter, const int nburn, const int nthin, const int nprint, const double jump_beta, const double jump_theta, const double jump_alpha, const double jump_delta, const double pr_mean_beta, const double pr_sd_beta, const double pr_mean_theta, const double pr_mean_delta, const double pr_sd_delta, const double pr_mean_alpha, const double pr_sd_alpha, const double pr_a_theta, const double pr_b_theta, const double missing);
-RcppExport SEXP _lsirm12pl_intrm2pl_mar_cpp(SEXP dataSEXP, SEXP niterSEXP, SEXP nburnSEXP, SEXP nthinSEXP, SEXP nprintSEXP, SEXP jump_betaSEXP, SEXP jump_thetaSEXP, SEXP jump_alphaSEXP, SEXP jump_deltaSEXP, SEXP pr_mean_betaSEXP, SEXP pr_sd_betaSEXP, SEXP pr_mean_thetaSEXP, SEXP pr_mean_deltaSEXP, SEXP pr_sd_deltaSEXP, SEXP pr_mean_alphaSEXP, SEXP pr_sd_alphaSEXP, SEXP pr_a_thetaSEXP, SEXP pr_b_thetaSEXP, SEXP missingSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::mat >::type data(dataSEXP);
-    Rcpp::traits::input_parameter< const int >::type niter(niterSEXP);
-    Rcpp::traits::input_parameter< const int >::type nburn(nburnSEXP);
-    Rcpp::traits::input_parameter< const int >::type nthin(nthinSEXP);
-    Rcpp::traits::input_parameter< const int >::type nprint(nprintSEXP);
-    Rcpp::traits::input_parameter< const double >::type jump_beta(jump_betaSEXP);
-    Rcpp::traits::input_parameter< const double >::type jump_theta(jump_thetaSEXP);
-    Rcpp::traits::input_parameter< const double >::type jump_alpha(jump_alphaSEXP);
-    Rcpp::traits::input_parameter< const double >::type jump_delta(jump_deltaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_mean_beta(pr_mean_betaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_sd_beta(pr_sd_betaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_mean_theta(pr_mean_thetaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_mean_delta(pr_mean_deltaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_sd_delta(pr_sd_deltaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_mean_alpha(pr_mean_alphaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_sd_alpha(pr_sd_alphaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_a_theta(pr_a_thetaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_b_theta(pr_b_thetaSEXP);
-    Rcpp::traits::input_parameter< const double >::type missing(missingSEXP);
-    rcpp_result_gen = Rcpp::wrap(intrm2pl_mar_cpp(data, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_delta, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_mean_delta, pr_sd_delta, pr_mean_alpha, pr_sd_alpha, pr_a_theta, pr_b_theta, missing));
-    return rcpp_result_gen;
-END_RCPP
-}
-// intrm2pl_mcar_cpp
-Rcpp::List intrm2pl_mcar_cpp(arma::mat data, const int niter, const int nburn, const int nthin, const int nprint, const double jump_beta, const double jump_theta, const double jump_alpha, const double jump_delta, const double pr_mean_beta, const double pr_sd_beta, const double pr_mean_theta, const double pr_mean_delta, const double pr_sd_delta, const double pr_mean_alpha, const double pr_sd_alpha, const double pr_a_theta, const double pr_b_theta, const double missing);
-RcppExport SEXP _lsirm12pl_intrm2pl_mcar_cpp(SEXP dataSEXP, SEXP niterSEXP, SEXP nburnSEXP, SEXP nthinSEXP, SEXP nprintSEXP, SEXP jump_betaSEXP, SEXP jump_thetaSEXP, SEXP jump_alphaSEXP, SEXP jump_deltaSEXP, SEXP pr_mean_betaSEXP, SEXP pr_sd_betaSEXP, SEXP pr_mean_thetaSEXP, SEXP pr_mean_deltaSEXP, SEXP pr_sd_deltaSEXP, SEXP pr_mean_alphaSEXP, SEXP pr_sd_alphaSEXP, SEXP pr_a_thetaSEXP, SEXP pr_b_thetaSEXP, SEXP missingSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::mat >::type data(dataSEXP);
-    Rcpp::traits::input_parameter< const int >::type niter(niterSEXP);
-    Rcpp::traits::input_parameter< const int >::type nburn(nburnSEXP);
-    Rcpp::traits::input_parameter< const int >::type nthin(nthinSEXP);
-    Rcpp::traits::input_parameter< const int >::type nprint(nprintSEXP);
-    Rcpp::traits::input_parameter< const double >::type jump_beta(jump_betaSEXP);
-    Rcpp::traits::input_parameter< const double >::type jump_theta(jump_thetaSEXP);
-    Rcpp::traits::input_parameter< const double >::type jump_alpha(jump_alphaSEXP);
-    Rcpp::traits::input_parameter< const double >::type jump_delta(jump_deltaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_mean_beta(pr_mean_betaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_sd_beta(pr_sd_betaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_mean_theta(pr_mean_thetaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_mean_delta(pr_mean_deltaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_sd_delta(pr_sd_deltaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_mean_alpha(pr_mean_alphaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_sd_alpha(pr_sd_alphaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_a_theta(pr_a_thetaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_b_theta(pr_b_thetaSEXP);
-    Rcpp::traits::input_parameter< const double >::type missing(missingSEXP);
-    rcpp_result_gen = Rcpp::wrap(intrm2pl_mcar_cpp(data, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_delta, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_mean_delta, pr_sd_delta, pr_mean_alpha, pr_sd_alpha, pr_a_theta, pr_b_theta, missing));
-    return rcpp_result_gen;
-END_RCPP
-}
-// intrm2pl_normal_cpp
-Rcpp::List intrm2pl_normal_cpp(arma::mat data, const int niter, const int nburn, const int nthin, const int nprint, const double jump_beta, const double jump_theta, const double jump_alpha, const double jump_delta, const double pr_mean_beta, const double pr_sd_beta, const double pr_mean_theta, const double pr_a_eps, const double pr_b_eps, const double pr_a_theta, const double pr_b_theta, const double pr_mean_delta, const double pr_sd_delta, const double pr_mean_alpha, const double pr_sd_alpha);
-RcppExport SEXP _lsirm12pl_intrm2pl_normal_cpp(SEXP dataSEXP, SEXP niterSEXP, SEXP nburnSEXP, SEXP nthinSEXP, SEXP nprintSEXP, SEXP jump_betaSEXP, SEXP jump_thetaSEXP, SEXP jump_alphaSEXP, SEXP jump_deltaSEXP, SEXP pr_mean_betaSEXP, SEXP pr_sd_betaSEXP, SEXP pr_mean_thetaSEXP, SEXP pr_a_epsSEXP, SEXP pr_b_epsSEXP, SEXP pr_a_thetaSEXP, SEXP pr_b_thetaSEXP, SEXP pr_mean_deltaSEXP, SEXP pr_sd_deltaSEXP, SEXP pr_mean_alphaSEXP, SEXP pr_sd_alphaSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::mat >::type data(dataSEXP);
-    Rcpp::traits::input_parameter< const int >::type niter(niterSEXP);
-    Rcpp::traits::input_parameter< const int >::type nburn(nburnSEXP);
-    Rcpp::traits::input_parameter< const int >::type nthin(nthinSEXP);
-    Rcpp::traits::input_parameter< const int >::type nprint(nprintSEXP);
-    Rcpp::traits::input_parameter< const double >::type jump_beta(jump_betaSEXP);
-    Rcpp::traits::input_parameter< const double >::type jump_theta(jump_thetaSEXP);
-    Rcpp::traits::input_parameter< const double >::type jump_alpha(jump_alphaSEXP);
-    Rcpp::traits::input_parameter< const double >::type jump_delta(jump_deltaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_mean_beta(pr_mean_betaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_sd_beta(pr_sd_betaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_mean_theta(pr_mean_thetaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_a_eps(pr_a_epsSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_b_eps(pr_b_epsSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_a_theta(pr_a_thetaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_b_theta(pr_b_thetaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_mean_delta(pr_mean_deltaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_sd_delta(pr_sd_deltaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_mean_alpha(pr_mean_alphaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_sd_alpha(pr_sd_alphaSEXP);
-    rcpp_result_gen = Rcpp::wrap(intrm2pl_normal_cpp(data, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_delta, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_a_eps, pr_b_eps, pr_a_theta, pr_b_theta, pr_mean_delta, pr_sd_delta, pr_mean_alpha, pr_sd_alpha));
-    return rcpp_result_gen;
-END_RCPP
-}
-// intrm2pl_normal_mar_cpp
-Rcpp::List intrm2pl_normal_mar_cpp(arma::mat data, const int niter, const int nburn, const int nthin, const int nprint, const double jump_beta, const double jump_theta, const double jump_alpha, const double jump_delta, const double pr_mean_beta, const double pr_sd_beta, const double pr_mean_theta, const double pr_a_eps, const double pr_b_eps, const double pr_a_theta, const double pr_b_theta, const double pr_mean_delta, const double pr_sd_delta, const double pr_mean_alpha, const double pr_sd_alpha, const double missing);
-RcppExport SEXP _lsirm12pl_intrm2pl_normal_mar_cpp(SEXP dataSEXP, SEXP niterSEXP, SEXP nburnSEXP, SEXP nthinSEXP, SEXP nprintSEXP, SEXP jump_betaSEXP, SEXP jump_thetaSEXP, SEXP jump_alphaSEXP, SEXP jump_deltaSEXP, SEXP pr_mean_betaSEXP, SEXP pr_sd_betaSEXP, SEXP pr_mean_thetaSEXP, SEXP pr_a_epsSEXP, SEXP pr_b_epsSEXP, SEXP pr_a_thetaSEXP, SEXP pr_b_thetaSEXP, SEXP pr_mean_deltaSEXP, SEXP pr_sd_deltaSEXP, SEXP pr_mean_alphaSEXP, SEXP pr_sd_alphaSEXP, SEXP missingSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::mat >::type data(dataSEXP);
-    Rcpp::traits::input_parameter< const int >::type niter(niterSEXP);
-    Rcpp::traits::input_parameter< const int >::type nburn(nburnSEXP);
-    Rcpp::traits::input_parameter< const int >::type nthin(nthinSEXP);
-    Rcpp::traits::input_parameter< const int >::type nprint(nprintSEXP);
-    Rcpp::traits::input_parameter< const double >::type jump_beta(jump_betaSEXP);
-    Rcpp::traits::input_parameter< const double >::type jump_theta(jump_thetaSEXP);
-    Rcpp::traits::input_parameter< const double >::type jump_alpha(jump_alphaSEXP);
-    Rcpp::traits::input_parameter< const double >::type jump_delta(jump_deltaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_mean_beta(pr_mean_betaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_sd_beta(pr_sd_betaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_mean_theta(pr_mean_thetaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_a_eps(pr_a_epsSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_b_eps(pr_b_epsSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_a_theta(pr_a_thetaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_b_theta(pr_b_thetaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_mean_delta(pr_mean_deltaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_sd_delta(pr_sd_deltaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_mean_alpha(pr_mean_alphaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_sd_alpha(pr_sd_alphaSEXP);
-    Rcpp::traits::input_parameter< const double >::type missing(missingSEXP);
-    rcpp_result_gen = Rcpp::wrap(intrm2pl_normal_mar_cpp(data, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_delta, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_a_eps, pr_b_eps, pr_a_theta, pr_b_theta, pr_mean_delta, pr_sd_delta, pr_mean_alpha, pr_sd_alpha, missing));
-    return rcpp_result_gen;
-END_RCPP
-}
-// intrm2pl_normal_mcar_cpp
-Rcpp::List intrm2pl_normal_mcar_cpp(arma::mat data, const int niter, const int nburn, const int nthin, const int nprint, const double jump_beta, const double jump_theta, const double jump_alpha, const double jump_delta, const double pr_mean_beta, const double pr_sd_beta, const double pr_mean_theta, const double pr_a_eps, const double pr_b_eps, const double pr_a_theta, const double pr_b_theta, const double pr_mean_delta, const double pr_sd_delta, const double pr_mean_alpha, const double pr_sd_alpha, const double missing);
-RcppExport SEXP _lsirm12pl_intrm2pl_normal_mcar_cpp(SEXP dataSEXP, SEXP niterSEXP, SEXP nburnSEXP, SEXP nthinSEXP, SEXP nprintSEXP, SEXP jump_betaSEXP, SEXP jump_thetaSEXP, SEXP jump_alphaSEXP, SEXP jump_deltaSEXP, SEXP pr_mean_betaSEXP, SEXP pr_sd_betaSEXP, SEXP pr_mean_thetaSEXP, SEXP pr_a_epsSEXP, SEXP pr_b_epsSEXP, SEXP pr_a_thetaSEXP, SEXP pr_b_thetaSEXP, SEXP pr_mean_deltaSEXP, SEXP pr_sd_deltaSEXP, SEXP pr_mean_alphaSEXP, SEXP pr_sd_alphaSEXP, SEXP missingSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::mat >::type data(dataSEXP);
-    Rcpp::traits::input_parameter< const int >::type niter(niterSEXP);
-    Rcpp::traits::input_parameter< const int >::type nburn(nburnSEXP);
-    Rcpp::traits::input_parameter< const int >::type nthin(nthinSEXP);
-    Rcpp::traits::input_parameter< const int >::type nprint(nprintSEXP);
-    Rcpp::traits::input_parameter< const double >::type jump_beta(jump_betaSEXP);
-    Rcpp::traits::input_parameter< const double >::type jump_theta(jump_thetaSEXP);
-    Rcpp::traits::input_parameter< const double >::type jump_alpha(jump_alphaSEXP);
-    Rcpp::traits::input_parameter< const double >::type jump_delta(jump_deltaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_mean_beta(pr_mean_betaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_sd_beta(pr_sd_betaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_mean_theta(pr_mean_thetaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_a_eps(pr_a_epsSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_b_eps(pr_b_epsSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_a_theta(pr_a_thetaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_b_theta(pr_b_thetaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_mean_delta(pr_mean_deltaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_sd_delta(pr_sd_deltaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_mean_alpha(pr_mean_alphaSEXP);
-    Rcpp::traits::input_parameter< const double >::type pr_sd_alpha(pr_sd_alphaSEXP);
-    Rcpp::traits::input_parameter< const double >::type missing(missingSEXP);
-    rcpp_result_gen = Rcpp::wrap(intrm2pl_normal_mcar_cpp(data, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_delta, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_a_eps, pr_b_eps, pr_a_theta, pr_b_theta, pr_mean_delta, pr_sd_delta, pr_mean_alpha, pr_sd_alpha, missing));
+    rcpp_result_gen = Rcpp::wrap(log_likelihood_2pl_cpp(data, ndim, beta_est, alpha_est, theta_est, gamma_est, z_est, w_est, missing));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -1532,18 +1270,10 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_lsirm12pl_intrm1pl_cpp", (DL_FUNC) &_lsirm12pl_intrm1pl_cpp, 15},
-    {"_lsirm12pl_intrm1pl_mar_cpp", (DL_FUNC) &_lsirm12pl_intrm1pl_mar_cpp, 16},
-    {"_lsirm12pl_intrm1pl_mcar_cpp", (DL_FUNC) &_lsirm12pl_intrm1pl_mcar_cpp, 16},
-    {"_lsirm12pl_intrm1pl_normal_cpp", (DL_FUNC) &_lsirm12pl_intrm1pl_normal_cpp, 17},
-    {"_lsirm12pl_intrm1pl_normal_mar_cpp", (DL_FUNC) &_lsirm12pl_intrm1pl_normal_mar_cpp, 18},
-    {"_lsirm12pl_intrm1pl_normal_mcar_cpp", (DL_FUNC) &_lsirm12pl_intrm1pl_normal_mcar_cpp, 18},
-    {"_lsirm12pl_intrm2pl_cpp", (DL_FUNC) &_lsirm12pl_intrm2pl_cpp, 18},
-    {"_lsirm12pl_intrm2pl_mar_cpp", (DL_FUNC) &_lsirm12pl_intrm2pl_mar_cpp, 19},
-    {"_lsirm12pl_intrm2pl_mcar_cpp", (DL_FUNC) &_lsirm12pl_intrm2pl_mcar_cpp, 19},
-    {"_lsirm12pl_intrm2pl_normal_cpp", (DL_FUNC) &_lsirm12pl_intrm2pl_normal_cpp, 20},
-    {"_lsirm12pl_intrm2pl_normal_mar_cpp", (DL_FUNC) &_lsirm12pl_intrm2pl_normal_mar_cpp, 21},
-    {"_lsirm12pl_intrm2pl_normal_mcar_cpp", (DL_FUNC) &_lsirm12pl_intrm2pl_normal_mcar_cpp, 21},
+    {"_lsirm12pl_log_likelihood_cpp", (DL_FUNC) &_lsirm12pl_log_likelihood_cpp, 8},
+    {"_lsirm12pl_log_likelihood_normal_cpp", (DL_FUNC) &_lsirm12pl_log_likelihood_normal_cpp, 9},
+    {"_lsirm12pl_log_likelihood_normal2pl_cpp", (DL_FUNC) &_lsirm12pl_log_likelihood_normal2pl_cpp, 10},
+    {"_lsirm12pl_log_likelihood_2pl_cpp", (DL_FUNC) &_lsirm12pl_log_likelihood_2pl_cpp, 9},
     {"_lsirm12pl_lsirm1pl_cpp", (DL_FUNC) &_lsirm12pl_lsirm1pl_cpp, 18},
     {"_lsirm12pl_lsirm1pl_fixed_gamma_cpp", (DL_FUNC) &_lsirm12pl_lsirm1pl_fixed_gamma_cpp, 15},
     {"_lsirm12pl_lsirm1pl_fixed_gamma_mar_cpp", (DL_FUNC) &_lsirm12pl_lsirm1pl_fixed_gamma_mar_cpp, 16},
