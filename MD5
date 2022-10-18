@@ -1,4 +1,4 @@
-03f5815de92316593f7cd980aa41964a *DESCRIPTION
+d64de8f0d6bf2889b458533950008248 *DESCRIPTION
 3525a8a1514d4f1fc3a14222e8359457 *NAMESPACE
 6d27178d10e017641202dbfc8babbb2c *R/RcppExports.R
 cc84e37681b430435afd5b0a30ccbbdf *R/data.R
@@ -108,16 +108,16 @@ da756d2facbdc6e66703d1ef5e5f7371 *man/summary.lsirm.Rd
 e6791d7ea46245299f3fd37f30de0c98 *src/lsirm1pl_mar.cpp
 a5cdce6ec55e5f6edc55396860207511 *src/lsirm1pl_mar_ss.cpp
 a5c24d70fc311306385b3e02fac9a811 *src/lsirm1pl_mcar.cpp
-981435e6f74bd1d89e7689de6f0a7369 *src/lsirm1pl_mcar_ss.cpp
+91422a61b31e9eee5f13e89d23d3089c *src/lsirm1pl_mcar_ss.cpp
 059be1989c4bddc9ebaf91be433da539 *src/lsirm1pl_normal.cpp
 55a28ac6e20f451d39e1ccdccfb2e69b *src/lsirm1pl_normal_fixed_gamma.cpp
 bd6842e649f88fe1f2cd99b4581aedb6 *src/lsirm1pl_normal_fixed_gamma_mar.cpp
 295c0c1a92937a0b7829648e4d79a6e8 *src/lsirm1pl_normal_fixed_gamma_mcar.cpp
 6326fd20ce46c5590dd768198c788e52 *src/lsirm1pl_normal_mar.cpp
-77acf943a537536d94b7e7c57ad061a5 *src/lsirm1pl_normal_mar_ss.cpp
+54f2e1358a759080efdb22c8d1c6f3ee *src/lsirm1pl_normal_mar_ss.cpp
 0bcb0d8d136485ff80b34d9d1e90d177 *src/lsirm1pl_normal_mcar.cpp
-a7208a28837ceed9c96d76b2e43953f8 *src/lsirm1pl_normal_mcar_ss.cpp
-2f6508f6b08b79282dec58362ba5c3e7 *src/lsirm1pl_normal_ss.cpp
+e16e9d721aee4f6500ec0819d5db88ca *src/lsirm1pl_normal_mcar_ss.cpp
+590220012bbe226f1c2c8e7903455f29 *src/lsirm1pl_normal_ss.cpp
 5c25eb0569cbef1fe8e9403bab925fa1 *src/lsirm1pl_ss.cpp
 b9b3e2dcc608e77889dc142cc7a2ed41 *src/lsirm2pl.cpp
 bf67872391b39ded929df2bfc361be2f *src/lsirm2pl_fixed_gamma.cpp
