@@ -1268,6 +1268,48 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// Kumulavsech
+double Kumulavsech(arma::mat CC, double omega, arma::vec xlim, arma::vec ylim);
+RcppExport SEXP _lsirm12pl_Kumulavsech(SEXP CCSEXP, SEXP omegaSEXP, SEXP xlimSEXP, SEXP ylimSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type CC(CCSEXP);
+    Rcpp::traits::input_parameter< double >::type omega(omegaSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type xlim(xlimSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type ylim(ylimSEXP);
+    rcpp_result_gen = Rcpp::wrap(Kumulavsech(CC, omega, xlim, ylim));
+    return rcpp_result_gen;
+END_RCPP
+}
+// logpXCbeta
+double logpXCbeta(arma::mat X, arma::mat CC, double alpha, double omega, double AreaW, double integral);
+RcppExport SEXP _lsirm12pl_logpXCbeta(SEXP XSEXP, SEXP CCSEXP, SEXP alphaSEXP, SEXP omegaSEXP, SEXP AreaWSEXP, SEXP integralSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type X(XSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type CC(CCSEXP);
+    Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< double >::type omega(omegaSEXP);
+    Rcpp::traits::input_parameter< double >::type AreaW(AreaWSEXP);
+    Rcpp::traits::input_parameter< double >::type integral(integralSEXP);
+    rcpp_result_gen = Rcpp::wrap(logpXCbeta(X, CC, alpha, omega, AreaW, integral));
+    return rcpp_result_gen;
+END_RCPP
+}
+// NewPoint
+arma::vec NewPoint(arma::vec xlim, arma::vec ylim);
+RcppExport SEXP _lsirm12pl_NewPoint(SEXP xlimSEXP, SEXP ylimSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::vec >::type xlim(xlimSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type ylim(ylimSEXP);
+    rcpp_result_gen = Rcpp::wrap(NewPoint(xlim, ylim));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_lsirm12pl_log_likelihood_cpp", (DL_FUNC) &_lsirm12pl_log_likelihood_cpp, 8},
@@ -1312,6 +1354,9 @@ static const R_CallMethodDef CallEntries[] = {
     {"_lsirm12pl_lsirm2pl_ss_cpp", (DL_FUNC) &_lsirm12pl_lsirm2pl_ss_cpp, 25},
     {"_lsirm12pl_onepl_cpp", (DL_FUNC) &_lsirm12pl_onepl_cpp, 12},
     {"_lsirm12pl_two_pl", (DL_FUNC) &_lsirm12pl_two_pl, 15},
+    {"_lsirm12pl_Kumulavsech", (DL_FUNC) &_lsirm12pl_Kumulavsech, 4},
+    {"_lsirm12pl_logpXCbeta", (DL_FUNC) &_lsirm12pl_logpXCbeta, 6},
+    {"_lsirm12pl_NewPoint", (DL_FUNC) &_lsirm12pl_NewPoint, 2},
     {NULL, NULL, 0}
 };
 

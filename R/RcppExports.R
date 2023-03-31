@@ -169,3 +169,15 @@ two_pl <- function(data, niter, nburn, nthin, nprint, jump_beta, jump_theta, jum
     .Call('_lsirm12pl_two_pl', PACKAGE = 'lsirm12pl', data, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_mean_alpha, pr_sd_alpha, pr_a_theta, pr_b_theta)
 }
 
+Kumulavsech <- function(CC, omega, xlim, ylim) {
+    .Call('_lsirm12pl_Kumulavsech', PACKAGE = 'lsirm12pl', CC, omega, xlim, ylim)
+}
+
+logpXCbeta <- function(X, CC, alpha, omega, AreaW, integral) {
+    .Call('_lsirm12pl_logpXCbeta', PACKAGE = 'lsirm12pl', X, CC, alpha, omega, AreaW, integral)
+}
+
+NewPoint <- function(xlim, ylim) {
+    .Call('_lsirm12pl_NewPoint', PACKAGE = 'lsirm12pl', xlim, ylim)
+}
+

@@ -4,7 +4,14 @@
 \alias{plot.lsirm}
 \title{Plotting the interaction map of fitted LSIRM model}
 \usage{
-\method{plot}{lsirm}(x, option = "interaction", rotation = FALSE, ...)
+\method{plot}{lsirm}(
+  x,
+  option = "interaction",
+  rotation = FALSE,
+  cluster = FALSE,
+  interact = FALSE,
+  ...
+)
 }
 \arguments{
 \item{x}{object of class \code{lsirm1pl}, \code{lsirm2pl}.}
@@ -12,6 +19,10 @@
 \item{option}{character; If value is "interaction", draw the interaction map that represents interactions between respondents and items. If value is "beta", draw the boxplot for the posterior samples of beta. If value is "theta", draw the distribution of the theta estimates per total test score for the \code{data}. If value is "alpha", draw the boxplot for the posterior samples of alpha. The "alpha" is only available for 2pl LSIRM.}
 
 \item{rotation}{Logical; If TRUE the latent positions are visualized after oblique (oblimin) rotation.}
+
+\item{cluster}{Logical; If TRUE the cluster result are visualized by Point Process Cluster Analysis.}
+
+\item{interact}{Logical; If TRUE, draw the interaction map interactively.}
 
 \item{...}{Additional arguments for the corresponding function.}
 }
@@ -23,6 +34,7 @@
 }
 \examples{
 \donttest{
+
 # generate example item response matrix
 data     <- matrix(rbinom(500, size = 1, prob = 0.5),ncol=10,nrow=50)
 lsirm_result <- lsirm(data ~ lsirm1pl(spikenslab = FALSE, fixed_gamma = FALSE))
@@ -30,6 +42,7 @@ plot(lsirm_result)
 
 # use oblique rotation
 plot(lsirm_result, rotation = TRUE)
+
 }
 
 }

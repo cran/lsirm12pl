@@ -3,14 +3,17 @@
 #' @description \link{plot} is used to plot the latent space of fitted LSIRM model.
 #'
 #' @param x object of class \code{lsirm1pl}, \code{lsirm2pl}.
-#' @param rotation Logical; If TRUE the latent positions are visualized after oblique (oblimin) rotation.
 #' @param option character; If value is "interaction", draw the interaction map that represents interactions between respondents and items. If value is "beta", draw the boxplot for the posterior samples of beta. If value is "theta", draw the distribution of the theta estimates per total test score for the \code{data}. If value is "alpha", draw the boxplot for the posterior samples of alpha. The "alpha" is only available for 2pl LSIRM.
+#' @param rotation Logical; If TRUE the latent positions are visualized after oblique (oblimin) rotation.
+#' @param cluster Logical; If TRUE the cluster result are visualized by Point Process Cluster Analysis.
+#' @param interact Logical; If TRUE, draw the interaction map interactively.
 #' @param ... Additional arguments for the corresponding function.
 #'
 #' @return \code{plot} returns the interaction map or boxplot for parameter estimate.
 #'
 #' @examples
 #' \donttest{
+#'
 #' # generate example item response matrix
 #' data     <- matrix(rbinom(500, size = 1, prob = 0.5),ncol=10,nrow=50)
 #' lsirm_result <- lsirm(data ~ lsirm1pl(spikenslab = FALSE, fixed_gamma = FALSE))
@@ -18,71 +21,274 @@
 #'
 #' # use oblique rotation
 #' plot(lsirm_result, rotation = TRUE)
+#'
 #' }
 #'
 #' @export
-plot.lsirm = function(x, option = "interaction", rotation=FALSE, ...){
-  # x <- NULL
+plot.lsirm = function(x, option = "interaction", rotation=FALSE, cluster=FALSE, interact=FALSE, ...){
+
+  group <- NULL
+  type <- NULL
   value <- NULL
   data = x$data
   if(option == "interaction"){
-    axis1 <- NULL; axis2 <- NULL
-    # if(sum(x$z_estimate) == 0){
-    #   item_position = x$ls_mean_item
-    #   resp_position = x$ls_mean_respondent
-    #   notation = c('v','u')
-    # }else{
-    #   item_position = x$w_estimate
-    #   resp_position = object$z_estimate
-    #   notation = c('w','z')
-    # }
 
     item_position = x$w_estimate
     resp_position = x$z_estimate
     notation = c('w','z')
 
     if((dim(item_position)[2]!=2)|(dim(resp_position)[2]!=2)){
-      stop('\"plot_latent\" is implemented for two-dimensional latent space.')
+      stop('\"interaction \" option is implemented for two-dimensional latent space.')
     }
 
-    if(rotation){
-      rot <- oblimin(item_position)
-      item_position = rot$loadings # item_position <- item_position %*% t(solve(rot$Th))
-      resp_position <- resp_position %*% t(solve(rot$Th))
+    if(cluster == TRUE){
+
+      w.samps1 <- item_position
+      z.samps1 <- resp_position
+
+      W <- owin(xrange=c(0,1), yrange=c(0,1)) # spatstat package ()
+
+      # Normalizing the w
+      x <- (w.samps1[,1] - min(w.samps1[,1])) / (max(w.samps1[,1]) - min(w.samps1[,1]))
+      y <- (w.samps1[,2] - min(w.samps1[,2])) / (max(w.samps1[,2]) - min(w.samps1[,2]))
+      w.post1 <- data.frame(cbind(x, y))
+      colnames(w.post1) <- c('x', 'y')
+
+      # Normalizing the z
+      zx <- (z.samps1[,1] - min(z.samps1[,1])) / (max(z.samps1[,1]) - min(z.samps1[,1]))
+      zy <- (z.samps1[,2] - min(z.samps1[,2])) / (max(z.samps1[,2]) - min(z.samps1[,2]))
+      z.post1 <- data.frame(cbind(zx, zy))
+      colnames(z.post1) <- c('x', 'y')
+
+      xlim <- W$xrange; ylim <- W$yrange
+      AreaW <- 1 # |S| area of the interaction map domain
+
+      U <- w.post1
+      x <- U[,1]
+      y <- U[,2]
+      X <- t(rbind(x, y))
+
+      # alpha: an expected number of items for each group center ci
+      # omega: controls the range of item groups in the interaction map
+      salpha <- 0.1; somega <- 0.015
+      sd_alpha <- 0.1; sd_omega <- 0.015
+      Niter = 100
+
+      parent <- list()
+      parentnum <- c()
+      accept <- c()
+      logllh <- c()
+      alphalist <- list()
+      kappalist <- list()
+      omegalist <- list()
+
+      pb <- txtProgressBar(title = "progress bar", min = 0, max = Niter,
+                           style = 3, width = 50)
+
+
+      # To calculate the BIC repeat 100 times
+      for (i in 1:Niter){
+        setTxtProgressBar(pb, i, label = paste( round(i/Niter * 100, 0), "% done"))
+
+        # Update the alpha, omega, CC (Thomas process fitting procedures)
+        Thomas<-MCMCestThomas(X, xlim, ylim, NStep=25000, DiscardStep=5000, Jump=5)
+
+        # Summarize the result of Thomas process fitting process
+        CC <- Thomas$CC
+        omega <- Thomas$Omegahat
+        alpha <- Thomas$Alphahat
+        integral <- Kumulavsech(CC, omega, xlim, ylim)
+        logP <- logpXCbeta(X, CC, alpha, omega, AreaW, integral)
+
+        # Save the result for each repeat
+        parentnum <- c(parentnum, dim(Thomas$CC)[1])
+        parent[[i]] <- CC
+        accept <- c(accept, Thomas$Accept)
+        logllh <- c(logllh, logP)
+        alphalist[[i]] <- Thomas$Postalpha
+        kappalist[[i]] <- Thomas$Postkappa
+        omegalist[[i]] <- Thomas$Postomega
+      }
+
+      # BIC
+      bic.total <- bic(X, parentnum, logllh)
+      df <- data.frame(parentnum, bic.total)
+
+      ## BIC of the most frequent parent number
+      ind <- as.numeric(names(which.max(table(parentnum))))
+
+      ## The index number which parent number is "ind (most frequent parent number)"
+      ind5 <- c()
+      for(i in 1:Niter){
+        if(parentnum[i]==ind){
+          ind5 <- c(ind5, i)
+        }
+      }
+
+      bic5 <- bic.total[ind5]
+
+      # The index number having smallest BIC among number of parent is "ind"
+      ind2 <- as.numeric(rownames(df[((df["parentnum"]==ind) & df["bic.total"]==bic5[which.min(bic5)] ),]))
+
+      # location of "in2" (which is best interation whith having smallest BIC)
+      par5 <- parent[[ind2]]
+      par5 <- data.frame(par5)
+      colnames(par5) <- c('x', 'y')
+
+      # clustering the latent position of item (using distance)
+      g_item <- clustering(w.post1, par5)
+      colnames(g_item) <- c("distance", "group")
+      # raanking based on distance from center
+      # (The closer the center is, the greater the alpha is.)
+      g_alpha <- c()
+
+      for(l in 1:ind){
+        temp <- g_item[which(g_item$group==l),]
+        temp <- ranking(temp)
+        g_alpha <- rbind(g_alpha, temp)
+      }
+
+      # ordering by order of item
+      g_alpha <- g_alpha[order(as.numeric(rownames(g_alpha))),]
+      g_fin <- cbind(w.post1[,1:2], g_alpha)
+
+      # parent density using the 1000 estimated parent location
+      cc <- parent[[1]]
+      for(i in 2:Niter){
+        cc<-rbind(cc, parent[[i]])
+      }
+      cc <- data.frame(cc)
+      colnames(cc) <- c('x','y')
+
+      if(ind > length(LETTERS)){
+        addlabel = LETTERS
+        for(U in 1:length(LETTERS)){
+          for(l in 1:length(letters)){
+            addlabel = c(addlabel, paste0(LETTERS[U],letters[l]))
+          }
+        }
+        alphabet = addlabel[1:ind]
+      } else{
+        alphabet = LETTERS[1:ind]
+      }
+
+      # Set the color and cluster name
+      ggcolor = rainbow(ind, s=.6, v=.9)[sample(1:ind, ind)]
+      par5["cluster"] <- alphabet
+      par5["color"] <- ggcolor
+
+      # Draw plot using ggplot
+      print(ggplot(w.post1, aes(x, y)) +
+              geom_point(data=z.post1, aes(x, y), col="grey", cex=1.0) +
+              stat_density_2d(data=cc, aes(x, y), color="gray80") + #density
+              geom_text(data=g_fin, aes(x, y), label=rownames(g_fin), color=ggcolor[g_fin$group], cex=4, fontface="bold") + # number of item
+              geom_text(data=par5, aes(x, y), label=alphabet[1:ind], col="gray30", cex=5.5, fontface="bold") + #alphabet
+              theme_bw() +
+              theme(plot.margin = unit(c(1,1,1,1), "cm"),
+                    axis.text=element_text(size=16),
+                    axis.title=element_text(size=14,face="bold"),
+                    axis.title.x=element_blank(),
+                    axis.title.y=element_blank(),
+                    legend.title=element_blank(),
+                    legend.position = c(0.9,0.9),
+                    legend.text = element_text(size=16),
+                    plot.title = element_text(hjust = 0.5, size = 20, face = "bold"))+
+              ggtitle("Interaction Map"))
+
+      # print the cluster information
+      g_alpha <- cbind(g_alpha, item = rownames(g_alpha))
+      clust <- data.frame(
+        g_alpha %>%
+          group_by(group) %>%
+          summarise(items = paste(item, collapse = ", ")))
+
+      c_res = capture.output(print(data.frame(group = alphabet[clust$group], item = clust[,2]),
+                                   row.names=F))
+      cat("\n\nClustering result: \n",paste(c_res,"\n",sep=" "))
+
+    }else{
+      axis1 <- NULL; axis2 <- NULL
+
+      if(rotation){
+        rot <- oblimin(item_position)
+        item_position = rot$loadings
+        resp_position <- resp_position %*% t(solve(rot$Th))
+      }
+
+      df1=as.data.frame(item_position)
+      df2=as.data.frame(resp_position)
+      df1[,3]=notation[1]
+      df2[,3]=notation[2]
+
+      colnames(df1)=c('axis1','axis2','source')
+      colnames(df2)=c('axis1','axis2','source')
+
+      df=rbind(df2,df1)
+      colnames(df)=c('axis1','axis2','source')
+
+      max_coordinate = sapply(df[,c(1,2)], max, na.rm = TRUE)
+      min_coordinate = sapply(df[,c(1,2)], min, na.rm = TRUE)
+      axis_value = max(abs(c(max_coordinate,min_coordinate)))
+      axis_range = c(-axis_value,axis_value)*1.1
+
+
+      # plotly
+      if(interact){
+        df1$type = rep("item", nrow(df1))
+        df2$type = rep("res", nrow(df1))
+        df.interact=rbind(df1,df2)
+        colnames(df.interact)=c('axis1','axis2','source','type')
+        pos.label = rep(c("item","res"),
+                        times=c(nrow(df1),nrow(df2)))
+        label.n = paste0(pos.label,
+                         c(1:nrow(df1),1:nrow(df2)))
+        item = c(1:nrow(df1), rep("",nrow(df2)))
+        interact = ggplot(data = df.interact,
+                          aes(x=axis1, y=axis2, color=type,
+                              lb=label.n,
+                              text=paste0("x.axis: ",round(axis1,3), "<br>",
+                                          "y.axis: ",round(axis2,3), "<br>")))+
+          geom_point(size = ifelse(df.interact$type=="item",
+                                   1e-06,1)) +
+          geom_text(data = df.interact, aes(x=axis1, y=axis2, label=item))+
+          scale_color_manual(values=c("res"="black","item"="red"))+
+          xlim(axis_range) +
+          ylim(axis_range) +
+          coord_cartesian(expand = FALSE) + theme_bw() +
+          theme(plot.margin = unit(c(1,1,1,1), "cm"),
+                axis.text=element_text(size=16),
+                axis.title=element_text(size=14,face="bold"),
+                axis.title.x=element_blank(),
+                axis.title.y=element_blank(),
+                legend.title=element_blank(),
+                legend.position = c(0.9,0.9),
+                legend.text = element_text(size=10),
+                plot.title = element_text(hjust = 0.5, size = 20, face = "bold"))+
+          ggtitle("Interaction Map")
+        ggplotly(interact, tooltip = c("text","lb"))
+      }else{
+        ggplot() +
+          geom_point(data = df2, aes(x = axis1, y = axis2), size = 0.7) +
+          geom_text(data = df1, aes(x = axis1, y = axis2, label=1:nrow(df1)), color = "red", size = 4, fontface = "bold") +
+          xlim(axis_range)+ylim(axis_range) + coord_cartesian(expand = FALSE) + theme_bw() +
+          theme(plot.margin = unit(c(1,1,1,1), "cm"),
+                axis.text=element_text(size=16),
+                axis.title=element_text(size=14,face="bold"),
+                axis.title.x=element_blank(),
+                axis.title.y=element_blank(),
+                legend.title=element_blank(),
+                legend.position = c(0.9,0.9),
+                legend.text = element_text(size=16),
+                plot.title = element_text(hjust = 0.5, size = 20, face = "bold"))+
+          ggtitle("Interaction Map")
+      }
     }
-
-    df1=as.data.frame(item_position)
-    df2=as.data.frame(resp_position)
-    df1[,3]=notation[1]
-    df2[,3]=notation[2]
-
-    colnames(df1)=c('axis1','axis2','source')
-    colnames(df2)=c('axis1','axis2','source')
-
-    df=rbind(df2,df1)
-    colnames(df)=c('axis1','axis2','source')
-
-    max_coordinate = sapply(df[,c(1,2)], max, na.rm = TRUE)
-    min_coordinate = sapply(df[,c(1,2)], min, na.rm = TRUE)
-    axis_value = max(abs(c(max_coordinate,min_coordinate)))
-    axis_range = c(-axis_value,axis_value)*1.1
-
-    ggplot() +
-      geom_point(data = df2, aes(x = axis1, y = axis2), size = 0.7) +
-      geom_text(data = df1, aes(x = axis1, y = axis2, label=1:nrow(df1)), color = "red", size = 4, fontface = "bold") +
-      xlim(axis_range)+ylim(axis_range) + coord_cartesian(expand = FALSE) + theme_bw() +
-      # geom_point(size = 2,alpha=1,shape=16) +
-      theme(plot.margin = unit(c(1,1,1,1), "cm"),
-            axis.text=element_text(size=16),
-            axis.title=element_text(size=14,face="bold"),
-            axis.title.x=element_blank(),
-            axis.title.y=element_blank(),
-            legend.title=element_blank(),
-            legend.position = c(0.9,0.9),
-            legend.text = element_text(size=16),
-            plot.title = element_text(hjust = 0.5, size = 20, face = "bold"))+
-      ggtitle("Interaction Map")
   }else if(option == "beta"){
+
+    if(option == "beta" & cluster == TRUE){
+      stop('\"cluster\" option is implemented for interaction map.')
+    }
+
     beta_dataframe <- data.frame(x = rep(1:ncol(x$beta), each= nrow(x$beta)),
                                  value = as.vector(x$beta))
     #outlier
@@ -108,8 +314,8 @@ plot.lsirm = function(x, option = "interaction", rotation=FALSE, ...){
               axis.title=element_text(size=15, face='bold'))
     }
   }else if(option == "theta"){
-    if(exists(x$missing.val)){
-    data[data==x$missing.val] = NA
+    if(is.null(x$missing.val) == TRUE){
+      data[data==x$missing.val] = NA
     }
 
     total_score <- rowSums(data, na.rm = TRUE)
@@ -152,6 +358,8 @@ plot.lsirm = function(x, option = "interaction", rotation=FALSE, ...){
   }else if(option == "alpha"){
     if(is.null(x$alpha) == TRUE){
       stop('The option "alpha" is only available for 2pl LSIRM.')
+    }else if(option == "alpha" & cluster == TRUE){
+      stop('\"cluster\" option is implemented for interaction map.')
     }else{
       alpha_dataframe <- data.frame(x = rep(1:ncol(x$alpha), each= nrow(x$alpha)),
                                     value = as.vector(x$alpha))
@@ -181,5 +389,3 @@ plot.lsirm = function(x, option = "interaction", rotation=FALSE, ...){
     }
   }
 }
-
-

@@ -6,11 +6,16 @@
 #' @name lsirm12pl
 #' @importFrom Rcpp evalCpp
 #' @importFrom MCMCpack procrustes
-#' @importFrom grDevices boxplot.stats dev.interactive devAskNewPage
+#' @importFrom grDevices boxplot.stats dev.interactive devAskNewPage rainbow
 #' @importFrom graphics mtext par rug title
 #' @importFrom stats acf density printCoefmat quantile setNames ts.plot
 #' @importFrom coda as.mcmc
-#' @import ggplot2 GPArotation dplyr pROC
+#' @importFrom spatstat.geom owin
+#' @importFrom spatstat.random rpoispp
+#' @importFrom plotly ggplotly
+#' @importFrom stats median pnorm rnorm runif
+#' @importFrom utils capture.output setTxtProgressBar txtProgressBar
+#' @import ggplot2 GPArotation dplyr pROC spatstat
 #' @useDynLib lsirm12pl
 #'
 NULL

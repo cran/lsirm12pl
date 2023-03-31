@@ -1,6 +1,6 @@
 #' Summary the result of LSIRM model
 #'
-#' @description \link{summary} is used to summary the result of LSIRM model.
+#' @description \link{summary.lsirm} is used to summary the result of LSIRM model.
 #'
 #' @param x object of class \code{lsirm1pl}, \code{lsirm2pl}.
 #' @param \dots Additional arguments.
