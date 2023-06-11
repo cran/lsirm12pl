@@ -2,11 +2,12 @@
 // [[Rcpp::plugins(cpp11)]]
 
 #include <RcppArmadillo.h>
+#include "progress.h"
 using namespace arma;
 // [[Rcpp::export]]
 Rcpp::List lsirm1pl_fixed_gamma_cpp(arma::mat data, const int ndim, const int niter, const int nburn, const int nthin, const int nprint,
                           const double jump_beta, const double jump_theta, const double jump_z, const double jump_w,
-                          const double pr_mean_beta, const double pr_sd_beta, const double pr_mean_theta, const double pr_a_theta, const double pr_b_theta){
+                          const double pr_mean_beta, const double pr_sd_beta, const double pr_mean_theta, const double pr_a_theta, const double pr_b_theta, const bool verbose){
 
   int i, j, k, count, accept;
   double num, den, old_like_beta, new_like_beta, old_like_theta, new_like_theta, pr_sd_theta = 1.0;
@@ -15,23 +16,23 @@ Rcpp::List lsirm1pl_fixed_gamma_cpp(arma::mat data, const int ndim, const int ni
   double pr_mean_z = 0.0, pr_sd_z = 1.0, pr_mean_w = 0.0, pr_sd_w = 1.0, mle;
   const int nsample = data.n_rows;
   const int nitem = data.n_cols;
-  
+
   arma::dvec oldbeta(nitem, fill::randu);
   oldbeta = oldbeta * 4.0 - 2.0;
   arma::dvec newbeta = oldbeta;
-  
+
   arma::dvec oldtheta(nsample, fill::randu);
   oldtheta = oldtheta * 4.0 - 2.0;
   arma::dvec newtheta = oldtheta;
-  
+
   arma::dmat oldz(nsample,ndim,fill::randu);
   oldz = oldz * 2.0 - 1.0;
   arma::dmat newz = oldz;
-  
+
   arma::dmat oldw(nitem,ndim,fill::randu);
   oldw = oldw * 2.0 - 1.0;
   arma::dmat neww = oldw;
-  
+
   arma::dmat samp_beta((niter-nburn)/nthin, nitem, fill::zeros);
   arma::dmat samp_theta((niter-nburn)/nthin, nsample, fill::zeros);
   arma::dcube samp_z(((niter-nburn)/nthin), nsample, ndim, fill::zeros);
@@ -42,7 +43,7 @@ Rcpp::List lsirm1pl_fixed_gamma_cpp(arma::mat data, const int ndim, const int ni
   arma::dvec accept_theta(nsample, fill::zeros);
   arma::dvec accept_z(nsample, fill::zeros);
   arma::dvec accept_w(nitem, fill::zeros);
-  
+
   accept = count = 0;
 
   arma::dmat dist(nsample,nitem,fill::zeros);
@@ -50,8 +51,11 @@ Rcpp::List lsirm1pl_fixed_gamma_cpp(arma::mat data, const int ndim, const int ni
   arma::dvec new_dist_k(nitem,fill::zeros);
   arma::dvec old_dist_i(nsample,fill::zeros);
   arma::dvec new_dist_i(nsample,fill::zeros);
-  
+
   for(int iter = 0; iter < niter; iter++){
+    if (iter % 10 == 0){
+      Rcpp::checkUserInterrupt();
+    }
 
     //dist(j,i) is distance of z_j and w_i
     dist.fill(0.0);
@@ -126,7 +130,7 @@ Rcpp::List lsirm1pl_fixed_gamma_cpp(arma::mat data, const int ndim, const int ni
     for(k = 0; k < nsample; k++){
       for(j = 0; j < ndim; j++) newz(k,j) = R::rnorm(oldz(k,j), jump_z);
       old_like_z = new_like_z = 0.0;
-      
+
       //calculate distance of oldw and newz
       for(i = 0; i < nitem; i++){
         dist_old_temp = dist_new_temp = 0.0;
@@ -145,7 +149,7 @@ Rcpp::List lsirm1pl_fixed_gamma_cpp(arma::mat data, const int ndim, const int ni
         if(data(k,i) == 1.0) old_like_z += -std::log(1.0 + std::exp(-(oldbeta(i) + oldtheta(k) - old_dist_k(i))));
         else old_like_z += -std::log(1.0 + std::exp(oldbeta(i) + oldtheta(k) - old_dist_k(i)));
       }
-      
+
       num = den = 0.0;
       for(j = 0; j < ndim; j++){
         num += R::dnorm4(newz(k,j),pr_mean_z,pr_sd_z,1);
@@ -179,7 +183,7 @@ Rcpp::List lsirm1pl_fixed_gamma_cpp(arma::mat data, const int ndim, const int ni
     for(i = 0; i < nitem; i++){
       for(j = 0; j < ndim; j++) neww(i,j) = R::rnorm(oldw(i,j), jump_w);
       old_like_w = new_like_w = 0.0;
-      
+
       //calculate distance of neww and oldz
       for(k = 0; k < nsample; k++){
         dist_old_temp = dist_new_temp = 0.0;
@@ -222,7 +226,7 @@ Rcpp::List lsirm1pl_fixed_gamma_cpp(arma::mat data, const int ndim, const int ni
       }
       else{
         for(j = 0; j < ndim; j++) neww(i,j) = oldw(i,j);
-      } 
+      }
     }
 
     //sigma_theta update with gibbs
@@ -231,8 +235,8 @@ Rcpp::List lsirm1pl_fixed_gamma_cpp(arma::mat data, const int ndim, const int ni
     for(j = 0; j < nsample; j++) post_b += std::pow((oldtheta(j) - pr_mean_theta), 2.0) / 2;
     pr_sd_theta = std::sqrt(2 * post_b *(1.0 /  R::rchisq(post_a)));
 
-    
-    //Burn in 
+
+    //Burn in
     if(iter >= nburn && iter % nthin == 0){
       for(i = 0; i < nitem; i++) samp_beta(count,i) = oldbeta(i);
       for(k = 0; k < nsample; k++) samp_theta(count,k) = oldtheta(k);
@@ -247,7 +251,7 @@ Rcpp::List lsirm1pl_fixed_gamma_cpp(arma::mat data, const int ndim, const int ni
         }
       }
       sample_sd_theta(count) = pr_sd_theta;
-      
+
       dist.fill(0.0);
       for(i = 0; i < nitem; i++){
         for(k = 0; k < nsample; k++){
@@ -256,7 +260,7 @@ Rcpp::List lsirm1pl_fixed_gamma_cpp(arma::mat data, const int ndim, const int ni
           dist(k,i) = std::sqrt(dist_temp);
         }
       }
-      
+
       mle = 0.0;
       for(i = 0; i < nitem; i++) mle += R::dnorm4(oldbeta(i), pr_mean_beta, pr_sd_beta, 1);
       for(k = 0; k < nsample; k++) mle += R::dnorm4(oldtheta(k), pr_mean_theta, pr_sd_theta, 1);
@@ -271,20 +275,27 @@ Rcpp::List lsirm1pl_fixed_gamma_cpp(arma::mat data, const int ndim, const int ni
         }
       }
       sample_mle(count) = mle;
-      
+
       count++;
     } //count end
 
-    if(iter % nprint == 0){
-      Rprintf("Iteration: %.5u", iter); 
-      for(i = 0 ; i < nitem ; i++ ) {
-        Rprintf("% .3f ", oldbeta(i));
+    if(verbose){
+      int percent = 0;
+      if(iter % nprint == 0){
+        percent = (iter*100)/niter;
+        Rprintf("Iteration: %.5u %3d%% ", iter, percent);
+        for(i = 0 ; i < nitem ; i++ ) {
+          Rprintf("% .3f ", oldbeta(i));
+        }
+        Rprintf(" %.3f\n", pr_sd_theta);
       }
-      Rprintf("%.3f\n", pr_sd_theta);
+    }else{
+      // progress bar
+      progressbar(iter+1,niter);
     }
-  
+
   }//for end
-  
+
   Rcpp::List output;
   output["beta"] = samp_beta;
   output["theta"] = samp_theta;
@@ -296,12 +307,12 @@ Rcpp::List lsirm1pl_fixed_gamma_cpp(arma::mat data, const int ndim, const int ni
   output["accept_theta"] = accept_theta;
   output["accept_z"] = accept_z;
   output["accept_w"] = accept_w;
-  
+
   return(output);
 
   }//function end
 
 // You can include R code blocks in C++ files processed with sourceCpp
-// (useful for testing and development). The R code will be automatically 
+// (useful for testing and development). The R code will be automatically
 // run after the compilation.
 

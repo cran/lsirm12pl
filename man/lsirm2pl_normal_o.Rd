@@ -27,7 +27,8 @@ lsirm2pl_normal_o(
   pr_a_theta = 0.001,
   pr_b_theta = 0.001,
   pr_a_eps = 0.001,
-  pr_b_eps = 0.001
+  pr_b_eps = 0.001,
+  verbose = FALSE
 )
 }
 \arguments{
@@ -76,6 +77,8 @@ lsirm2pl_normal_o(
 \item{pr_a_eps}{Numeric; shape parameter of inverse gamma prior for variance of data likelihood. default value is 0.001.}
 
 \item{pr_b_eps}{Numeric; scale parameter of inverse gamma prior for variance of data likelihood default value is 0.001.}
+
+\item{verbose}{Logical; If TRUE, MCMC samples are printed for each \code{nprint}. default value is FALSE}
 }
 \value{
 \code{lsirm2pl_normal_o} returns an object of  list containing the following components:

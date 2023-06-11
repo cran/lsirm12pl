@@ -1,14 +1,13 @@
 #' Diagnostic the result of LSIRM model
 #'
-#' @description \code{diagnostic.lsirm} is used to diagnostic the result of LSIRM model.
+#' @description \code{diagnostic} is used to diagnostic the result of LSIRM model.
 #'
 #' @param object object of class \code{lsirm}.
 #' @param plot If \code{TRUE}, MCMC diagnostic plots are returned
 #' @param draw.item Select items for diagnosis. A default "first" is drawing the first item for selected parameters in \code{which.draw}. Parameter "alpha", however, uses "second" as a default value because the first alpha has an estimation issue. Positions and item names are supported. For instance, if the name of item is "i1", "i2", "i3" and its positions is in order, the result of \code{beta = c("i1","i2","i3")} and \code{beta = c(1,2,3)} are equivalent.
 #' @param which.draw Select parameters for diagnosis. For the 1PL model, "beta", "theta" and "gamma" are available. "alpha" is only available in the 2PL model.
-#' @param plot.roc If \code{TRUE}, ROC curve and AUC value are returned. This option is only available when input data type is binary.
 #'
-#' @return \code{diagnostic.lsirm} returns plots for checking MCMC convergence for selected parameters. In binary cases, ROC curve and AUC are supported.
+#' @return \code{diagnostic} returns plots for checking MCMC convergence for selected parameters.
 #'
 #' @examples
 #' \donttest{
@@ -17,26 +16,35 @@
 #' lsirm_result <- lsirm(data ~ lsirm1pl(spikenslab = FALSE, fixed_gamma = FALSE))
 #'
 #' # 1PL model
-#' diagnostic.lsirm(lsirm_result, plot=TRUE,
-#'                  which.draw=c("beta","theta","gamma"), plot.roc = TRUE)
+#' diagnostic(lsirm_result, plot=TRUE,
+#'            which.draw=c("beta","theta","gamma"))
 #'
 #' # 1PL model, multiple items
-#' diagnostic.lsirm(lsirm_result, plot=TRUE, draw.item=list(beta = c(1,2,3)),
-#'                  which.draw=c("beta", "gamma"), plot.roc = TRUE)
+#' diagnostic(lsirm_result, plot=TRUE, draw.item=list(beta = c(1,2,3)),
+#'            which.draw=c("beta", "gamma"))
 #'
 #' lsirm_result <- lsirm(data ~ lsirm2pl(spikenslab = FALSE, fixed_gamma = FALSE))
 #'
 #' # 2PL model
-#' diagnostic.lsirm(lsirm_result, plot=TRUE,
-#'                  which.draw=c("beta", "theta", "alpha", "gamma"), plot.roc = TRUE)
+#' diagnostic(lsirm_result, plot=TRUE,
+#'            which.draw=c("beta", "theta", "alpha", "gamma"))
 #' }
+
+#' @export diagnostic
+diagnostic <- function(object, plot=TRUE,
+                       draw.item=list(beta="first",
+                                      theta="first",
+                                      alpha="second"),
+                       which.draw=c("beta","gamma")){
+  UseMethod("diagnostic")
+}
+
 #' @export
 diagnostic.lsirm <- function(object, plot=TRUE,
                              draw.item=list(beta="first",
                                             theta="first",
                                             alpha="second"),
-                             which.draw=c("beta","gamma"),
-                             plot.roc = T)
+                             which.draw=c("beta","gamma"))
 {
   mcmc.beta = mcmc.gamma = mcmc.theta = mcmc.alpha = NULL
   if("beta" %in% which.draw) mcmc.beta <- as.mcmc(object$beta)
@@ -234,13 +242,5 @@ diagnostic.lsirm <- function(object, plot=TRUE,
     }
   }
   par(mfrow=c(1,1), oma=c(0, 0, 0, 0))
-  if((plot) & (plot.roc)){
-    if(object$dtype == "continuous") stop("AUC option does not support dtype:continuous")
-    if(object$method == "lsirm1pl"){
-      # res$AUC = roc_1pl(object, levels = c(0,1), direction = "<")
-      res$AUC = roc_1pl(object)
-    }else{res$AUC = roc_2pl(object)}
-  }
   devAskNewPage(F)
-  list(AUC = res$AUC) # add more
 }

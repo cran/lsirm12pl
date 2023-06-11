@@ -8,7 +8,7 @@
   x,
   option = "interaction",
   rotation = FALSE,
-  cluster = FALSE,
+  cluster = NA,
   interact = FALSE,
   ...
 )
@@ -43,6 +43,11 @@ plot(lsirm_result)
 # use oblique rotation
 plot(lsirm_result, rotation = TRUE)
 
+# plotly
+plot(lsirm_result, interact = TRUE)
+
+# clustering
+plot(lsirm_result, cluster = TRUE)
 }
 
 }

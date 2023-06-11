@@ -21,7 +21,8 @@ lsirm1pl_normal_fixed_gamma(
   pr_a_theta = 0.001,
   pr_b_theta = 0.001,
   pr_a_eps = 0.001,
-  pr_b_eps = 0.001
+  pr_b_eps = 0.001,
+  verbose = FALSE
 )
 }
 \arguments{
@@ -58,6 +59,8 @@ lsirm1pl_normal_fixed_gamma(
 \item{pr_a_eps}{Numeric; shape parameter of inverse gamma prior for variance of data likelihood. default value is 0.001.}
 
 \item{pr_b_eps}{Numeric; scale parameter of inverse gamma prior for variance of data likelihood default value is 0.001.}
+
+\item{verbose}{Logical; If TRUE, MCMC samples are printed for each \code{nprint}. default value is FALSE}
 }
 \value{
 \code{lsirm1pl_normal_fixed_gamma} returns an object of  list containing the following components:

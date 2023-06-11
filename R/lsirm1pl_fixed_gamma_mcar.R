@@ -19,7 +19,8 @@
 #' @param pr_a_theta Numeric; shape parameter of inverse gamma prior for variance of theta. default value is 0.001.
 #' @param pr_b_theta Numeric; scale parameter of inverse gamma prior for variance of theta. default value is 0.001.
 #' @param missing.val Numeric; a number to replace missing values. default value is 99.
-#'
+#' @param verbose Logical; If TRUE, MCMC samples are printed for each \code{nprint}. default value is FALSE
+#' 
 #' @return \code{lsirm1pl_fixed_gamma_mcar} returns an object of  list containing the following components:
 #'  \item{data}{data frame or matrix containing the variables in the model.}
 #'  \item{missing.val}{a number to replace missing values.}
@@ -66,17 +67,19 @@
 lsirm1pl_fixed_gamma_mcar = function(data, ndim = 2, niter = 15000, nburn = 2500, nthin = 5, nprint = 500,
                                     jump_beta = 0.4, jump_theta = 1.0, jump_z = 0.5, jump_w = 0.5,
                                     pr_mean_beta = 0, pr_sd_beta = 1.0, pr_mean_theta = 0,
-                                    pr_a_theta = 0.001, pr_b_theta = 0.001, missing.val = 99){
+                                    pr_a_theta = 0.001, pr_b_theta = 0.001, missing.val = 99, verbose=FALSE){
 
   if(is.data.frame(data)){
     cname = colnames(data)
   }else{
     cname = paste("item", 1:ncol(data), sep=" ")
   }
+  
+  cat("\n\nFitting with MCMC algorithm\n")
 
   output <- lsirm1pl_fixed_gamma_mcar_cpp(as.matrix(data), ndim, niter, nburn, nthin, nprint,
                            jump_beta, jump_theta, jump_z, jump_w,
-                           pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_a_theta, pr_b_theta, missing.val)
+                           pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_a_theta, pr_b_theta, missing.val, verbose=verbose)
 
   mcmc.inf = list(nburn=nburn, niter=niter, nthin=nthin)
   nsample <- nrow(data)
@@ -89,6 +92,8 @@ lsirm1pl_fixed_gamma_mcar = function(data, ndim = 2, niter = 15000, nburn = 2500
   z.star = output$z[max.address,,]
   w.proc = array(0,dim=c(nmcmc,nitem,ndim))
   z.proc = array(0,dim=c(nmcmc,nsample,ndim))
+
+  cat("\n\nProcrustes Matching Analysis\n")
 
   for(iter in 1:nmcmc){
     z.iter = output$z[iter,,]
@@ -112,6 +117,7 @@ lsirm1pl_fixed_gamma_mcar = function(data, ndim = 2, niter = 15000, nburn = 2500
   rownames(beta.summary) <- cname
 
   # Calculate BIC
+  cat("\n\nCalculate BIC\n")
   log_like = log_likelihood_cpp(as.matrix(data), ndim, as.matrix(beta.estimate), as.matrix(theta.estimate), 1, z.est, w.est, missing.val)
   p = nitem + nsample + 1 + ndim * nitem + ndim * nsample
   bic = -2 * log_like[[1]] + p * log(nsample * nsample)

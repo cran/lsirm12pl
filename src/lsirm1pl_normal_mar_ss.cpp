@@ -2,6 +2,7 @@
 // [[Rcpp::plugins(cpp11)]]
 
 #include <RcppArmadillo.h>
+#include "progress.h"
 using namespace arma;
 // [[Rcpp::export]]
 Rcpp::List lsirm1pl_normal_mar_ss_cpp(arma::mat data, const int ndim, const int niter, const int nburn, const int nthin, const int nprint,
@@ -9,7 +10,7 @@ Rcpp::List lsirm1pl_normal_mar_ss_cpp(arma::mat data, const int ndim, const int 
                               const double pr_mean_beta, const double pr_sd_beta, const double pr_mean_theta,
                               const double pr_spike_mean, const double pr_spike_sd, const double pr_slab_mean, const double pr_slab_sd,
                               const double pr_a_theta, const double pr_b_theta, const double pr_a_eps, const double pr_b_eps,
-                              const double pr_beta_a, const double pr_beta_b, const double missing){
+                              const double pr_beta_a, const double pr_beta_b, const double missing, const bool verbose){
 
   const int nsample = data.n_rows;
   const int nitem = data.n_cols;
@@ -85,6 +86,11 @@ Rcpp::List lsirm1pl_normal_mar_ss_cpp(arma::mat data, const int ndim, const int 
   arma::dmat samp_impute((niter-nburn)/nthin, nmissing, fill::zeros);
 
   for(int iter = 0; iter < niter; iter++){
+
+      if (iter % 10 == 0){
+      Rcpp::checkUserInterrupt();
+    }
+
     // Imputation step
     mi = 0;
     for(i =0; i<nitem; i++){
@@ -396,13 +402,20 @@ Rcpp::List lsirm1pl_normal_mar_ss_cpp(arma::mat data, const int ndim, const int 
       count++;
     }
 
-    if(iter % nprint == 0){
-      Rprintf("Iteration: %.5u ", iter);
-      for(i = 0 ; i < nitem ; i++ ) {
-        Rprintf("% .3f ", oldbeta(i));
+    if(verbose){
+      int percent = 0;
+      if(iter % nprint == 0){
+        percent = (iter*100)/niter;
+        Rprintf("Iteration: %.5u %3d%% ", iter, percent);
+        for(i = 0 ; i < nitem ; i++ ) {
+          Rprintf("% .3f ", oldbeta(i));
+        }
+        Rprintf(" %.3f ", oldgamma);
+        Rprintf(" %.3f\n", pr_sd_theta);
       }
-      Rprintf(" %.3f ", oldgamma);
-      Rprintf(" %.3f\n", pr_sd_theta);
+    }else{
+      // progress bar
+      progressbar(iter+1,niter);
     }
 
   } //for end

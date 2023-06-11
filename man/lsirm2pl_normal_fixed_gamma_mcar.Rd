@@ -25,7 +25,8 @@ lsirm2pl_normal_fixed_gamma_mcar(
   pr_b_theta = 0.001,
   pr_a_eps = 0.001,
   pr_b_eps = 0.001,
-  missing.val = 99
+  missing.val = 99,
+  verbose = FALSE
 )
 }
 \arguments{
@@ -70,6 +71,8 @@ lsirm2pl_normal_fixed_gamma_mcar(
 \item{pr_b_eps}{Numeric; scale parameter of inverse gamma prior for variance of data likelihood default value is 0.001.}
 
 \item{missing.val}{Numeric; a number to replace missing values. default value is 99.}
+
+\item{verbose}{Logical; If TRUE, MCMC samples are printed for each \code{nprint}. default value is FALSE}
 }
 \value{
 \code{lsirm2pl_normal_fixed_gamma_mcar} returns an object of  list containing the following components:

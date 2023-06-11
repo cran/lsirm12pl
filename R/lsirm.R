@@ -13,7 +13,7 @@ lsirm = function(data, ...) UseMethod("lsirm")
 #' Formula function for LSIRM model
 #' @description \link{lsirm.formula} is formula object.
 #'
-#' @param formula The form of formula is \code{lsirm(A ~ <term 1>(<term 2> + <term 3> ...))}, where \code{A} is binary or continuous item response matrix to be analyzed, \code{<term1>} is the model you want to fit and has one of the following values: "lsirm1pl" and "lsirm2pl"., and \code{<term 2>}, \code{<term 3>}, etc., are each options for the model.
+#' @param formula The form of formula is \code{lsirm(A ~ <term 1>(<term 2> + <term 3> ...))}, where \code{A} is binary or continuous item response matrix to be analyzed, \code{<term1>} is the model you want to fit and has one of the following values: "lsirm1pl" and "lsirm2pl"., and \code{<term 2>}, \code{<term 3>}, etc., are each option for the model.
 #' @param ... Additional arguments for the corresponding function.
 #'
 #' @export

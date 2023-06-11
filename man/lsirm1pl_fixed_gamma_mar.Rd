@@ -20,7 +20,8 @@ lsirm1pl_fixed_gamma_mar(
   pr_mean_theta = 0,
   pr_a_theta = 0.001,
   pr_b_theta = 0.001,
-  missing.val = 99
+  missing.val = 99,
+  verbose = FALSE
 )
 }
 \arguments{
@@ -55,6 +56,8 @@ lsirm1pl_fixed_gamma_mar(
 \item{pr_b_theta}{Numeric; scale parameter of inverse gamma prior for variance of theta. default value is 0.001.}
 
 \item{missing.val}{Numeric; a number to replace missing values. default value is 99.}
+
+\item{verbose}{Logical; If TRUE, MCMC samples are printed for each \code{nprint}. default value is FALSE}
 }
 \value{
 \code{lsirm1pl_fixed_gamma_mar} returns an object of  list containing the following components:

@@ -17,148 +17,148 @@ log_likelihood_2pl_cpp <- function(data, ndim, beta_est, alpha_est, theta_est, g
     .Call('_lsirm12pl_log_likelihood_2pl_cpp', PACKAGE = 'lsirm12pl', data, ndim, beta_est, alpha_est, theta_est, gamma_est, z_est, w_est, missing)
 }
 
-lsirm1pl_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_a_theta, pr_b_theta, pr_mean_theta, pr_mean_gamma, pr_sd_gamma, jump_gamma) {
-    .Call('_lsirm12pl_lsirm1pl_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_a_theta, pr_b_theta, pr_mean_theta, pr_mean_gamma, pr_sd_gamma, jump_gamma)
+lsirm1pl_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_a_theta, pr_b_theta, pr_mean_theta, pr_mean_gamma, pr_sd_gamma, jump_gamma, verbose) {
+    .Call('_lsirm12pl_lsirm1pl_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_a_theta, pr_b_theta, pr_mean_theta, pr_mean_gamma, pr_sd_gamma, jump_gamma, verbose)
 }
 
-lsirm1pl_fixed_gamma_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_a_theta, pr_b_theta) {
-    .Call('_lsirm12pl_lsirm1pl_fixed_gamma_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_a_theta, pr_b_theta)
+lsirm1pl_fixed_gamma_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_a_theta, pr_b_theta, verbose) {
+    .Call('_lsirm12pl_lsirm1pl_fixed_gamma_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_a_theta, pr_b_theta, verbose)
 }
 
-lsirm1pl_fixed_gamma_mar_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_a_theta, pr_b_theta, missing) {
-    .Call('_lsirm12pl_lsirm1pl_fixed_gamma_mar_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_a_theta, pr_b_theta, missing)
+lsirm1pl_fixed_gamma_mar_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_a_theta, pr_b_theta, missing, verbose) {
+    .Call('_lsirm12pl_lsirm1pl_fixed_gamma_mar_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_a_theta, pr_b_theta, missing, verbose)
 }
 
-lsirm1pl_fixed_gamma_mcar_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_a_theta, pr_b_theta, missing) {
-    .Call('_lsirm12pl_lsirm1pl_fixed_gamma_mcar_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_a_theta, pr_b_theta, missing)
+lsirm1pl_fixed_gamma_mcar_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_a_theta, pr_b_theta, missing, verbose) {
+    .Call('_lsirm12pl_lsirm1pl_fixed_gamma_mcar_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_a_theta, pr_b_theta, missing, verbose)
 }
 
-lsirm1pl_mar_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_mean_gamma, pr_sd_gamma, pr_a_theta, pr_b_theta, missing) {
-    .Call('_lsirm12pl_lsirm1pl_mar_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_mean_gamma, pr_sd_gamma, pr_a_theta, pr_b_theta, missing)
+lsirm1pl_mar_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_mean_gamma, pr_sd_gamma, pr_a_theta, pr_b_theta, missing, verbose) {
+    .Call('_lsirm12pl_lsirm1pl_mar_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_mean_gamma, pr_sd_gamma, pr_a_theta, pr_b_theta, missing, verbose)
 }
 
-lsirm1pl_mar_ss_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_spike_mean, pr_spike_sd, pr_slab_mean, pr_slab_sd, pr_a_theta, pr_b_theta, pr_beta_a, pr_beta_b, missing) {
-    .Call('_lsirm12pl_lsirm1pl_mar_ss_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_spike_mean, pr_spike_sd, pr_slab_mean, pr_slab_sd, pr_a_theta, pr_b_theta, pr_beta_a, pr_beta_b, missing)
+lsirm1pl_mar_ss_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_spike_mean, pr_spike_sd, pr_slab_mean, pr_slab_sd, pr_a_theta, pr_b_theta, pr_beta_a, pr_beta_b, missing, verbose) {
+    .Call('_lsirm12pl_lsirm1pl_mar_ss_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_spike_mean, pr_spike_sd, pr_slab_mean, pr_slab_sd, pr_a_theta, pr_b_theta, pr_beta_a, pr_beta_b, missing, verbose)
 }
 
-lsirm1pl_mcar_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_mean_gamma, pr_sd_gamma, pr_a_theta, pr_b_theta, missing) {
-    .Call('_lsirm12pl_lsirm1pl_mcar_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_mean_gamma, pr_sd_gamma, pr_a_theta, pr_b_theta, missing)
+lsirm1pl_mcar_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_mean_gamma, pr_sd_gamma, pr_a_theta, pr_b_theta, missing, verbose) {
+    .Call('_lsirm12pl_lsirm1pl_mcar_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_mean_gamma, pr_sd_gamma, pr_a_theta, pr_b_theta, missing, verbose)
 }
 
-lsirm1pl_mcar_ss_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_spike_mean, pr_spike_sd, pr_slab_mean, pr_slab_sd, pr_a_theta, pr_b_theta, pr_beta_a, pr_beta_b, missing) {
-    .Call('_lsirm12pl_lsirm1pl_mcar_ss_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_spike_mean, pr_spike_sd, pr_slab_mean, pr_slab_sd, pr_a_theta, pr_b_theta, pr_beta_a, pr_beta_b, missing)
+lsirm1pl_mcar_ss_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_spike_mean, pr_spike_sd, pr_slab_mean, pr_slab_sd, pr_a_theta, pr_b_theta, pr_beta_a, pr_beta_b, missing, verbose) {
+    .Call('_lsirm12pl_lsirm1pl_mcar_ss_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_spike_mean, pr_spike_sd, pr_slab_mean, pr_slab_sd, pr_a_theta, pr_b_theta, pr_beta_a, pr_beta_b, missing, verbose)
 }
 
-lsirm1pl_normal_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_mean_gamma, pr_sd_gamma, pr_a_theta, pr_b_theta, pr_a_eps, pr_b_eps) {
-    .Call('_lsirm12pl_lsirm1pl_normal_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_mean_gamma, pr_sd_gamma, pr_a_theta, pr_b_theta, pr_a_eps, pr_b_eps)
+lsirm1pl_normal_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_mean_gamma, pr_sd_gamma, pr_a_theta, pr_b_theta, pr_a_eps, pr_b_eps, verbose) {
+    .Call('_lsirm12pl_lsirm1pl_normal_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_mean_gamma, pr_sd_gamma, pr_a_theta, pr_b_theta, pr_a_eps, pr_b_eps, verbose)
 }
 
-lsirm1pl_normal_fixed_gamma_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_a_theta, pr_b_theta, pr_a_eps, pr_b_eps) {
-    .Call('_lsirm12pl_lsirm1pl_normal_fixed_gamma_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_a_theta, pr_b_theta, pr_a_eps, pr_b_eps)
+lsirm1pl_normal_fixed_gamma_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_a_theta, pr_b_theta, pr_a_eps, pr_b_eps, verbose) {
+    .Call('_lsirm12pl_lsirm1pl_normal_fixed_gamma_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_a_theta, pr_b_theta, pr_a_eps, pr_b_eps, verbose)
 }
 
-lsirm1pl_normal_fixed_gamma_mar_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_a_theta, pr_b_theta, pr_a_eps, pr_b_eps, missing) {
-    .Call('_lsirm12pl_lsirm1pl_normal_fixed_gamma_mar_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_a_theta, pr_b_theta, pr_a_eps, pr_b_eps, missing)
+lsirm1pl_normal_fixed_gamma_mar_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_a_theta, pr_b_theta, pr_a_eps, pr_b_eps, missing, verbose) {
+    .Call('_lsirm12pl_lsirm1pl_normal_fixed_gamma_mar_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_a_theta, pr_b_theta, pr_a_eps, pr_b_eps, missing, verbose)
 }
 
-lsirm1pl_normal_fixed_gamma_mcar_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_a_theta, pr_b_theta, pr_a_eps, pr_b_eps, missing) {
-    .Call('_lsirm12pl_lsirm1pl_normal_fixed_gamma_mcar_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_a_theta, pr_b_theta, pr_a_eps, pr_b_eps, missing)
+lsirm1pl_normal_fixed_gamma_mcar_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_a_theta, pr_b_theta, pr_a_eps, pr_b_eps, missing, verbose) {
+    .Call('_lsirm12pl_lsirm1pl_normal_fixed_gamma_mcar_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_a_theta, pr_b_theta, pr_a_eps, pr_b_eps, missing, verbose)
 }
 
-lsirm1pl_normal_mar_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_mean_gamma, pr_sd_gamma, pr_a_theta, pr_b_theta, pr_a_eps, pr_b_eps, missing) {
-    .Call('_lsirm12pl_lsirm1pl_normal_mar_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_mean_gamma, pr_sd_gamma, pr_a_theta, pr_b_theta, pr_a_eps, pr_b_eps, missing)
+lsirm1pl_normal_mar_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_mean_gamma, pr_sd_gamma, pr_a_theta, pr_b_theta, pr_a_eps, pr_b_eps, missing, verbose) {
+    .Call('_lsirm12pl_lsirm1pl_normal_mar_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_mean_gamma, pr_sd_gamma, pr_a_theta, pr_b_theta, pr_a_eps, pr_b_eps, missing, verbose)
 }
 
-lsirm1pl_normal_mar_ss_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_spike_mean, pr_spike_sd, pr_slab_mean, pr_slab_sd, pr_a_theta, pr_b_theta, pr_a_eps, pr_b_eps, pr_beta_a, pr_beta_b, missing) {
-    .Call('_lsirm12pl_lsirm1pl_normal_mar_ss_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_spike_mean, pr_spike_sd, pr_slab_mean, pr_slab_sd, pr_a_theta, pr_b_theta, pr_a_eps, pr_b_eps, pr_beta_a, pr_beta_b, missing)
+lsirm1pl_normal_mar_ss_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_spike_mean, pr_spike_sd, pr_slab_mean, pr_slab_sd, pr_a_theta, pr_b_theta, pr_a_eps, pr_b_eps, pr_beta_a, pr_beta_b, missing, verbose) {
+    .Call('_lsirm12pl_lsirm1pl_normal_mar_ss_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_spike_mean, pr_spike_sd, pr_slab_mean, pr_slab_sd, pr_a_theta, pr_b_theta, pr_a_eps, pr_b_eps, pr_beta_a, pr_beta_b, missing, verbose)
 }
 
-lsirm1pl_normal_mcar_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_mean_gamma, pr_sd_gamma, pr_a_theta, pr_b_theta, pr_a_eps, pr_b_eps, missing) {
-    .Call('_lsirm12pl_lsirm1pl_normal_mcar_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_mean_gamma, pr_sd_gamma, pr_a_theta, pr_b_theta, pr_a_eps, pr_b_eps, missing)
+lsirm1pl_normal_mcar_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_mean_gamma, pr_sd_gamma, pr_a_theta, pr_b_theta, pr_a_eps, pr_b_eps, missing, verbose) {
+    .Call('_lsirm12pl_lsirm1pl_normal_mcar_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_mean_gamma, pr_sd_gamma, pr_a_theta, pr_b_theta, pr_a_eps, pr_b_eps, missing, verbose)
 }
 
-lsirm1pl_normal_mcar_ss_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_spike_mean, pr_spike_sd, pr_slab_mean, pr_slab_sd, pr_a_theta, pr_b_theta, pr_a_eps, pr_b_eps, pr_beta_a, pr_beta_b, missing) {
-    .Call('_lsirm12pl_lsirm1pl_normal_mcar_ss_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_spike_mean, pr_spike_sd, pr_slab_mean, pr_slab_sd, pr_a_theta, pr_b_theta, pr_a_eps, pr_b_eps, pr_beta_a, pr_beta_b, missing)
+lsirm1pl_normal_mcar_ss_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_spike_mean, pr_spike_sd, pr_slab_mean, pr_slab_sd, pr_a_theta, pr_b_theta, pr_a_eps, pr_b_eps, pr_beta_a, pr_beta_b, missing, verbose) {
+    .Call('_lsirm12pl_lsirm1pl_normal_mcar_ss_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_spike_mean, pr_spike_sd, pr_slab_mean, pr_slab_sd, pr_a_theta, pr_b_theta, pr_a_eps, pr_b_eps, pr_beta_a, pr_beta_b, missing, verbose)
 }
 
-lsirm1pl_normal_ss_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_spike_mean, pr_spike_sd, pr_slab_mean, pr_slab_sd, pr_a_theta, pr_b_theta, pr_a_eps, pr_b_eps, pr_beta_a, pr_beta_b) {
-    .Call('_lsirm12pl_lsirm1pl_normal_ss_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_spike_mean, pr_spike_sd, pr_slab_mean, pr_slab_sd, pr_a_theta, pr_b_theta, pr_a_eps, pr_b_eps, pr_beta_a, pr_beta_b)
+lsirm1pl_normal_ss_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_spike_mean, pr_spike_sd, pr_slab_mean, pr_slab_sd, pr_a_theta, pr_b_theta, pr_a_eps, pr_b_eps, pr_beta_a, pr_beta_b, verbose) {
+    .Call('_lsirm12pl_lsirm1pl_normal_ss_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_spike_mean, pr_spike_sd, pr_slab_mean, pr_slab_sd, pr_a_theta, pr_b_theta, pr_a_eps, pr_b_eps, pr_beta_a, pr_beta_b, verbose)
 }
 
-lsirm1pl_ss_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_spike_mean, pr_spike_sd, pr_slab_mean, pr_slab_sd, pr_a_theta, pr_b_theta, pr_beta_a, pr_beta_b) {
-    .Call('_lsirm12pl_lsirm1pl_ss_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_spike_mean, pr_spike_sd, pr_slab_mean, pr_slab_sd, pr_a_theta, pr_b_theta, pr_beta_a, pr_beta_b)
+lsirm1pl_ss_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_spike_mean, pr_spike_sd, pr_slab_mean, pr_slab_sd, pr_a_theta, pr_b_theta, pr_beta_a, pr_beta_b, verbose) {
+    .Call('_lsirm12pl_lsirm1pl_ss_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_spike_mean, pr_spike_sd, pr_slab_mean, pr_slab_sd, pr_a_theta, pr_b_theta, pr_beta_a, pr_beta_b, verbose)
 }
 
-lsirm2pl_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_mean_gamma, pr_sd_gamma, pr_mean_alpha, pr_sd_alpha, pr_a_theta, pr_b_theta) {
-    .Call('_lsirm12pl_lsirm2pl_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_mean_gamma, pr_sd_gamma, pr_mean_alpha, pr_sd_alpha, pr_a_theta, pr_b_theta)
+lsirm2pl_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_mean_gamma, pr_sd_gamma, pr_mean_alpha, pr_sd_alpha, pr_a_theta, pr_b_theta, verbose) {
+    .Call('_lsirm12pl_lsirm2pl_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_mean_gamma, pr_sd_gamma, pr_mean_alpha, pr_sd_alpha, pr_a_theta, pr_b_theta, verbose)
 }
 
-lsirm2pl_fixed_gamma_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_mean_alpha, pr_sd_alpha, pr_a_theta, pr_b_theta) {
-    .Call('_lsirm12pl_lsirm2pl_fixed_gamma_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_mean_alpha, pr_sd_alpha, pr_a_theta, pr_b_theta)
+lsirm2pl_fixed_gamma_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_mean_alpha, pr_sd_alpha, pr_a_theta, pr_b_theta, verbose) {
+    .Call('_lsirm12pl_lsirm2pl_fixed_gamma_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_mean_alpha, pr_sd_alpha, pr_a_theta, pr_b_theta, verbose)
 }
 
-lsirm2pl_fixed_gamma_mar_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_mean_alpha, pr_sd_alpha, pr_a_theta, pr_b_theta, missing) {
-    .Call('_lsirm12pl_lsirm2pl_fixed_gamma_mar_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_mean_alpha, pr_sd_alpha, pr_a_theta, pr_b_theta, missing)
+lsirm2pl_fixed_gamma_mar_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_mean_alpha, pr_sd_alpha, pr_a_theta, pr_b_theta, missing, verbose) {
+    .Call('_lsirm12pl_lsirm2pl_fixed_gamma_mar_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_mean_alpha, pr_sd_alpha, pr_a_theta, pr_b_theta, missing, verbose)
 }
 
-lsirm2pl_fixed_gamma_mcar_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_mean_alpha, pr_sd_alpha, pr_a_theta, pr_b_theta, missing) {
-    .Call('_lsirm12pl_lsirm2pl_fixed_gamma_mcar_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_mean_alpha, pr_sd_alpha, pr_a_theta, pr_b_theta, missing)
+lsirm2pl_fixed_gamma_mcar_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_mean_alpha, pr_sd_alpha, pr_a_theta, pr_b_theta, missing, verbose) {
+    .Call('_lsirm12pl_lsirm2pl_fixed_gamma_mcar_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_mean_alpha, pr_sd_alpha, pr_a_theta, pr_b_theta, missing, verbose)
 }
 
-lsirm2pl_mar_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_mean_gamma, pr_sd_gamma, pr_mean_alpha, pr_sd_alpha, pr_a_theta, pr_b_theta, missing) {
-    .Call('_lsirm12pl_lsirm2pl_mar_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_mean_gamma, pr_sd_gamma, pr_mean_alpha, pr_sd_alpha, pr_a_theta, pr_b_theta, missing)
+lsirm2pl_mar_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_mean_gamma, pr_sd_gamma, pr_mean_alpha, pr_sd_alpha, pr_a_theta, pr_b_theta, missing, verbose) {
+    .Call('_lsirm12pl_lsirm2pl_mar_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_mean_gamma, pr_sd_gamma, pr_mean_alpha, pr_sd_alpha, pr_a_theta, pr_b_theta, missing, verbose)
 }
 
-lsirm2pl_mar_ss_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_spike_mean, pr_spike_sd, pr_slab_mean, pr_slab_sd, pr_mean_alpha, pr_sd_alpha, pr_a_theta, pr_b_theta, pr_beta_a, pr_beta_b, missing) {
-    .Call('_lsirm12pl_lsirm2pl_mar_ss_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_spike_mean, pr_spike_sd, pr_slab_mean, pr_slab_sd, pr_mean_alpha, pr_sd_alpha, pr_a_theta, pr_b_theta, pr_beta_a, pr_beta_b, missing)
+lsirm2pl_mar_ss_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_spike_mean, pr_spike_sd, pr_slab_mean, pr_slab_sd, pr_mean_alpha, pr_sd_alpha, pr_a_theta, pr_b_theta, pr_beta_a, pr_beta_b, missing, verbose) {
+    .Call('_lsirm12pl_lsirm2pl_mar_ss_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_spike_mean, pr_spike_sd, pr_slab_mean, pr_slab_sd, pr_mean_alpha, pr_sd_alpha, pr_a_theta, pr_b_theta, pr_beta_a, pr_beta_b, missing, verbose)
 }
 
-lsirm2pl_mcar_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_mean_gamma, pr_sd_gamma, pr_mean_alpha, pr_sd_alpha, pr_a_theta, pr_b_theta, missing) {
-    .Call('_lsirm12pl_lsirm2pl_mcar_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_mean_gamma, pr_sd_gamma, pr_mean_alpha, pr_sd_alpha, pr_a_theta, pr_b_theta, missing)
+lsirm2pl_mcar_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_mean_gamma, pr_sd_gamma, pr_mean_alpha, pr_sd_alpha, pr_a_theta, pr_b_theta, missing, verbose) {
+    .Call('_lsirm12pl_lsirm2pl_mcar_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_mean_gamma, pr_sd_gamma, pr_mean_alpha, pr_sd_alpha, pr_a_theta, pr_b_theta, missing, verbose)
 }
 
-lsirm2pl_mcar_ss_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_spike_mean, pr_spike_sd, pr_slab_mean, pr_slab_sd, pr_mean_alpha, pr_sd_alpha, pr_a_theta, pr_b_theta, pr_beta_a, pr_beta_b, missing) {
-    .Call('_lsirm12pl_lsirm2pl_mcar_ss_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_spike_mean, pr_spike_sd, pr_slab_mean, pr_slab_sd, pr_mean_alpha, pr_sd_alpha, pr_a_theta, pr_b_theta, pr_beta_a, pr_beta_b, missing)
+lsirm2pl_mcar_ss_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_spike_mean, pr_spike_sd, pr_slab_mean, pr_slab_sd, pr_mean_alpha, pr_sd_alpha, pr_a_theta, pr_b_theta, pr_beta_a, pr_beta_b, missing, verbose) {
+    .Call('_lsirm12pl_lsirm2pl_mcar_ss_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_spike_mean, pr_spike_sd, pr_slab_mean, pr_slab_sd, pr_mean_alpha, pr_sd_alpha, pr_a_theta, pr_b_theta, pr_beta_a, pr_beta_b, missing, verbose)
 }
 
-lsirm2pl_normal_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_a_theta, pr_b_theta, pr_mean_theta, pr_a_eps, pr_b_eps, pr_mean_gamma, pr_sd_gamma, pr_mean_alpha, pr_sd_alpha) {
-    .Call('_lsirm12pl_lsirm2pl_normal_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_a_theta, pr_b_theta, pr_mean_theta, pr_a_eps, pr_b_eps, pr_mean_gamma, pr_sd_gamma, pr_mean_alpha, pr_sd_alpha)
+lsirm2pl_normal_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_a_theta, pr_b_theta, pr_mean_theta, pr_a_eps, pr_b_eps, pr_mean_gamma, pr_sd_gamma, pr_mean_alpha, pr_sd_alpha, verbose) {
+    .Call('_lsirm12pl_lsirm2pl_normal_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_a_theta, pr_b_theta, pr_mean_theta, pr_a_eps, pr_b_eps, pr_mean_gamma, pr_sd_gamma, pr_mean_alpha, pr_sd_alpha, verbose)
 }
 
-lsirm2pl_normal_fixed_gamma_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_a_theta, pr_b_theta, pr_mean_theta, pr_a_eps, pr_b_eps, pr_mean_alpha, pr_sd_alpha) {
-    .Call('_lsirm12pl_lsirm2pl_normal_fixed_gamma_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_a_theta, pr_b_theta, pr_mean_theta, pr_a_eps, pr_b_eps, pr_mean_alpha, pr_sd_alpha)
+lsirm2pl_normal_fixed_gamma_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_a_theta, pr_b_theta, pr_mean_theta, pr_a_eps, pr_b_eps, pr_mean_alpha, pr_sd_alpha, verbose) {
+    .Call('_lsirm12pl_lsirm2pl_normal_fixed_gamma_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_a_theta, pr_b_theta, pr_mean_theta, pr_a_eps, pr_b_eps, pr_mean_alpha, pr_sd_alpha, verbose)
 }
 
-lsirm2pl_normal_fixed_gamma_mar_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_a_theta, pr_b_theta, pr_mean_theta, pr_a_eps, pr_b_eps, pr_mean_alpha, pr_sd_alpha, missing) {
-    .Call('_lsirm12pl_lsirm2pl_normal_fixed_gamma_mar_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_a_theta, pr_b_theta, pr_mean_theta, pr_a_eps, pr_b_eps, pr_mean_alpha, pr_sd_alpha, missing)
+lsirm2pl_normal_fixed_gamma_mar_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_a_theta, pr_b_theta, pr_mean_theta, pr_a_eps, pr_b_eps, pr_mean_alpha, pr_sd_alpha, missing, verbose) {
+    .Call('_lsirm12pl_lsirm2pl_normal_fixed_gamma_mar_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_a_theta, pr_b_theta, pr_mean_theta, pr_a_eps, pr_b_eps, pr_mean_alpha, pr_sd_alpha, missing, verbose)
 }
 
-lsirm2pl_normal_fixed_gamma_mcar_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_a_theta, pr_b_theta, pr_mean_theta, pr_a_eps, pr_b_eps, pr_mean_alpha, pr_sd_alpha, missing) {
-    .Call('_lsirm12pl_lsirm2pl_normal_fixed_gamma_mcar_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_a_theta, pr_b_theta, pr_mean_theta, pr_a_eps, pr_b_eps, pr_mean_alpha, pr_sd_alpha, missing)
+lsirm2pl_normal_fixed_gamma_mcar_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_a_theta, pr_b_theta, pr_mean_theta, pr_a_eps, pr_b_eps, pr_mean_alpha, pr_sd_alpha, missing, verbose) {
+    .Call('_lsirm12pl_lsirm2pl_normal_fixed_gamma_mcar_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_a_theta, pr_b_theta, pr_mean_theta, pr_a_eps, pr_b_eps, pr_mean_alpha, pr_sd_alpha, missing, verbose)
 }
 
-lsirm2pl_normal_mar_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_a_theta, pr_b_theta, pr_mean_theta, pr_a_eps, pr_b_eps, pr_mean_gamma, pr_sd_gamma, pr_mean_alpha, pr_sd_alpha, missing) {
-    .Call('_lsirm12pl_lsirm2pl_normal_mar_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_a_theta, pr_b_theta, pr_mean_theta, pr_a_eps, pr_b_eps, pr_mean_gamma, pr_sd_gamma, pr_mean_alpha, pr_sd_alpha, missing)
+lsirm2pl_normal_mar_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_a_theta, pr_b_theta, pr_mean_theta, pr_a_eps, pr_b_eps, pr_mean_gamma, pr_sd_gamma, pr_mean_alpha, pr_sd_alpha, missing, verbose) {
+    .Call('_lsirm12pl_lsirm2pl_normal_mar_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_a_theta, pr_b_theta, pr_mean_theta, pr_a_eps, pr_b_eps, pr_mean_gamma, pr_sd_gamma, pr_mean_alpha, pr_sd_alpha, missing, verbose)
 }
 
-lsirm2pl_normal_mar_ss_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_spike_mean, pr_spike_sd, pr_slab_mean, pr_slab_sd, pr_mean_alpha, pr_sd_alpha, pr_a_eps, pr_b_eps, pr_a_theta, pr_b_theta, pr_beta_a, pr_beta_b, missing) {
-    .Call('_lsirm12pl_lsirm2pl_normal_mar_ss_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_spike_mean, pr_spike_sd, pr_slab_mean, pr_slab_sd, pr_mean_alpha, pr_sd_alpha, pr_a_eps, pr_b_eps, pr_a_theta, pr_b_theta, pr_beta_a, pr_beta_b, missing)
+lsirm2pl_normal_mar_ss_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_spike_mean, pr_spike_sd, pr_slab_mean, pr_slab_sd, pr_mean_alpha, pr_sd_alpha, pr_a_eps, pr_b_eps, pr_a_theta, pr_b_theta, pr_beta_a, pr_beta_b, missing, verbose) {
+    .Call('_lsirm12pl_lsirm2pl_normal_mar_ss_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_spike_mean, pr_spike_sd, pr_slab_mean, pr_slab_sd, pr_mean_alpha, pr_sd_alpha, pr_a_eps, pr_b_eps, pr_a_theta, pr_b_theta, pr_beta_a, pr_beta_b, missing, verbose)
 }
 
-lsirm2pl_normal_mcar_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_a_theta, pr_b_theta, pr_mean_theta, pr_a_eps, pr_b_eps, pr_mean_gamma, pr_sd_gamma, pr_mean_alpha, pr_sd_alpha, missing) {
-    .Call('_lsirm12pl_lsirm2pl_normal_mcar_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_a_theta, pr_b_theta, pr_mean_theta, pr_a_eps, pr_b_eps, pr_mean_gamma, pr_sd_gamma, pr_mean_alpha, pr_sd_alpha, missing)
+lsirm2pl_normal_mcar_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_a_theta, pr_b_theta, pr_mean_theta, pr_a_eps, pr_b_eps, pr_mean_gamma, pr_sd_gamma, pr_mean_alpha, pr_sd_alpha, missing, verbose) {
+    .Call('_lsirm12pl_lsirm2pl_normal_mcar_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_a_theta, pr_b_theta, pr_mean_theta, pr_a_eps, pr_b_eps, pr_mean_gamma, pr_sd_gamma, pr_mean_alpha, pr_sd_alpha, missing, verbose)
 }
 
-lsirm2pl_normal_mcar_ss_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_spike_mean, pr_spike_sd, pr_slab_mean, pr_slab_sd, pr_mean_alpha, pr_sd_alpha, pr_a_eps, pr_b_eps, pr_a_theta, pr_b_theta, pr_beta_a, pr_beta_b, missing) {
-    .Call('_lsirm12pl_lsirm2pl_normal_mcar_ss_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_spike_mean, pr_spike_sd, pr_slab_mean, pr_slab_sd, pr_mean_alpha, pr_sd_alpha, pr_a_eps, pr_b_eps, pr_a_theta, pr_b_theta, pr_beta_a, pr_beta_b, missing)
+lsirm2pl_normal_mcar_ss_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_spike_mean, pr_spike_sd, pr_slab_mean, pr_slab_sd, pr_mean_alpha, pr_sd_alpha, pr_a_eps, pr_b_eps, pr_a_theta, pr_b_theta, pr_beta_a, pr_beta_b, missing, verbose) {
+    .Call('_lsirm12pl_lsirm2pl_normal_mcar_ss_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_spike_mean, pr_spike_sd, pr_slab_mean, pr_slab_sd, pr_mean_alpha, pr_sd_alpha, pr_a_eps, pr_b_eps, pr_a_theta, pr_b_theta, pr_beta_a, pr_beta_b, missing, verbose)
 }
 
-lsirm2pl_normal_ss_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_spike_mean, pr_spike_sd, pr_slab_mean, pr_slab_sd, pr_mean_alpha, pr_sd_alpha, pr_a_eps, pr_b_eps, pr_a_theta, pr_b_theta, pr_beta_a, pr_beta_b) {
-    .Call('_lsirm12pl_lsirm2pl_normal_ss_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_spike_mean, pr_spike_sd, pr_slab_mean, pr_slab_sd, pr_mean_alpha, pr_sd_alpha, pr_a_eps, pr_b_eps, pr_a_theta, pr_b_theta, pr_beta_a, pr_beta_b)
+lsirm2pl_normal_ss_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_spike_mean, pr_spike_sd, pr_slab_mean, pr_slab_sd, pr_mean_alpha, pr_sd_alpha, pr_a_eps, pr_b_eps, pr_a_theta, pr_b_theta, pr_beta_a, pr_beta_b, verbose) {
+    .Call('_lsirm12pl_lsirm2pl_normal_ss_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_spike_mean, pr_spike_sd, pr_slab_mean, pr_slab_sd, pr_mean_alpha, pr_sd_alpha, pr_a_eps, pr_b_eps, pr_a_theta, pr_b_theta, pr_beta_a, pr_beta_b, verbose)
 }
 
-lsirm2pl_ss_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_spike_mean, pr_spike_sd, pr_slab_mean, pr_slab_sd, pr_mean_alpha, pr_sd_alpha, pr_a_theta, pr_b_theta, pr_beta_a, pr_beta_b) {
-    .Call('_lsirm12pl_lsirm2pl_ss_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_spike_mean, pr_spike_sd, pr_slab_mean, pr_slab_sd, pr_mean_alpha, pr_sd_alpha, pr_a_theta, pr_b_theta, pr_beta_a, pr_beta_b)
+lsirm2pl_ss_cpp <- function(data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_spike_mean, pr_spike_sd, pr_slab_mean, pr_slab_sd, pr_mean_alpha, pr_sd_alpha, pr_a_theta, pr_b_theta, pr_beta_a, pr_beta_b, verbose) {
+    .Call('_lsirm12pl_lsirm2pl_ss_cpp', PACKAGE = 'lsirm12pl', data, ndim, niter, nburn, nthin, nprint, jump_beta, jump_theta, jump_alpha, jump_gamma, jump_z, jump_w, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_spike_mean, pr_spike_sd, pr_slab_mean, pr_slab_sd, pr_mean_alpha, pr_sd_alpha, pr_a_theta, pr_b_theta, pr_beta_a, pr_beta_b, verbose)
 }
 
 onepl_cpp <- function(data, niter, nburn, nthin, nprint, jump_beta, jump_theta, pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_a_theta, pr_b_theta) {

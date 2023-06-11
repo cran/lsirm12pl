@@ -28,7 +28,7 @@
 #' @param pr_b_theta Numeric; scale parameter of inverse gamma prior for variance of theta. default value is 0.001.
 #' @param pr_xi_a Numeric; first shape parameter of beta prior for latent variable xi. default value is 1.
 #' @param pr_xi_b Numeric; second shape parameter of beta prior for latent variable xi. default value is 1.
-#'
+#' @param verbose Logical; If TRUE, MCMC samples are printed for each \code{nprint}. default value is FALSE
 #'
 #' @return \code{lsirm2pl_ss} returns an object of  list containing the following components:
 #'  \item{data}{data frame or matrix containing the variables in the model.}
@@ -78,7 +78,7 @@ lsirm2pl_ss = function(data, ndim = 2, niter = 15000, nburn = 2500, nthin = 5, n
                        pr_mean_beta = 0, pr_sd_beta = 1.0, pr_mean_theta = 0,
                        pr_spike_mean = -3, pr_spike_sd = 1.0, pr_slab_mean = 0.5, pr_slab_sd = 1.0 ,
                        pr_mean_alpha = 0.5, pr_sd_alpha = 1.0,
-                       pr_a_theta = 0.001, pr_b_theta = 0.001, pr_xi_a  = 1, pr_xi_b = 1){
+                       pr_a_theta = 0.001, pr_b_theta = 0.001, pr_xi_a  = 1, pr_xi_b = 1, verbose=FALSE){
 
   if(is.data.frame(data)){
     cname = colnames(data)
@@ -86,12 +86,14 @@ lsirm2pl_ss = function(data, ndim = 2, niter = 15000, nburn = 2500, nthin = 5, n
     cname = paste("item", 1:ncol(data), sep=" ")
   }
 
+  cat("\n\nFitting with MCMC algorithm\n")
+
   output <- lsirm2pl_ss_cpp(as.matrix(data), ndim, niter, nburn, nthin, nprint,
                             jump_beta, jump_theta, jump_alpha, jump_gamma, jump_z, jump_w,
                             pr_mean_beta, pr_sd_beta, pr_mean_theta,
                             pr_spike_mean, pr_spike_sd, pr_slab_mean, pr_slab_sd,
                             pr_mean_alpha, pr_sd_alpha,
-                            pr_a_theta, pr_b_theta, pr_xi_a, pr_xi_b)
+                            pr_a_theta, pr_b_theta, pr_xi_a, pr_xi_b, verbose=verbose)
 
   mcmc.inf = list(nburn=nburn, niter=niter, nthin=nthin)
   nsample <- nrow(data)
@@ -104,7 +106,9 @@ lsirm2pl_ss = function(data, ndim = 2, niter = 15000, nburn = 2500, nthin = 5, n
   z.star = output$z[max.address,,]
   w.proc = array(0,dim=c(nmcmc,nitem,ndim))
   z.proc = array(0,dim=c(nmcmc,nsample,ndim))
-  #library(MCMCpack)
+  
+  cat("\n\nProcrustes Matching Analysis\n")
+
   for(iter in 1:nmcmc){
     z.iter = output$z[iter,,]
     if(iter != max.address) z.proc[iter,,] = procrustes(z.iter,z.star)$X.new
@@ -131,6 +135,7 @@ lsirm2pl_ss = function(data, ndim = 2, niter = 15000, nburn = 2500, nthin = 5, n
   rownames(beta.summary) <- cname
 
   # Calculate BIC
+  cat("\n\nCalculate BIC\n")
   if(pi.estimate > 0.5){
     log_like = log_likelihood_2pl_cpp(as.matrix(data), ndim, as.matrix(beta.estimate), as.matrix(alpha.estimate), as.matrix(theta.estimate), gamma.estimate, z.est, w.est, 99)
   }else{

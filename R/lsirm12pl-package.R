@@ -12,10 +12,13 @@
 #' @importFrom coda as.mcmc
 #' @importFrom spatstat.geom owin
 #' @importFrom spatstat.random rpoispp
-#' @importFrom plotly ggplotly
-#' @importFrom stats median pnorm rnorm runif
-#' @importFrom utils capture.output setTxtProgressBar txtProgressBar
-#' @import ggplot2 GPArotation dplyr pROC spatstat
+#' @importFrom plotly ggplotly add_markers add_text
+#' @importFrom stats median pnorm rnorm runif dist kmeans rbinom
+#' @importFrom utils capture.output setTxtProgressBar txtProgressBar stack
+#' @importFrom gridExtra grid.arrange arrangeGrob
+#' @importFrom fpc cluster.stats
+#' @importFrom kernlab specc
+#' @import ggplot2 GPArotation dplyr pROC spatstat grid
 #' @useDynLib lsirm12pl
 #'
 NULL

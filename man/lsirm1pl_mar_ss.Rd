@@ -27,7 +27,8 @@ lsirm1pl_mar_ss(
   pr_b_theta = 0.001,
   pr_xi_a = 1,
   pr_xi_b = 1,
-  missing.val = 99
+  missing.val = 99,
+  verbose = FALSE
 )
 }
 \arguments{
@@ -76,6 +77,8 @@ lsirm1pl_mar_ss(
 \item{pr_xi_b}{Numeric; second shape parameter of beta prior for latent variable xi. default value is 1.}
 
 \item{missing.val}{Numeric; a number to replace missing values. default value is 99.}
+
+\item{verbose}{Logical; If TRUE, MCMC samples are printed for each \code{nprint}. default value is FALSE}
 }
 \value{
 \code{lsirm1pl_mar_ss} returns an object of  list containing the following components:

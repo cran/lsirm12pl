@@ -22,7 +22,8 @@ lsirm2pl_fixed_gamma(
   pr_mean_alpha = 0.5,
   pr_sd_alpha = 1,
   pr_a_theta = 0.001,
-  pr_b_theta = 0.001
+  pr_b_theta = 0.001,
+  verbose = FALSE
 )
 }
 \arguments{
@@ -61,6 +62,8 @@ lsirm2pl_fixed_gamma(
 \item{pr_a_theta}{Numeric; shape parameter of inverse gamma prior for variance of theta. default value is 0.001.}
 
 \item{pr_b_theta}{Numeric; scale parameter of inverse gamma prior for variance of theta. default value is 0.001.}
+
+\item{verbose}{Logical; If TRUE, MCMC samples are printed for each \code{nprint}. default value is FALSE}
 }
 \value{
 \code{lsirm2pl_fixed_gamma} returns an object of  list containing the following components:
