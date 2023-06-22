@@ -131,18 +131,25 @@ plot.lsirm = function(x, option = "interaction", rotation=FALSE, cluster=NA, int
 
         w.samps1 <- item_position
         z.samps1 <- resp_position
+        df = rbind(item_position, resp_position)
+        max_coord = apply(df,2,max,na.rm=T)
+        min_coord = apply(df,2,min,na.rm=T)
 
         W <- owin(xrange=c(0,1), yrange=c(0,1)) # spatstat package ()
 
         # Normalizing the w
-        x <- (w.samps1[,1] - min(w.samps1[,1])) / (max(w.samps1[,1]) - min(w.samps1[,1]))
-        y <- (w.samps1[,2] - min(w.samps1[,2])) / (max(w.samps1[,2]) - min(w.samps1[,2]))
+        # x <- (w.samps1[,1] - min(w.samps1[,1])) / (max(w.samps1[,1]) - min(w.samps1[,1]))
+        # y <- (w.samps1[,2] - min(w.samps1[,2])) / (max(w.samps1[,2]) - min(w.samps1[,2]))
+        x = (w.samps1[,1] - min_coord[1])/(max_coord[1]-min_coord[1])
+        y = (w.samps1[,2] - min_coord[2])/(max_coord[2]-min_coord[2])
         w.post1 <- data.frame(cbind(x, y))
         colnames(w.post1) <- c('x', 'y')
 
         # Normalizing the z
-        zx <- (z.samps1[,1] - min(z.samps1[,1])) / (max(z.samps1[,1]) - min(z.samps1[,1]))
-        zy <- (z.samps1[,2] - min(z.samps1[,2])) / (max(z.samps1[,2]) - min(z.samps1[,2]))
+        # zx <- (z.samps1[,1] - min(z.samps1[,1])) / (max(z.samps1[,1]) - min(z.samps1[,1]))
+        # zy <- (z.samps1[,2] - min(z.samps1[,2])) / (max(z.samps1[,2]) - min(z.samps1[,2]))
+        zx = (z.samps1[,1] - min_coord[1])/(max_coord[1]-min_coord[1])
+        zy = (z.samps1[,2] - min_coord[2])/(max_coord[2]-min_coord[2])
         z.post1 <- data.frame(cbind(zx, zy))
         colnames(z.post1) <- c('x', 'y')
 

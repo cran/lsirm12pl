@@ -1,4 +1,4 @@
-c19cee9f5f53d75b0f4bb3bd5922a327 *DESCRIPTION
+28d8d162ce43630489a1d8b9d161c40d *DESCRIPTION
 c71721c709a3775f77f2cf81017afcc9 *NAMESPACE
 347df77dc9285bbad8cae61760006e59 *R/RcppExports.R
 cc84e37681b430435afd5b0a30ccbbdf *R/data.R
@@ -45,7 +45,7 @@ a39bbcd2e4f4c2ab0f251b1f5096aab4 *R/lsirm2pl_normal_ss.R
 8530078a63f76d949e5b504c522529a9 *R/lsirm2pl_o.R
 9a10235d3075734d7726d52f692a4475 *R/lsirm2pl_ss.R
 d456c1cdf8e5aea8ddf02e977779c33c *R/onepl.R
-e3a8141d908d836b164e69a509651091 *R/plot.lsirm.R
+1639fa94e585ddc73a3613fbb53272d5 *R/plot.lsirm.R
 be870bfcd6c0c1751a33ccf84ceac720 *R/print.summary.R
 317a1648a2eb2c302dcb4327da3b56fd *R/print.summary.lsirm.R
 f45e67de00483a1181f511ebbd7694de *R/roc.R
