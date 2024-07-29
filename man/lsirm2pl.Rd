@@ -2,30 +2,151 @@
 % Please edit documentation in R/lsirm.R
 \name{lsirm2pl}
 \alias{lsirm2pl}
-\title{Fit a 2pl LSIRM model}
+\title{Fit a 2pl LSIRM for binary and continuous item resopnse data}
 \usage{
-lsirm2pl(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data = NA, ...)
+lsirm2pl(
+  data,
+  spikenslab = FALSE,
+  fixed_gamma = FALSE,
+  missing_data = NA,
+  chains = 1,
+  multicore = 1,
+  seed = NA,
+  ndim,
+  niter,
+  nburn,
+  nthin,
+  nprint,
+  jump_beta,
+  jump_theta,
+  jump_alpha,
+  jump_z,
+  jump_w,
+  pr_mean_beta,
+  pr_sd_beta,
+  pr_mean_theta,
+  pr_a_theta,
+  pr_b_theta,
+  pr_mean_alpha,
+  pr_sd_alpha,
+  ...
+)
 }
 \arguments{
-\item{data}{Matrix; binary or continuous item response matrix to be analyzed. Each row is assumed to be respondent and its column values are assumed to be response to the corresponding item.}
+\item{data}{Matrix; a binary or continuous item response matrix for analysis. Each row represents a respondent, and each column contains responses to the corresponding item.}
 
-\item{spikenslab}{Whether to use a model selection approach.}
+\item{spikenslab}{Logical; specifies whether to use a model selection approach. Default is FALSE.}
 
-\item{fixed_gamma}{Whether fix gamma to 1.}
+\item{fixed_gamma}{Logical; indicates whether to fix gamma at 1. Default is FALSE.}
 
-\item{missing_data}{The assumed missing type. One of NA, "mar" and "mcar". Default uses NA.}
+\item{missing_data}{Character; the type of missing data assumed. Options are NA, "mar", or "mcar". Default is NA.}
 
-\item{...}{Additional arguments for the corresponding function.}
+\item{chains}{Integer; the number of MCMC chains to run. Default is 1.}
+
+\item{multicore}{Integer; the number of cores to use for parallel execution. Default is 1.}
+
+\item{seed}{Integer; the seed number for MCMC fitting. Default is NA.}
+
+\item{ndim}{Integer; the dimension of the latent space. Default is 2.}
+
+\item{niter}{Integer; the total number of MCMC iterations to run. Default is 15000.}
+
+\item{nburn}{Integer; the number of initial MCMC iterations to discard as burn-in. Default is 2500.}
+
+\item{nthin}{Integer; the number of MCMC iterations to thin. Default is 5.}
+
+\item{nprint}{Integer; the interval at which MCMC samples are displayed during execution. Default is 500.}
+
+\item{jump_beta}{Numeric; the jumping rule for the beta proposal density. Default is 0.4.}
+
+\item{jump_theta}{Numeric; the jumping rule for the theta proposal density. Default is 1.0.}
+
+\item{jump_alpha}{Numeric; the jumping rule for the alpha proposal density. Default is 1.0.}
+
+\item{jump_z}{Numeric; the jumping rule for the z proposal density. Default is 0.5.}
+
+\item{jump_w}{Numeric; the jumping rule for the w proposal density. Default is 0.5.}
+
+\item{pr_mean_beta}{Numeric; the mean of the normal prior for beta. Default is 0.}
+
+\item{pr_sd_beta}{Numeric; the standard deviation of the normal prior for beta. Default is 1.0.}
+
+\item{pr_mean_theta}{Numeric; the mean of the normal prior for theta. Default is 0.}
+
+\item{pr_a_theta}{Numeric; the shape parameter of the inverse gamma prior for the variance of theta. Default is 0.001.}
+
+\item{pr_b_theta}{Numeric; the scale parameter of the inverse gamma prior for the variance of theta. Default is 0.001.}
+
+\item{pr_mean_alpha}{Numeric; the mean of the log normal prior for alpha. Default is 0.5.}
+
+\item{pr_sd_alpha}{Numeric; the standard deviation of the log normal prior for alpha. Default is 1.0.}
+
+\item{\dots}{Additional arguments for the for various settings. Refer to the functions in the Details.}
 }
 \value{
-\code{lsirm2pl} returns an object of list. See corresponding function.
+\code{lsirm2pl} returns an object of list.
+The basic return list containing the following components:
+\item{data}{A data frame or matrix containing the variables used in the model.}
+\item{bic}{A numeric value representing the Bayesian Information Criterion (BIC).}
+\item{mcmc_inf}{Details about the number of MCMC iterations, burn-in periods, and thinning intervals.}
+\item{map_inf}{The log maximum a posteriori (MAP) value and the iteration number at which this MAP value occurs.}
+\item{beta_estimate}{Posterior estimates of the beta parameter.}
+\item{theta_estimate}{Posterior estimates of the theta parameter.}
+\item{sigma_theta_estimate}{Posterior estimates of the standard deviation of theta.}
+\item{alpha_estimate}{posterior estimates of alpha parameter..}
+\item{z_estimate}{Posterior estimates of the z parameter.}
+\item{w_estimate}{Posterior estimates of the w parameter.}
+\item{beta}{Posterior samples of the beta parameter.}
+\item{theta}{Posterior samples of the theta parameter.}
+\item{theta_sd}{Posterior samples of the standard deviation of theta.}
+\item{alpha}{Posterior samples of the alpha parameter.}
+\item{z}{Posterior samples of the z parameter, represented as a 3-dimensional matrix where the last axis denotes the dimension of the latent space.}
+\item{w}{Posterior samples of the w parameter, represented as a 3-dimensional matrix where the last axis denotes the dimension of the latent space.}
+\item{accept_beta}{Acceptance ratio for the beta parameter.}
+\item{accept_theta}{Acceptance ratio for the theta parameter.}
+\item{accept_z}{Acceptance ratio for the z parameter.}
+\item{accept_w}{Acceptance ratio for the w parameter.}
+\item{accept_alpha}{Acceptance ratio for the alpha parameter.}
+\item{...}{Additional return values for various settings. Refer to the functions in the Details.}
 }
 \description{
-\link{lsirm2pl} integrates all functions related to 2pl LSIRM
+\code{\link{lsirm2pl}} integrates all functions related to 2PL LSIRM. Various 2PL LSIRM function can be used by setting the \code{spikenslab}, \code{fixed_gamma}, and \code{missing_data} arguments.
+
+This function can be used regardless of the data type, providing a unified approach to model fitting.
+}
+\details{
+Additional arguments and return values for each function are documented in the respective function's description.
+
+* For 2PL LSIRM with data included missing value are detailed in \link{lsirm2pl_mar} and \link{lsirm2pl_mcar}.
+
+* For 2PL LSIRM using the spike-and-slab model selection approach are detailed in \link{lsirm2pl_ss}.
+
+* For continuous version of 2PL LSIRM are detailed in \link{lsirm2pl_normal_o}.
+
+For 2PL LSIRM with binary item response data, the probability of correct response by respondent \eqn{j} to item \eqn{i} with item effect \eqn{\beta_i}, respondent effect \eqn{\theta_j} and the distance between latent position \eqn{w_i} of item \eqn{i} and latent position \eqn{z_j} of respondent \eqn{j} in the shared metric space, with \eqn{\gamma} represents the weight of the distance term. For 2pl model, the the item effect is assumed to have additional discrimination parameter \eqn{\alpha_i} multiplied by \eqn{\theta_j}: \deqn{logit(P(Y_{j,i} = 1|\theta_j,\alpha_i,\beta_i,\gamma,z_j,w_i))=\theta_j*\alpha_i+\beta_i-\gamma||z_j-w_i||}
+
+For 2PL LSIRM with continuous item response data, the continuous value of response by respondent \eqn{j} to item \eqn{i} with item effect \eqn{\beta_i}, respondent effect \eqn{\theta_j} and the distance between latent position \eqn{w_i} of item \eqn{i} and latent position \eqn{z_j} of respondent \eqn{j} in the shared metric space, with \eqn{\gamma} represents the weight of the distance term. For 2pl model, the the item effect is assumed to have additional discrimination parameter \eqn{\alpha_i} multiplied by \eqn{\theta_j}: \deqn{Y_{j,i} = \theta_j+\beta_i-\gamma||z_j-w_i|| + e_{j,i}} where the error \eqn{e_{j,i} \sim N(0,\sigma^2)}
 }
 \note{
 If both \code{spikenslab} and \code{fixed_gamma} are set \code{TRUE}, it returns error because both are related to \code{gamma}.
 }
+\examples{
+\donttest{
+# generate example item response matrix
+data     <- matrix(rbinom(500, size = 1, prob = 0.5),ncol=10,nrow=50)
+lsirm_result <- lsirm2pl(data)
+
+# The code following can achieve the same result.
+lsirm_result <- lsirm(data~lsirm2pl())
+
+}
+}
 \seealso{
-\code{\link{lsirm2pl_o}}, \code{\link{lsirm2pl_fixed_gamma}}, \code{\link{lsirm2pl_mar}},  \code{\link{lsirm2pl_mcar}},\code{\link{lsirm2pl_fixed_gamma_mar}}, \code{\link{lsirm2pl_fixed_gamma_mcar}}, \code{\link{lsirm2pl_ss}}, \code{\link{lsirm2pl_mar_ss}}, \code{\link{lsirm2pl_mcar_ss}}, \code{\link{lsirm2pl_normal_o}}, \code{\link{lsirm2pl_normal_fixed_gamma}}, \code{\link{lsirm2pl_normal_mar}},  \code{\link{lsirm2pl_mcar}},\code{\link{lsirm2pl_normal_fixed_gamma_mar}}, \code{\link{lsirm2pl_normal_fixed_gamma_mcar}}, \code{\link{lsirm2pl_normal_ss}}, \code{\link{lsirm2pl_normal_mar_ss}}, \code{\link{lsirm2pl_normal_mcar_ss}}
+The 2PL LSIRM for binary item response data as following:
+
+\code{\link{lsirm2pl_o}}, \code{\link{lsirm2pl_fixed_gamma}}, \code{\link{lsirm2pl_mar}},\code{\link{lsirm2pl_mcar}}, \code{\link{lsirm2pl_fixed_gamma_mar}}, \code{\link{lsirm2pl_fixed_gamma_mcar}}, \code{\link{lsirm2pl_ss}}, \code{\link{lsirm2pl_mar_ss}}, and \code{\link{lsirm2pl_mcar_ss}}
+
+The 2PL LSIRM for continuous item response data as following:
+
+\code{\link{lsirm2pl_normal_o}}, \code{\link{lsirm2pl_normal_fixed_gamma}}, \code{\link{lsirm2pl_normal_mar}},  \code{\link{lsirm2pl_normal_mcar}},\code{\link{lsirm1pl_normal_fixed_gamma_mar}}, \code{\link{lsirm2pl_normal_fixed_gamma_mcar}}, \code{\link{lsirm2pl_normal_ss}}, \code{\link{lsirm2pl_normal_mar_ss}}, \code{\link{lsirm2pl_normal_mcar_ss}}
 }

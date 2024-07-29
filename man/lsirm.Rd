@@ -2,21 +2,38 @@
 % Please edit documentation in R/lsirm.R
 \name{lsirm}
 \alias{lsirm}
-\title{Fit a LSIRM model}
+\title{Fit a LSIRM ( Latent Space Item Response Model)}
 \usage{
-lsirm(data, ...)
+lsirm(formula, ...)
 }
 \arguments{
-\item{data}{Matrix; binary or continuous item response matrix to be analyzed. Each row is assumed to be respondent and its column values are assumed to be response to the corresponding item.}
+\item{formula}{The form of formula is \code{lsirm(A ~ <term 1>(<term 2>, <term 3> ...))}, where \code{A} is binary or continuous item response matrix to be analyzed, \code{<term1>} is the model you want to fit and has one of the following values: "lsirm1pl" and "lsirm2pl"., and \code{<term 2>}, \code{<term 3>}, etc. are each option for the model.}
 
 \item{...}{Additional arguments for the corresponding function.}
 }
 \value{
-\code{lsirm} returns an object of list. See corresponding function.
+\code{lsirm} returns an object of class \code{list}.
+
+See corresponding functions such as \code{\link{lsirm1pl}} for 1PL LSIRM and \code{\link{lsirm2pl}} for 2PL LSIRM.
 }
 \description{
 \link{lsirm} is used to fit 1PL LSIRM and 2PL LSIRM using Bayesian method as described in Jeon et al. (2021).
 }
+\details{
+The descriptions of options for each model, such as \code{<term 2>} and \code{<term 3>}, are included in \code{\link{lsirm1pl}} for 1PL LSIRM and \code{\link{lsirm2pl}} for 2PL LSIRM.
+}
+\examples{
+\donttest{
+# generate example item response matrix
+data     <- matrix(rbinom(500, size = 1, prob = 0.5),ncol=10,nrow=50)
+
+lsirm_result <- lsirm(data~lsirm1pl())
+lsirm_result <- lsirm(data~lsirm2pl())
+
+}
+}
 \seealso{
-\link{lsirm1pl} and \link{lsirm2pl}
+\code{\link{lsirm1pl}} for 1PL LSIRM.
+
+\code{\link{lsirm2pl}} for 2PL LSIRM.
 }

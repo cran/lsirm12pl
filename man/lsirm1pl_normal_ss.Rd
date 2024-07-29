@@ -2,7 +2,7 @@
 % Please edit documentation in R/lsirm1pl_normal_ss.R
 \name{lsirm1pl_normal_ss}
 \alias{lsirm1pl_normal_ss}
-\title{1pl LSIRM model with normal likelihood and model selection approach.}
+\title{1PL LSIRM with normal likelihood and model selection approach.}
 \usage{
 lsirm1pl_normal_ss(
   data,
@@ -33,33 +33,33 @@ lsirm1pl_normal_ss(
 )
 }
 \arguments{
-\item{data}{Matrix; continuous item response matrix to be analyzed. Each row is assumed to be respondent and its column values are assumed to be response to the corresponding item.}
+\item{data}{Matrix; a binary or continuous item response matrix for analysis. Each row represents a respondent, and each column contains responses to the corresponding item.}
 
-\item{ndim}{Numeric; dimension of latent space. default value is 2.}
+\item{ndim}{Integer; the dimension of the latent space. Default is 2.}
 
-\item{niter}{Numeric; number of iterations to run MCMC sampling. default value is 15000.}
+\item{niter}{Integer; the total number of MCMC iterations to run. Default is 15000.}
 
-\item{nburn}{Numeric; number of initial, pre-thinning, MCMC iterations to discard. default value is 2500.}
+\item{nburn}{Integer; the number of initial MCMC iterations to discard as burn-in. Default is 2500.}
 
-\item{nthin}{Numeric;number of thinning, MCMC iterations to discard. default value is 5.}
+\item{nthin}{Integer; the number of MCMC iterations to thin. Default is 5.}
 
-\item{nprint}{Numeric; MCMC samples is displayed during execution of MCMC chain for each \code{nprint}. default value is 500.}
+\item{nprint}{Integer; the interval at which MCMC samples are displayed during execution. Default is 500.}
 
-\item{jump_beta}{Numeric; jumping rule of the proposal density for beta. default value is 0.4.}
+\item{jump_beta}{Numeric; the jumping rule for the beta proposal density. Default is 0.4.}
 
-\item{jump_theta}{Numeric; jumping rule of the proposal density for theta. default value is 1.0.}
+\item{jump_theta}{Numeric; the jumping rule for the theta proposal density. Default is 1.0.}
 
-\item{jump_gamma}{Numeric; jumping rule of the proposal density for gamma. default value is 0.025.}
+\item{jump_gamma}{Numeric; the jumping rule for the theta proposal density. Default is 1.0.}
 
-\item{jump_z}{Numeric; jumping rule of the proposal density for z. default value is 0.5.}
+\item{jump_z}{Numeric; the jumping rule for the z proposal density. Default is 0.5.}
 
-\item{jump_w}{Numeric; jumping rule of the proposal density for w. default value is 0.5.}
+\item{jump_w}{Numeric; the jumping rule for the w proposal density. Default is 0.5.}
 
-\item{pr_mean_beta}{Numeric; mean of normal prior for beta. default value is 0.}
+\item{pr_mean_beta}{Numeric; the mean of the normal prior for beta. Default is 0.}
 
-\item{pr_sd_beta}{Numeric; standard deviation of normal prior for beta. default value is 1.0.}
+\item{pr_sd_beta}{Numeric; the standard deviation of the normal prior for beta. Default is 1.0.}
 
-\item{pr_mean_theta}{Numeric; mean of normal prior for theta. default value is 0.}
+\item{pr_mean_theta}{Numeric; the mean of the normal prior for theta. Default is 0.}
 
 \item{pr_spike_mean}{Numeric; mean of spike prior for log gamma default value is -3.}
 
@@ -69,23 +69,23 @@ lsirm1pl_normal_ss(
 
 \item{pr_slab_sd}{Numeric; standard deviation of spike prior for log gamma default value is 1.}
 
-\item{pr_a_theta}{Numeric; shape parameter of inverse gamma prior for variance of theta. default value is 0.001.}
+\item{pr_a_theta}{Numeric; the shape parameter of the inverse gamma prior for the variance of theta. Default is 0.001.}
 
-\item{pr_b_theta}{Numeric; scale parameter of inverse gamma prior for variance of theta. default value is 0.001.}
+\item{pr_b_theta}{Numeric; the scale parameter of the inverse gamma prior for the variance of theta. Default is 0.001.}
 
-\item{pr_a_eps}{Numeric; shape parameter of inverse gamma prior for variance of data likelihood. default value is 0.001.}
+\item{pr_a_eps}{Numeric; shape parameter of inverse gamma prior for variance of data likelihood. Default is 0.001.}
 
-\item{pr_b_eps}{Numeric; scale parameter of inverse gamma prior for variance of data likelihood default value is 0.001.}
+\item{pr_b_eps}{Numeric; scale parameter of inverse gamma prior for variance of data likelihood. Default is 0.001.}
 
-\item{pr_xi_a}{Numeric; first shape parameter of beta prior for latent variable xi. default value is 1.}
+\item{pr_xi_a}{Numeric; first shape parameter of beta prior for latent variable xi. Default is 1.}
 
-\item{pr_xi_b}{Numeric; second shape parameter of beta prior for latent variable xi. default value is 1.}
+\item{pr_xi_b}{Numeric; second shape parameter of beta prior for latent variable xi. Default is 1.}
 
-\item{verbose}{Logical; If TRUE, MCMC samples are printed for each \code{nprint}. default value is FALSE}
+\item{verbose}{Logical; If TRUE, MCMC samples are printed for each \code{nprint}. Default is FALSE.}
 }
 \value{
 \code{lsirm1pl_normal_ss} returns an object of  list containing the following components:
- \item{data}{data frame or matrix containing the variables in the model.}
+ \item{data}{Data frame or matrix containing the variables in the model.}
  \item{bic}{Numeric value with the corresponding BIC.}
  \item{mcmc_inf}{number of mcmc iteration, burn-in periods, and thinning intervals.}
  \item{map_inf}{value of log maximum a posterior and iteration number which have log maximum a posterior.}
@@ -112,7 +112,7 @@ lsirm1pl_normal_ss(
  \item{accept_gamma}{accept ratio of gamma.}
 }
 \description{
-\link{lsirm1pl_normal_ss} is used to fit LSIRM model with model selection approach based on spike-and-slab priors for continuous variable with 1pl.
+\link{lsirm1pl_normal_ss} is used to fit LSIRM with model selection approach based on spike-and-slab priors for continuous variable with 1pl.
 LSIRM factorizes continuous item response matrix into column-wise item effect, row-wise respondent effect and further embeds interaction effect in a latent space. The resulting latent space provides an interaction map that represents interactions between respondents and items.
 }
 \details{

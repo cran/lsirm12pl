@@ -2,7 +2,7 @@
 % Please edit documentation in R/onepl.R
 \name{onepl}
 \alias{onepl}
-\title{1pl Rasch model.}
+\title{1PL Rasch model.}
 \usage{
 onepl(
   data,
@@ -56,7 +56,7 @@ onepl(
  \item{accept_theta}{accept ratio of theta.}
 }
 \description{
-\link{onepl} is used to fit 1pl Rasch model.
+\link{onepl} is used to fit 1PL Rasch model.
 }
 \details{
 \code{onepl} models the probability of correct response by respondent \eqn{j} to item \eqn{i} with item effect \eqn{\beta_i}, respondent effect \eqn{\theta_j}: \deqn{logit(P(Y_{j,i} = 1|\theta_j,\beta_i))=\theta_j+\beta_i}

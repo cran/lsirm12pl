@@ -1,41 +1,56 @@
-#' Plotting the interaction map of fitted LSIRM model
+#' Plotting the interaction map or summarizing the parameter estimate of fitted LSIRM with box plot.
 #'
-#' @description \link{plot} is used to plot the latent space of fitted LSIRM model.
+#' @description \link{plot} is used to plot the interaction map of fitted LSIRM or summarizing the parameter estimate of fitted LSIRM with box plot.
 #'
-#' @param x object of class \code{lsirm1pl}, \code{lsirm2pl}.
-#' @param option character; If value is "interaction", draw the interaction map that represents interactions between respondents and items. If value is "beta", draw the boxplot for the posterior samples of beta. If value is "theta", draw the distribution of the theta estimates per total test score for the \code{data}. If value is "alpha", draw the boxplot for the posterior samples of alpha. The "alpha" is only available for 2pl LSIRM.
+#' @param object Object of class \code{lsirm}.
+#' @param option Character; If value is "interaction", draw the interaction map that represents interactions between respondents and items. If value is "beta", draw the boxplot for the posterior samples of beta. If value is "theta", draw the distribution of the theta estimates per total test score for the \code{data}. If value is "alpha", draw the boxplot for the posterior samples of alpha. The "alpha" is only available for 2PL LSIRM.
 #' @param rotation Logical; If TRUE the latent positions are visualized after oblique (oblimin) rotation.
-#' @param cluster Logical; If TRUE the cluster result are visualized by Point Process Cluster Analysis.
+#' @param cluster Character; If value is "neyman" the cluster result are visualized by Point Process Cluster Analysis. If value is "spectral", spectral clustering method applied. Default is NA.
+#' @param which.clust Character; Choose which values to clustering. "resp" is the option for respondent and "item" is the option for items. Default is "item".
 #' @param interact Logical; If TRUE, draw the interaction map interactively.
+#' @param chain.idx Numeric; Index of MCMC chain. Default is 1.
 #' @param ... Additional arguments for the corresponding function.
 #'
 #' @return \code{plot} returns the interaction map or boxplot for parameter estimate.
-#'
 #' @examples
 #' \donttest{
 #'
 #' # generate example item response matrix
-#' data     <- matrix(rbinom(500, size = 1, prob = 0.5),ncol=10,nrow=50)
-#' lsirm_result <- lsirm(data ~ lsirm1pl(spikenslab = FALSE, fixed_gamma = FALSE))
+#' data     <- matrix(rbinom(500, size = 1, prob = 0.5), ncol=10, nrow=50)
+#' lsirm_result <- lsirm(data ~ lsirm1pl())
 #' plot(lsirm_result)
 #'
 #' # use oblique rotation
 #' plot(lsirm_result, rotation = TRUE)
 #'
-#' # plotly
+#' # interaction map interactively
 #' plot(lsirm_result, interact = TRUE)
 #'
-#' # clustering
+#' # clustering the respondents or items
 #' plot(lsirm_result, cluster = TRUE)
 #' }
-#'
 #' @export
-plot.lsirm = function(x, option = "interaction", rotation=FALSE, cluster=NA, interact=FALSE, ...){
+plot <- function(object, ..., option = "interaction", rotation=FALSE, cluster=NA,
+                 which.clust="item", interact=FALSE, chain.idx = 1){
+  UseMethod("plot")
+}
+
+#' @export
+plot.lsirm <- function(object, ..., option = "interaction", rotation=FALSE, cluster=NA,
+                       which.clust="item", interact=FALSE, chain.idx = 1){
 
   group <- NULL
   type <- NULL
   value <- NULL
-  data = x$data
+  if(object$chains == 1){
+    x = object
+  }else{
+    if(chain.idx %in% 1:object$chains){
+      x = object[[chain.idx]]
+    }else{
+      stop(sprintf("Invalid chain index: %d. The index of a chain must be lower than the total number of chains, which is %d.", chain.idx, object$chains))
+    }
+  }
 
   if(option == "interaction"){
 
@@ -102,7 +117,7 @@ plot.lsirm = function(x, option = "interaction", rotation=FALSE, cluster=NA, int
                 axis.title.x=element_blank(),
                 axis.title.y=element_blank(),
                 legend.title=element_blank(),
-                legend.position = c(0.9,0.9),
+                # legend.position.inside = c(0.9,0.9),
                 legend.text = element_text(size=10),
                 plot.title = element_text(hjust = 0.5, size = 20, face = "bold"))+
           ggtitle("Interaction Map")
@@ -119,7 +134,7 @@ plot.lsirm = function(x, option = "interaction", rotation=FALSE, cluster=NA, int
                 axis.title.x=element_blank(),
                 axis.title.y=element_blank(),
                 legend.title=element_blank(),
-                legend.position = c(0.9,0.9),
+                # legend.position.inside = c(0.9,0.9),
                 legend.text = element_text(size=16),
                 plot.title = element_text(hjust = 0.5, size = 20, face = "bold"))+
           ggtitle("Interaction Map")
@@ -128,9 +143,16 @@ plot.lsirm = function(x, option = "interaction", rotation=FALSE, cluster=NA, int
 
 
       if(cluster == "neyman"){
+        if(which.clust == "item"){
+          w.samps1 <- item_position
+          z.samps1 <- resp_position
+        }else if(which.clust == "resp"){
+          w.samps1 <- resp_position
+          z.samps1 <- item_position
+        }else{
+          stop("Not supported")
+        }
 
-        w.samps1 <- item_position
-        z.samps1 <- resp_position
         df = rbind(item_position, resp_position)
         max_coord = apply(df,2,max,na.rm=T)
         min_coord = apply(df,2,min,na.rm=T)
@@ -286,26 +308,45 @@ plot.lsirm = function(x, option = "interaction", rotation=FALSE, cluster=NA, int
                            axis.title.x=element_blank(),
                            axis.title.y=element_blank(),
                            legend.title=element_blank(),
-                           legend.position = c(0.9,0.9),
                            legend.text = element_text(size=16),
                            plot.title = element_text(hjust = 0.5, size = 20, face = "bold"))+
                      ggtitle("Interaction Map"))
+          if(which.clust == "item"){
+            int.plot = ggplotly(temp) %>%
+              add_markers(x = z.post1$x, y = z.post1$y,
+                          type = 'scatter',
+                          mode = 'markers',
+                          text = paste("respondent", 1:nrow(z.post1), sep = ""),
+                          name = "Respondent",
+                          marker = list(color = "lightgrey")) %>%
+              add_text(x = g_fin$x, y = g_fin$y, type = 'scatter',
+                       name = "Item",
+                       text = 1:nrow(w.post1),
+                       textfont = list(family="Arial Black",size=16, weight="bold", color = ggcolor[g_fin$group])) %>%
+              add_text(x = par5$x, y = par5$y, type = 'scatter',
+                       name = "Cluster",
+                       text = alphabet[1:ind],
+                       textfont = list(size=19, color = "black"))
+          }else if(which.clust == "resp"){
+            int.plot = ggplotly(temp) %>%
+              add_markers(x = z.post1$x, y = z.post1$y,
+                          type = 'scatter',
+                          mode = 'markers',
+                          text = paste("item", 1:nrow(z.post1), sep = ""),
+                          name = "Item",
+                          marker = list(color = "lightgrey")) %>%
+              add_text(x = g_fin$x, y = g_fin$y, type = 'scatter',
+                       name = "Respondent",
+                       text = 1:nrow(w.post1),
+                       textfont = list(family="Arial Black",size=16, weight="bold", color = ggcolor[g_fin$group])) %>%
+              add_text(x = par5$x, y = par5$y, type = 'scatter',
+                       name = "Cluster",
+                       text = alphabet[1:ind],
+                       textfont = list(size=19, color = "black"))
+          }else{
+            stop("Not supported")
+          }
 
-          int.plot = ggplotly(temp) %>%
-            add_markers(x = z.post1$x, y = z.post1$y,
-                        type = 'scatter',
-                        mode = 'markers',
-                        text = paste("respondent", 1:nrow(z.post1), sep = ""),
-                        name = "Respondent",
-                        marker = list(color = "lightgrey")) %>%
-            add_text(x = g_fin$x, y = g_fin$y, type = 'scatter',
-                     name = "Item",
-                     text = 1:nrow(w.post1),
-                     textfont = list(family="Arial Black",size=16, weight="bold", color = ggcolor[g_fin$group])) %>%
-            add_text(x = par5$x, y = par5$y, type = 'scatter',
-                     name = "Cluster",
-                     text = alphabet[1:ind],
-                     textfont = list(size=19, color = "black"))
           print(int.plot)
 
         }else{
@@ -322,7 +363,6 @@ plot.lsirm = function(x, option = "interaction", rotation=FALSE, cluster=NA, int
                         axis.title.x=element_blank(),
                         axis.title.y=element_blank(),
                         legend.title=element_blank(),
-                        legend.position = c(0.9,0.9),
                         legend.text = element_text(size=16),
                         plot.title = element_text(hjust = 0.5, size = 20, face = "bold"))+
                   ggtitle("Interaction Map"))
@@ -333,40 +373,54 @@ plot.lsirm = function(x, option = "interaction", rotation=FALSE, cluster=NA, int
         clust <- data.frame(
           g_alpha %>%
             group_by(group) %>%
-            summarise(items = paste(item, collapse = ", ")))
+            reframe(items = paste(item, collapse = ", ")))
+
+
 
         c_res = capture.output(print(data.frame(group = alphabet[clust$group], item = clust[,2]),
                                      row.names=F))
-        cat("\n\nClustering result (Nayman-Scott process): \n",paste(c_res,"\n",sep=" "))
+        cat("\n\nClustering result (Neyman-Scott process): \n",paste(c_res,"\n",sep=" "))
 
       }else if(cluster == "spectral"){
 
         # Select the number of clustering using Average Silhouette Width (ASW) which is a popular cluster validation index to estimate the number of clusters.
-        scale_func <- function(x) x %>% mutate_if(is.numeric, function(y) as.vector(scale(y)))
-        item_scaled <- item_position %>% scale()
 
-        num <- 2:(nrow(item_scaled)-1)
+        scale_func <- function(x) x %>% mutate_if(is.numeric, function(y) as.vector(scale(y)))
+        if(which.clust == "item"){
+          pos_scaled <- item_position %>% scale()
+          df1=as.data.frame(item_position)
+          df2=as.data.frame(resp_position)
+        }else if(which.clust == "resp"){
+          pos_scaled <- resp_position %>% scale()
+          df1=as.data.frame(resp_position)
+          df2=as.data.frame(item_position)
+        }else{
+          stop("Not supported")
+        }
+
+        num <- 2:(nrow(pos_scaled)-1)
         ASW <- sapply(num, FUN=function(k) {
-          fpc::cluster.stats(dist(item_scaled),
-                             kmeans(item_scaled, centers=k,
+          fpc::cluster.stats(dist(pos_scaled),
+                             kmeans(pos_scaled, centers=k,
                                     nstart = 5)$cluster)$avg.silwidth
         })
 
         best_k <- num[which.max(ASW)]
-
+        # asw = pbapply::pbsapply(num, FUN=function(k) {
+        #   fpc::cluster.stats(dist(pos_scaled),
+        #                      kmeans(pos_scaled, centers=k,
+        #                             nstart = 5)$cluster)$avg.silwidth
+        # })
         # Spectral Clustering
-
-        spectral_result <- specc(as.matrix(item_scaled), centers = best_k) #kernlab package
-        spectral_result <- data.frame(cbind(group = as.numeric(spectral_result), item = 1:nrow(item_scaled)))
+        spectral_result <- specc(as.matrix(pos_scaled), centers = best_k) #kernlab package
+        spectral_result <- data.frame(cbind(group = as.numeric(spectral_result), item = 1:nrow(pos_scaled)))
         clust <- data.frame(
           spectral_result %>%
             group_by(group) %>%
-            summarise(items = paste(item, collapse = ", "))
+            reframe(items = paste(item, collapse = ", "))
+          # summarise(items = paste(item, collapse = ", "))
         )
 
-
-        df1=as.data.frame(item_position)
-        df2=as.data.frame(resp_position)
         df1[,3]=notation[1]
         df2[,3]=notation[2]
 
@@ -381,7 +435,6 @@ plot.lsirm = function(x, option = "interaction", rotation=FALSE, cluster=NA, int
         min_coordinate = sapply(df[,c(1,2)], min, na.rm = TRUE)
         axis_value = max(abs(c(max_coordinate,min_coordinate)))
         axis_range = c(-axis_value,axis_value)*1.1
-
 
         g_fin <- cbind(df1, spectral_result)
         ind <- max(spectral_result$group)
@@ -414,24 +467,37 @@ plot.lsirm = function(x, option = "interaction", rotation=FALSE, cluster=NA, int
                            axis.title.x=element_blank(),
                            axis.title.y=element_blank(),
                            legend.title=element_blank(),
-                           legend.position = c(0.9,0.9),
                            legend.text = element_text(size=16),
                            plot.title = element_text(hjust = 0.5, size = 20, face = "bold"))+
                      ggtitle("Interaction Map"))
-
-          int.plot = ggplotly(temp) %>%
-            add_markers(x = df2$x, y = df2$y,
-                        type = 'scatter',
-                        mode = 'markers',
-                        text = paste("respondent", 1:nrow(df2), sep = ""),
-                        name = "Respondent",
-                        marker = list(color = "lightgrey")) %>%
-            add_text(x = g_fin$x, y = g_fin$y, type = 'scatter',
-                     name = "Item",
-                     text = 1:nrow(g_fin),
-                     textfont = list(family="Arial Black",size=16, weight="bold", color = ggcolor[g_fin$group]))
+          if(which.clust == "item"){
+            int.plot = ggplotly(temp) %>%
+              add_markers(x = df2$x, y = df2$y,
+                          type = 'scatter',
+                          mode = 'markers',
+                          text = paste("respondent", 1:nrow(df2), sep = ""),
+                          name = "Respondent",
+                          marker = list(color = "lightgrey")) %>%
+              add_text(x = g_fin$x, y = g_fin$y, type = 'scatter',
+                       name = "Item",
+                       text = 1:nrow(g_fin),
+                       textfont = list(family="Arial Black",size=16, weight="bold", color = ggcolor[g_fin$group]))
+          }else if(which.clust == "resp"){
+            int.plot = ggplotly(temp) %>%
+              add_markers(x = df2$x, y = df2$y,
+                          type = 'scatter',
+                          mode = 'markers',
+                          text = paste("item", 1:nrow(df2), sep = ""),
+                          name = "Item",
+                          marker = list(color = "lightgrey")) %>%
+              add_text(x = g_fin$x, y = g_fin$y, type = 'scatter',
+                       name = "Respondent",
+                       text = 1:nrow(g_fin),
+                       textfont = list(family="Arial Black",size=16, weight="bold", color = ggcolor[g_fin$group]))
+          }else{
+            stop("Not supported")
+          }
           print(int.plot)
-
         }else{
           temp <- (ggplot(data=df, aes(x, y)) +
                      geom_point(data=df2, aes(x, y), col="grey", cex=1.0) +
@@ -444,7 +510,6 @@ plot.lsirm = function(x, option = "interaction", rotation=FALSE, cluster=NA, int
                            axis.title.x=element_blank(),
                            axis.title.y=element_blank(),
                            legend.title=element_blank(),
-                           legend.position = c(0.9,0.9),
                            legend.text = element_text(size=16),
                            plot.title = element_text(hjust = 0.5, size = 20, face = "bold"))+
                      ggtitle("Interaction Map"))
@@ -468,8 +533,12 @@ plot.lsirm = function(x, option = "interaction", rotation=FALSE, cluster=NA, int
     beta_dataframe <- data.frame(x = rep(1:ncol(x$beta), each= nrow(x$beta)),
                                  value = as.vector(x$beta))
     #outlier
-    lower <- min(data.frame(beta_dataframe %>% group_by(x) %>% summarise(stat = boxplot.stats(value)$stats, .groups = "drop"))[1:ncol(data)*5 - 4, 2])
-    upper <- max(data.frame(beta_dataframe %>% group_by(x) %>% summarise(stat = boxplot.stats(value)$stats, .groups = "drop"))[1:ncol(data)*5, 2])
+    lower <- min(data.frame(beta_dataframe %>% group_by(x) %>%
+                              reframe(stat = boxplot.stats(value)$stats, .groups = "drop"))[1:ncol(data)*5 - 4, 2])
+    # summarise(stat = boxplot.stats(value)$stats, .groups = "drop"))[1:ncol(data)*5 - 4, 2])
+    upper <- max(data.frame(beta_dataframe %>% group_by(x) %>%
+                              reframe(stat = boxplot.stats(value)$stats, .groups = "drop"))[1:ncol(data)*5, 2])
+    # summarise(stat = boxplot.stats(value)$stats, .groups = "drop"))[1:ncol(data)*5, 2])
     ylim1 = c(lower, upper)
 
     if(ncol(data) > 30){
@@ -548,8 +617,12 @@ plot.lsirm = function(x, option = "interaction", rotation=FALSE, cluster=NA, int
                                     value = as.vector(x$alpha))
 
       #outlier
-      lower <- min(data.frame(alpha_dataframe %>% group_by(x) %>% summarise(stat = boxplot.stats(value)$stats, .groups = "drop"))[1:ncol(data)*5 - 4, 2])
-      upper <- max(data.frame(alpha_dataframe %>% group_by(x) %>% summarise(stat = boxplot.stats(value)$stats, .groups = 'drop'))[1:ncol(data)*5, 2])
+      lower <- min(data.frame(alpha_dataframe %>% group_by(x) %>%
+                                reframe(stat = boxplot.stats(value)$stats, .groups = "drop"))[1:ncol(data)*5 - 4, 2])
+      # summarise(stat = boxplot.stats(value)$stats, .groups = "drop"))[1:ncol(data)*5 - 4, 2])
+      upper <- max(data.frame(alpha_dataframe %>% group_by(x) %>%
+                                reframe(stat = boxplot.stats(value)$stats, .groups = 'drop'))[1:ncol(data)*5, 2])
+      # summarise(stat = boxplot.stats(value)$stats, .groups = 'drop'))[1:ncol(data)*5, 2])
       ylim1 = c(lower, upper)
 
       if(ncol(data) > 30){

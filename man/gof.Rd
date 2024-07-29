@@ -2,26 +2,26 @@
 % Please edit documentation in R/gof.lsirm.R
 \name{gof}
 \alias{gof}
-\title{Goodness-of-fit LSIRM model}
+\title{Goodness-of-fit LSIRM}
 \usage{
-gof(object, nsim = 500)
+gof(object, chain.idx = 1)
 }
 \arguments{
-\item{object}{object of class \code{lsirm}.}
+\item{object}{Object of class \code{lsirm}.}
 
-\item{nsim}{Integer; Number of simulation. Default is 500}
+\item{chain.idx}{Numeric; Index of MCMC chain. Default is 1.}
 }
 \value{
 \code{gof} returns the boxplot or AUC plot
 }
 \description{
-\link{gof} is goodness-of-fit the latent space of fitted LSIRM model.
+\link{gof} is goodness-of-fit the latent space of fitted LSIRM.
 }
 \examples{
 \donttest{
 # generate example item response matrix
 data     <- matrix(rbinom(500, size = 1, prob = 0.5),ncol=10,nrow=50)
-lsirm_result <- lsirm(data ~ lsirm1pl(spikenslab = FALSE, fixed_gamma = FALSE))
+lsirm_result <- lsirm(data ~ lsirm1pl())
 gof(lsirm_result)
 }
 }

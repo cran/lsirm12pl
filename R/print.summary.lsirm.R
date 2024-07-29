@@ -1,20 +1,11 @@
-#' Summary the result of LSIRM model
+#' Print the summary the result of LSIRM
 #'
-#' @description \link{summary.lsirm} is used to summary the result of LSIRM model.
+#' @description \link{print.summary.lsirm} is used to print summary the result of LSIRM.
 #'
-#' @param x object of class \code{lsirm1pl}, \code{lsirm2pl}.
-#' @param \dots Additional arguments.
+#' @param x List; summary of LSIRM with \code{summary.lsirm}.
+#' @param ... Additional arguments.
 #'
-#' @return \code{summary.lsirm} contains following elements. A print method is available.
-#' \item{call}{R call used to fit the model.}
-#' \item{coef}{Covariate coefficients posterior means.}
-#' \item{mcmc.opt}{The number of mcmc iteration, burn-in periods, and thinning intervals.}
-#' \item{map.inf}{value of log maximum a posterior and iteration number which have log maximum a posterior.}
-#' \item{BIC}{Numeric value with the corresponding BIC.}
-#' \item{method}{1pl LSIRM or 2pl LSIRM }
-#' \item{missing}{The assumed missing type. One of NA, "mar" and "mcar". Default uses NA.}
-#' \item{dtype}{Binary or Continuous}
-#' \item{ss}{\code{TRUE} if using spike-slab prior}
+#' @return \code{print.summary.lsirm} return a summary of LSIRM.
 #'
 #' @examples
 #' \donttest{
@@ -23,7 +14,7 @@
 #' lsirm_result <- lsirm(data ~ lsirm1pl())
 #' summary(lsirm_result)
 #' }
-#'
+#' @rdname print.summary.lsirm
 #' @export
 print.summary.lsirm <- function(x, ...){
   cat("==========================","\n")
@@ -36,7 +27,11 @@ print.summary.lsirm <- function(x, ...){
   cat("Missing:\t", x$missing, "\n")
   cat(sprintf("MCMC sample of size %i, after burnin of %i iteration",
               x$mcmc.opt$niter,x$mcmc.opt$nburn),"\n\n")
-  cat("Covariate coefficients posterior means: ","\n\n")
+  if(x$n.chains == 1){
+    cat("Covariate coefficients posterior means: ","\n\n")
+  }else{
+    cat("Covariate coefficients posterior means of chain", x$chain,": ","\n\n")
+  }
   printCoefmat(x$coef)
   cat("\n---------------------------","\n\n")
   cat("Overall BIC (Smaller is better) :",x$BIC,"\n")

@@ -1,6 +1,6 @@
-#' 1pl Rasch model. 
+#' 1PL Rasch model. 
 #' 
-#' @description \link{onepl} is used to fit 1pl Rasch model. 
+#' @description \link{onepl} is used to fit 1PL Rasch model. 
 #' 
 #' @param data Matrix; binary item response matrix to be analyzed. Each row is assumed to be respondent and its column values are assumed to be response to the corresponding item.
 #' @param niter Numeric; number of iterations to run MCMC sampling. default value is 15000.

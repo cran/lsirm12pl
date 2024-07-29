@@ -1,39 +1,73 @@
-#' Goodness-of-fit LSIRM model
+#' Goodness-of-fit LSIRM
 #'
-#' @description \link{gof} is goodness-of-fit the latent space of fitted LSIRM model.
+#' @description \link{gof} is goodness-of-fit the latent space of fitted LSIRM.
 #'
-#' @param object object of class \code{lsirm}.
-#' @param nsim Integer; Number of simulation. Default is 500
+#' @param object Object of class \code{lsirm}.
+#' @param chain.idx Numeric; Index of MCMC chain. Default is 1.
 #'
 #' @return \code{gof} returns the boxplot or AUC plot
-#'
 #' @examples
 #' \donttest{
 #' # generate example item response matrix
 #' data     <- matrix(rbinom(500, size = 1, prob = 0.5),ncol=10,nrow=50)
-#' lsirm_result <- lsirm(data ~ lsirm1pl(spikenslab = FALSE, fixed_gamma = FALSE))
+#' lsirm_result <- lsirm(data ~ lsirm1pl())
 #' gof(lsirm_result)
 #' }
 
 #' @export gof
-gof <- function(object, nsim=500){
+gof <- function(object, chain.idx=1){
   UseMethod("gof")
 }
 
 #' @export
-gof.lsirm = function(object, nsim=500){
+gof.lsirm = function(object, chain.idx=1){
   ind <- NULL
   values <- NULL
   x <- NULL
   y <- NULL
+  if(object$chains == 1){
+    data = object$data
+    dtype = object$dtype
+    method = object$method
+    niter = nrow(object$beta)
+    if(object$dtype=="continuous"){
+      e.sigma = object$sigma
+    }else{
+      e.sigma = rep(niter, 1)
+    }
+    if(!is.null(object$gamma)){
+      gamma = object$gamma
+    }else{
+      gamma = rep(niter, 1)
+    }
+    P = make_prob(niter, beta=object$beta,theta=object$theta,
+                  gamma=gamma, sigma=e.sigma,
+                  item = object$w,
+                  res = object$z,
+                  type = object$dtype)
+  }else{
+    object = object[[chain.idx]]
+    data = object$data
+    dtype = object$dtype
+    method = object$method
+    niter = nrow(object$beta)
+    if(object$dtype=="continuous"){
+      e.sigma = object$sigma
+    }else{
+      e.sigma = rep(niter, 1)
+    }
+    if(!is.null(object$gamma)){
+      gamma = object$gamma
+    }else{
+      gamma = rep(niter, 1)
+    }
+    P = make_prob(niter, beta=object$beta,theta=object$theta,
+                  gamma=gamma, sigma=e.sigma,
+                  item = object$w,
+                  res = object$z,
+                  type = object$dtype)
+  }
 
-  data = object$data
-  e.sigma = ifelse(object$dtype=="continuous",object$sigma_estimate,1)
-  gamma = ifelse(!is.null(object$gamma_estimate),object$gamma_estimate,1)
-  P = make_prob(nsim, beta=object$beta_estimate,theta=object$theta_estimate,
-                gamma=gamma, sigma=e.sigma,
-                item = object$w_estimate, res = object$z_estimate,
-                type = object$dtype)
 
   colnames(P) = c(1:ncol(data))
   dat = stack(as.data.frame(P))
@@ -50,6 +84,7 @@ gof.lsirm = function(object, nsim=500){
                  color="red",
                  size=1)+
       xlab("Item number")+
+      ylab("Values")+
       theme(axis.text.x = element_text(face="bold",size=13),
             axis.text.y = element_text( face="bold",size=15),
             axis.title = element_text(size=15, face='bold'),
@@ -62,19 +97,20 @@ gof.lsirm = function(object, nsim=500){
                  color="red",
                  size=1)+
       xlab("Item number")+
+      ylab("Values")+
       theme(axis.text.x = element_text(face="bold",size=13),
             axis.text.y = element_text( face="bold",size=15),
             axis.title = element_text(size=15, face='bold'),
             plot.margin = margin(1,1,1.5,1.2,"cm"))
   }
-  if(object$dtype == "continuous"){
+  if(dtype == "continuous"){
     gofp = gofp+
       labs(title="Goodness of fit")+
       theme(title = element_text(size=25,face="bold",hjust=0.5),
             plot.title = element_text(hjust = 0.5))
     return(gofp)
   }else{
-    if(object$method == "lsirm1pl"){
+    if(method == "lsirm1pl"){
       aucp = roc_1pl(object)
       title <- grid::textGrob("Goodness of fit",
                               gp=gpar(font=2,fontsize=25))
@@ -102,35 +138,36 @@ gof.lsirm = function(object, nsim=500){
   }
 }
 
-make_prob = function(nsim,beta,theta,gamma,sigma=1,item,res,type="continuous"){
+make_prob = function(niter,beta,theta,gamma,sigma,item,res,type="continuous"){
   cat("\nSimulation Start\n\n")
-  pb <- txtProgressBar(title = "progress bar", min = 0, max = nsim,
+  pb <- txtProgressBar(title = "progress bar", min = 0, max = niter,
                        style = 3, width = 50)
-  n.i = nrow(item)
-  n.r = nrow(res)
-  S = matrix(nrow=nsim,ncol=n.i)
+  n.i = dim(item)[2]
+  n.r = dim(res)[2]
+  S = matrix(nrow=niter,ncol=n.i)
   P = matrix(nrow=n.r,ncol=n.i)
+
   if(type=="binary"){
-    for(i in 1:n.i){
-      for(j in 1:n.r){
-        d = sum((item[i,] - res[j,])^2)^{1/2}
-        P[j,i] = exp(beta[i]+theta[j]-gamma*d)/(1+exp(beta[i]+theta[j]-gamma*d))
+    for(k in 1:niter){
+      for(i in 1:n.i){
+        for(j in 1:n.r){
+          d = sum((item[k, i,] - res[k, j,])^2)^{1/2}
+          P[j,i] = exp(beta[k, i]+theta[k, j]-gamma[k]*d)/(1+exp(beta[k, i]+theta[k, j]-gamma[k]*d))
+        }
       }
-    }
-    for(k in 1:nsim){
-      setTxtProgressBar(pb, k, label = paste( round(k/nsim * 100, 0), "% done"))
+      setTxtProgressBar(pb, k, label = paste( round(k/niter * 100, 0), "% done"))
       S[k,] = colMeans(matrix(rbinom(n.r*n.i,1,P),nrow=n.r,ncol=n.i))
     }
   }else if(type=="continuous"){
-    for(i in 1:n.i){
-      for(j in 1:n.r){
-        d = sum((item[i,] - res[j,])^2)^{1/2}
-        P[j,i] = beta[i]+theta[j]-gamma*d
+    for(k in 1:niter){
+      for(i in 1:n.i){
+        for(j in 1:n.r){
+          d = sum((item[k, i,] - res[k, j,])^2)^{1/2}
+          P[j,i] = beta[k, i]+theta[k, j]-gamma[k]*d
+        }
       }
-    }
-    for(k in 1:nsim){
-      setTxtProgressBar(pb, k, label = paste( round(k/nsim * 100, 0), "% done"))
-      S[k,] = colMeans(P + matrix(rnorm(n.i*n.r,0,sigma),nrow=n.r,ncol=n.i))
+      setTxtProgressBar(pb, k, label = paste( round(k/niter * 100, 0), "% done"))
+      S[k,] = colMeans(P + matrix(rnorm(n.i*n.r, 0, sigma[k]),nrow=n.r,ncol=n.i))
     }
   }
   return(S)

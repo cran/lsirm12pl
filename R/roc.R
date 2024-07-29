@@ -25,7 +25,9 @@ roc_1pl = function(lsirm_result, ...){
           axis.title=element_text(size=15, face='bold'),
           plot.margin = margin(1,1,1.5,1.2,"cm"))+
     annotate("text", x = 0.3, y = 0.05, label = legend_text,
-             fontface=2, size=4)
+             fontface=2, size=4) +
+    xlab("Specificity")+
+    ylab("Sensitivity")
   return(rocp)
 }
 
@@ -56,7 +58,9 @@ roc_2pl = function(lsirm_result){
           axis.title=element_text(size=15, face='bold'),
           plot.margin = margin(1,1,1.5,1.2,"cm"))+
     annotate("text", x = 0.3, y = 0.05, label = legend_text,
-             fontface=2, size=4)
+             fontface=2, size=4)+
+    xlab("Specificity")+
+    ylab("Sensitivity")
   return(rocp)
 }
 

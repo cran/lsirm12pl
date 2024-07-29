@@ -1,36 +1,22 @@
-#' 1pl LSIRM model with normal likelihood and model selection approach.
+#' 1PL LSIRM with normal likelihood and model selection approach.
 #'
-#' @description \link{lsirm1pl_normal_ss} is used to fit LSIRM model with model selection approach based on spike-and-slab priors for continuous variable with 1pl.
+#' @description \link{lsirm1pl_normal_ss} is used to fit LSIRM with model selection approach based on spike-and-slab priors for continuous variable with 1pl.
 #' LSIRM factorizes continuous item response matrix into column-wise item effect, row-wise respondent effect and further embeds interaction effect in a latent space. The resulting latent space provides an interaction map that represents interactions between respondents and items.
 #'
-#' @param data Matrix; continuous item response matrix to be analyzed. Each row is assumed to be respondent and its column values are assumed to be response to the corresponding item.
-#' @param ndim Numeric; dimension of latent space. default value is 2.
-#' @param niter Numeric; number of iterations to run MCMC sampling. default value is 15000.
-#' @param nburn Numeric; number of initial, pre-thinning, MCMC iterations to discard. default value is 2500.
-#' @param nthin Numeric;number of thinning, MCMC iterations to discard. default value is 5.
-#' @param nprint Numeric; MCMC samples is displayed during execution of MCMC chain for each \code{nprint}. default value is 500.
-#' @param jump_beta Numeric; jumping rule of the proposal density for beta. default value is 0.4.
-#' @param jump_theta Numeric; jumping rule of the proposal density for theta. default value is 1.0.
-#' @param jump_gamma Numeric; jumping rule of the proposal density for gamma. default value is 0.025.
-#' @param jump_z Numeric; jumping rule of the proposal density for z. default value is 0.5.
-#' @param jump_w Numeric; jumping rule of the proposal density for w. default value is 0.5.
-#' @param pr_mean_beta Numeric; mean of normal prior for beta. default value is 0.
-#' @param pr_sd_beta Numeric; standard deviation of normal prior for beta. default value is 1.0.
-#' @param pr_mean_theta Numeric; mean of normal prior for theta. default value is 0.
+#' @inheritParams lsirm1pl
+#' @param jump_gamma Numeric; the jumping rule for the theta proposal density. Default is 1.0.
 #' @param pr_spike_mean Numeric; mean of spike prior for log gamma default value is -3.
 #' @param pr_spike_sd Numeric; standard deviation of spike prior for log gamma default value is 1.
 #' @param pr_slab_mean Numeric; mean of spike prior for log gamma default value is 0.5.
 #' @param pr_slab_sd Numeric; standard deviation of spike prior for log gamma default value is 1.
-#' @param pr_a_theta Numeric; shape parameter of inverse gamma prior for variance of theta. default value is 0.001.
-#' @param pr_b_theta Numeric; scale parameter of inverse gamma prior for variance of theta. default value is 0.001.
-#' @param pr_a_eps Numeric; shape parameter of inverse gamma prior for variance of data likelihood. default value is 0.001.
-#' @param pr_b_eps Numeric; scale parameter of inverse gamma prior for variance of data likelihood default value is 0.001.
-#' @param pr_xi_a Numeric; first shape parameter of beta prior for latent variable xi. default value is 1.
-#' @param pr_xi_b Numeric; second shape parameter of beta prior for latent variable xi. default value is 1.
-#' @param verbose Logical; If TRUE, MCMC samples are printed for each \code{nprint}. default value is FALSE
-#' 
+#' @param pr_a_eps Numeric; shape parameter of inverse gamma prior for variance of data likelihood. Default is 0.001.
+#' @param pr_b_eps Numeric; scale parameter of inverse gamma prior for variance of data likelihood. Default is 0.001.
+#' @param pr_xi_a Numeric; first shape parameter of beta prior for latent variable xi. Default is 1.
+#' @param pr_xi_b Numeric; second shape parameter of beta prior for latent variable xi. Default is 1.
+#' @param verbose Logical; If TRUE, MCMC samples are printed for each \code{nprint}. Default is FALSE.
+#'
 #' @return \code{lsirm1pl_normal_ss} returns an object of  list containing the following components:
-#'  \item{data}{data frame or matrix containing the variables in the model.}
+#'  \item{data}{Data frame or matrix containing the variables in the model.}
 #'  \item{bic}{Numeric value with the corresponding BIC.}
 #'  \item{mcmc_inf}{number of mcmc iteration, burn-in periods, and thinning intervals.}
 #'  \item{map_inf}{value of log maximum a posterior and iteration number which have log maximum a posterior.}
@@ -57,7 +43,6 @@
 #'  \item{accept_gamma}{accept ratio of gamma.}
 #'
 #' @details \code{lsirm1pl_normal_ss} models the continuous value of response by respondent \eqn{j} to item \eqn{i} with item effect \eqn{\beta_i}, respondent effect \eqn{\theta_j} and the distance between latent position \eqn{w_i} of item \eqn{i} and latent position \eqn{z_j} of respondent \eqn{j} in the shared metric space, with \eqn{\gamma} represents the weight of the distance term: \deqn{Y_{j,i} = \theta_j+\beta_i-\gamma||z_j-w_i|| + e_{j,i}} where the error \eqn{e_{j,i} \sim N(0,\sigma^2)}. \code{lsrm1pl_noraml_ss} model include model selection approach based on spike-and-slab priors for log gamma. For detail of spike-and-slab priors, see References.
-#'
 #' @references
 #' Ishwaran, H., & Rao, J. S. (2005). Spike and slab variable selection: Frequentist and Bayesian strategies (Vol. 33). The Annals of Statistics
 #'
@@ -78,14 +63,17 @@ lsirm1pl_normal_ss = function(data, ndim = 2, niter = 15000, nburn = 2500, nthin
                               pr_a_theta = 0.001, pr_b_theta = 0.001,
                               pr_a_eps = 0.001, pr_b_eps = 0.001,
                               pr_xi_a = 0.001, pr_xi_b = 0.001, verbose=FALSE){
-
+  if(niter < nburn){
+    stop("niter must be greater than burn-in process.")
+  }
   if(is.data.frame(data)){
     cname = colnames(data)
   }else{
     cname = paste("item", 1:ncol(data), sep=" ")
   }
 
-  cat("\n\nFitting with MCMC algorithm\n")
+  # cat("\n\nFitting with MCMC algorithm\n")
+
 
   output <- lsirm1pl_normal_ss_cpp(as.matrix(data), ndim, niter, nburn, nthin, nprint,
                                    jump_beta, jump_theta, jump_gamma, jump_z, jump_w,
@@ -107,14 +95,23 @@ lsirm1pl_normal_ss = function(data, ndim = 2, niter = 15000, nburn = 2500, nthin
   w.proc = array(0,dim=c(nmcmc,nitem,ndim))
   z.proc = array(0,dim=c(nmcmc,nsample,ndim))
 
-  cat("\n\nProcrustes Matching Analysis\n")
+  # cat("\n\nProcrustes Matching Analysis\n")
+cat("\n")
 
   for(iter in 1:nmcmc){
     z.iter = output$z[iter,,]
+    w.iter = output$w[iter,,]
+
+    if(ndim == 1){
+      z.iter = as.matrix(z.iter)
+      w.iter = as.matrix(w.iter)
+      z.star = as.matrix(z.star)
+      w.star = as.matrix(w.star)
+    }
+
     if(iter != max.address) z.proc[iter,,] = procrustes(z.iter,z.star)$X.new
     else z.proc[iter,,] = z.iter
 
-    w.iter = output$w[iter,,]
     if(iter != max.address) w.proc[iter,,] = procrustes(w.iter,w.star)$X.new
     else w.proc[iter,,] = w.iter
   }
@@ -135,7 +132,7 @@ lsirm1pl_normal_ss = function(data, ndim = 2, niter = 15000, nburn = 2500, nthin
   rownames(beta.summary) <- cname
 
   # Calculate BIC
-  cat("\n\nCalculate BIC\n")
+  # cat("\n\nCalculate BIC\n")
   if(pi.estimate > 0.5){
     log_like = log_likelihood_normal_cpp(as.matrix(data), ndim, as.matrix(beta.estimate), as.matrix(theta.estimate), gamma.estimate, z.est, w.est, sigma.estimate, 99)
   }else{

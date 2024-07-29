@@ -2,7 +2,7 @@
 % Please edit documentation in R/twopl.R
 \name{twopl}
 \alias{twopl}
-\title{2pl Rasch model.}
+\title{2PL Rasch model.}
 \usage{
 twopl(
   data,
@@ -68,8 +68,8 @@ twopl(
   \item{accept_alpha}{accept ratio of alpha.}
 }
 \description{
-\link{twopl} is used to fit 2pl Rasch model. 
-Unlike 1pl model, 2pl model assumes the item effect can vary according to respondent, allowing additional parameter multiplied with respondent effect.
+\link{twopl} is used to fit 2PL Rasch model. 
+Unlike 1PL model, 2PL model assumes the item effect can vary according to respondent, allowing additional parameter multiplied with respondent effect.
 }
 \details{
 \code{twopl} models the probability of correct response by respondent \eqn{j} to item \eqn{i} with item effect \eqn{\beta_i}, respondent effect \eqn{\theta_j}. For 2pl model, the the item effect is assumed to have additional discrimination parameter \eqn{\alpha_i} multiplied by \eqn{\theta_j}: \deqn{logit(P(Y_{j,i} = 1|\theta_j,\beta_i, \alpha_i))=\theta_j * \alpha_i+\beta_i}

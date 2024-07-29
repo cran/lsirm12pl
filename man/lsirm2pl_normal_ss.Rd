@@ -2,7 +2,7 @@
 % Please edit documentation in R/lsirm2pl_normal_ss.R
 \name{lsirm2pl_normal_ss}
 \alias{lsirm2pl_normal_ss}
-\title{2pl LSIRM model with normal likelihood and model selection approach.}
+\title{2PL LSIRM with normal likelihood and model selection approach.}
 \usage{
 lsirm2pl_normal_ss(
   data,
@@ -36,35 +36,35 @@ lsirm2pl_normal_ss(
 )
 }
 \arguments{
-\item{data}{Matrix; continuous item response matrix to be analyzed. Each row is assumed to be respondent and its column values are assumed to be response to the corresponding item.}
+\item{data}{Matrix; a binary or continuous item response matrix for analysis. Each row represents a respondent, and each column contains responses to the corresponding item.}
 
-\item{ndim}{Numeric; dimension of latent space. default value is 2.}
+\item{ndim}{Integer; the dimension of the latent space. Default is 2.}
 
-\item{niter}{Numeric; number of iterations to run MCMC sampling. default value is 15000.}
+\item{niter}{Integer; the total number of MCMC iterations to run. Default is 15000.}
 
-\item{nburn}{Numeric; number of initial, pre-thinning, MCMC iterations to discard. default value is 2500.}
+\item{nburn}{Integer; the number of initial MCMC iterations to discard as burn-in. Default is 2500.}
 
-\item{nthin}{Numeric;number of thinning, MCMC iterations to discard. default value is 5.}
+\item{nthin}{Integer; the number of MCMC iterations to thin. Default is 5.}
 
-\item{nprint}{Numeric; MCMC samples is displayed during execution of MCMC chain for each \code{nprint}. default value is 500.}
+\item{nprint}{Integer; the interval at which MCMC samples are displayed during execution. Default is 500.}
 
-\item{jump_beta}{Numeric; jumping rule of the proposal density for beta. default value is 0.4.}
+\item{jump_beta}{Numeric; the jumping rule for the beta proposal density. Default is 0.4.}
 
-\item{jump_theta}{Numeric; jumping rule of the proposal density for theta. default value is 1.0.}
+\item{jump_theta}{Numeric; the jumping rule for the theta proposal density. Default is 1.0.}
 
-\item{jump_alpha}{Numeric; jumping rule of the proposal density for alpha default value is 1.0.}
+\item{jump_alpha}{Numeric; the jumping rule for the alpha proposal density. Default is 1.0.}
 
-\item{jump_gamma}{Numeric; jumping rule of the proposal density for gamma. default value is 0.025.}
+\item{jump_gamma}{Numeric; the jumping rule for the theta proposal density. Default is 1.0.}
 
-\item{jump_z}{Numeric; jumping rule of the proposal density for z. default value is 0.5.}
+\item{jump_z}{Numeric; the jumping rule for the z proposal density. Default is 0.5.}
 
-\item{jump_w}{Numeric; jumping rule of the proposal density for w. default value is 0.5.}
+\item{jump_w}{Numeric; the jumping rule for the w proposal density. Default is 0.5.}
 
-\item{pr_mean_beta}{Numeric; mean of normal prior for beta. default value is 0.}
+\item{pr_mean_beta}{Numeric; the mean of the normal prior for beta. Default is 0.}
 
-\item{pr_sd_beta}{Numeric; standard deviation of normal prior for beta. default value is 1.0.}
+\item{pr_sd_beta}{Numeric; the standard deviation of the normal prior for beta. Default is 1.0.}
 
-\item{pr_mean_theta}{Numeric; mean of normal prior for theta. default value is 0.}
+\item{pr_mean_theta}{Numeric; the mean of the normal prior for theta. Default is 0.}
 
 \item{pr_spike_mean}{Numeric; mean of spike prior for log gamma default value is -3.}
 
@@ -74,27 +74,27 @@ lsirm2pl_normal_ss(
 
 \item{pr_slab_sd}{Numeric; standard deviation of spike prior for log gamma default value is 1.}
 
-\item{pr_mean_alpha}{Numeric; mean of normal prior for alpha. default value is 0.5.}
+\item{pr_mean_alpha}{Numeric; the mean of the log normal prior for alpha. Default is 0.5.}
 
-\item{pr_sd_alpha}{Numeric; mean of normal prior for beta. default value is 1.0.}
+\item{pr_sd_alpha}{Numeric; the standard deviation of the log normal prior for alpha. Default is 1.0.}
 
-\item{pr_a_eps}{Numeric; shape parameter of inverse gamma prior for variance of data likelihood. default value is 0.001.}
+\item{pr_a_eps}{Numeric; shape parameter of inverse gamma prior for variance of data likelihood. Default is 0.001.}
 
-\item{pr_b_eps}{Numeric; scale parameter of inverse gamma prior for variance of data likelihood default value is 0.001.}
+\item{pr_b_eps}{Numeric; scale parameter of inverse gamma prior for variance of data likelihood. Default is 0.001.}
 
-\item{pr_a_theta}{Numeric; shape parameter of inverse gamma prior for variance of theta. default value is 0.001.}
+\item{pr_a_theta}{Numeric; the shape parameter of the inverse gamma prior for the variance of theta. Default is 0.001.}
 
-\item{pr_b_theta}{Numeric; scale parameter of inverse gamma prior for variance of theta. default value is 0.001.}
+\item{pr_b_theta}{Numeric; the scale parameter of the inverse gamma prior for the variance of theta. Default is 0.001.}
 
-\item{pr_xi_a}{Numeric; first shape parameter of beta prior for latent variable xi. default value is 1.}
+\item{pr_xi_a}{Numeric; first shape parameter of beta prior for latent variable xi. Default is 1.}
 
-\item{pr_xi_b}{Numeric; second shape parameter of beta prior for latent variable xi. default value is 1.}
+\item{pr_xi_b}{Numeric; second shape parameter of beta prior for latent variable xi. Default is 1.}
 
-\item{verbose}{Logical; If TRUE, MCMC samples are printed for each \code{nprint}. default value is FALSE}
+\item{verbose}{Logical; If TRUE, MCMC samples are printed for each \code{nprint}. Default is FALSE.}
 }
 \value{
 \code{lsirm2pl_normal_ss} returns an object of  list containing the following components:
- \item{data}{data frame or matrix containing the variables in the model.}
+ \item{data}{Data frame or matrix containing the variables in the model.}
  \item{bic}{Numeric value with the corresponding BIC.}
  \item{mcmc_inf}{number of mcmc iteration, burn-in periods, and thinning intervals.}
  \item{map_inf}{value of log maximum a posterior and iteration number which have log maximum a posterior.}
@@ -103,7 +103,6 @@ lsirm2pl_normal_ss(
  \item{sigma_theta_estimate}{posterior estimation of standard deviation of theta.}
  \item{sigma_estimate}{posterior estimation of standard deviation.}
  \item{gamma_estimate}{posterior estimation of gamma.}
- \item{alpha_estimate}{posterior estimation of alpha.}
  \item{z_estimate}{posterior estimation of z.}
  \item{w_estimate}{posterior estimation of w.}
  \item{pi_estimate}{posterior estimation of phi. inclusion probability of gamma. if estimation of phi is less than 0.5, choose Rasch model with gamma = 0, otherwise latent space model with gamma > 0. }
@@ -112,7 +111,6 @@ lsirm2pl_normal_ss(
  \item{theta_sd}{posterior samples of standard deviation of theta.}
  \item{sigma}{posterior samples of standard deviation.}
  \item{gamma}{posterior samples of gamma.}
- \item{alpha}{posterior samples of alpha.}
  \item{z}{posterior samples of z. The output is 3-dimensional matrix with last axis represent the dimension of latent space.}
  \item{w}{posterior samples of w. The output is 3-dimensional matrix with last axis represent the dimension of latent space.}
  \item{pi}{posterior samples of phi which is indicator of spike and slab prior. If phi is 1, log gamma follows the slab prior, otherwise follows the spike prior. }
@@ -121,11 +119,13 @@ lsirm2pl_normal_ss(
  \item{accept_w}{accept ratio of w.}
  \item{accept_z}{accept ratio of z.}
  \item{accept_gamma}{accept ratio of gamma.}
- \item{accept_alpha}{accept ratio of alpha.}
+ \item{alpha_estimate}{Posterior estimates of the alpha parameter.}
+ \item{alpha}{Posterior estimates of the alpha parameter.}
+ \item{accept_alpha}{Acceptance ratio for the alpha parameter.}
 }
 \description{
-\link{lsirm2pl_normal_ss} is used to fit 2pl LSIRM model for continuous variable with model selection approach.
-\link{lsirm2pl_normal_ss} factorizes item response matrix into column-wise item effect, row-wise respondent effect and further embeds interaction effect in a latent space. Unlike 1pl model, 2pl model assumes the item effect can vary according to respondent, allowing additional parameter multiplied with respondent effect. The resulting latent space provides an interaction map that represents interactions between respondents and items.
+\link{lsirm2pl_normal_ss} is used to fit 2PL LSIRM for continuous variable with model selection approach.
+\link{lsirm2pl_normal_ss} factorizes item response matrix into column-wise item effect, row-wise respondent effect and further embeds interaction effect in a latent space. Unlike 1PL model, 2PL model assumes the item effect can vary according to respondent, allowing additional parameter multiplied with respondent effect. The resulting latent space provides an interaction map that represents interactions between respondents and items.
 }
 \details{
 \code{lsirm2pl_normal_ss} models the continuous value of response by respondent \eqn{j} to item \eqn{i} with item effect \eqn{\beta_i}, respondent effect \eqn{\theta_j} and the distance between latent position \eqn{w_i} of item \eqn{i} and latent position \eqn{z_j} of respondent \eqn{j} in the shared metric space, with \eqn{\gamma} represents the weight of the distance term. For 2pl model, the the item effect is assumed to have additional discrimination parameter \eqn{\alpha_i} multiplied by \eqn{\theta_j}: \deqn{Y_{j,i} = \theta_j+\beta_i-\gamma||z_j-w_i|| + e_{j,i}} where the error \eqn{e_{j,i} \sim N(0,\sigma^2)}. \code{lsrm2pl_noraml_ss} model include model selection approach based on spike-and-slab priors for log gamma. For detail of spike-and-slab priors, see References.

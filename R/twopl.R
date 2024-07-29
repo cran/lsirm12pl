@@ -1,7 +1,7 @@
-#' 2pl Rasch model. 
+#' 2PL Rasch model. 
 #' 
-#' @description \link{twopl} is used to fit 2pl Rasch model. 
-#' Unlike 1pl model, 2pl model assumes the item effect can vary according to respondent, allowing additional parameter multiplied with respondent effect.
+#' @description \link{twopl} is used to fit 2PL Rasch model. 
+#' Unlike 1PL model, 2PL model assumes the item effect can vary according to respondent, allowing additional parameter multiplied with respondent effect.
 #' 
 #' @param data Matrix; binary item response matrix to be analyzed. Each row is assumed to be respondent and its column values are assumed to be response to the corresponding item.
 #' @param niter Numeric; number of iterations to run MCMC sampling. default value is 15000.
