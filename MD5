@@ -1,10 +1,10 @@
-d806f97e75e797376eec754ce7160d70 *DESCRIPTION
+2d17a6a83e44f845671997b0a603b25f *DESCRIPTION
 a226ccf05390eeca9fb94114b806cbfa *NAMESPACE
 8e77c85893ddfed1002c18f0a2c35d10 *R/RcppExports.R
 cc84e37681b430435afd5b0a30ccbbdf *R/data.R
 b1c58b860634e50a740195722f4a5a20 *R/diagnostic.lsirm.R
 60c4cbc20e3b1ff12a17df11a4d0c9b5 *R/gof.lsirm.R
-dd6076d0cf4828e754297dc73650c7dd *R/lsirm.R
+e39952a6dd0be2d56d84ee91f8319e2e *R/lsirm.R
 11b32533c858691502c699ac05cdf460 *R/lsirm12pl-package.R
 8bc95865cb1f16a68ef9b05b675f65c6 *R/lsirm1pl_fixed_gamma.R
 7fec0dc9da02b6b17d925f0170c4ef69 *R/lsirm1pl_fixed_gamma_mar.R
@@ -58,7 +58,7 @@ b97d8a637278f7e122b3941f860356ee *man/gof.Rd
 dafa294b84673aec51716d93ac6a61e4 *man/lsirm.Rd
 c47d9ead4eab6f94dfc2a45e9816fd01 *man/lsirm.formula.Rd
 5d1dbdf0e89a981850d8e8ee8d83c45b *man/lsirm12pl.Rd
-f5440615a3cd4d489bbda51439009ae1 *man/lsirm1pl.Rd
+553cd3cbed2348e438b65cf7e08b4a40 *man/lsirm1pl.Rd
 13c2f68fa4c473b4be11221026ceb152 *man/lsirm1pl_fixed_gamma.Rd
 1ed12d000400eb00e65ea16d1970d1fa *man/lsirm1pl_fixed_gamma_mar.Rd
 35dffd876ebeaef4f5197607f268065d *man/lsirm1pl_fixed_gamma_mcar.Rd
@@ -77,7 +77,7 @@ c63175525a612bda5fed32d05c43f51c *man/lsirm1pl_normal_o.Rd
 192f0022c3efe3131b9fd29a41ed9aa5 *man/lsirm1pl_normal_ss.Rd
 45828f73aeb8a927d3a7524bbd92198f *man/lsirm1pl_o.Rd
 03104d6fc31bfdf00f1befc8e6138cbc *man/lsirm1pl_ss.Rd
-0e87ed8d0a19e4f78571fe6da97ab625 *man/lsirm2pl.Rd
+bfa1cecd78d9a241e4f2e5e8951d898b *man/lsirm2pl.Rd
 9ffb31cbdbe7ba1c54e3d57563dd6e37 *man/lsirm2pl_fixed_gamma.Rd
 e268d43a3d67026313d41ce0939a5322 *man/lsirm2pl_fixed_gamma_mar.Rd
 b92065f501069c5da410e8ab8168e903 *man/lsirm2pl_fixed_gamma_mcar.Rd
