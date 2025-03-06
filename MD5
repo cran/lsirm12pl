@@ -1,13 +1,13 @@
-2d17a6a83e44f845671997b0a603b25f *DESCRIPTION
+b9d688a97b052a2be8092e37b2e4343d *DESCRIPTION
 a226ccf05390eeca9fb94114b806cbfa *NAMESPACE
 8e77c85893ddfed1002c18f0a2c35d10 *R/RcppExports.R
 cc84e37681b430435afd5b0a30ccbbdf *R/data.R
 b1c58b860634e50a740195722f4a5a20 *R/diagnostic.lsirm.R
 60c4cbc20e3b1ff12a17df11a4d0c9b5 *R/gof.lsirm.R
-e39952a6dd0be2d56d84ee91f8319e2e *R/lsirm.R
+b8b8d0dbf03abf5b77bde27e666cce0f *R/lsirm.R
 11b32533c858691502c699ac05cdf460 *R/lsirm12pl-package.R
 8bc95865cb1f16a68ef9b05b675f65c6 *R/lsirm1pl_fixed_gamma.R
-7fec0dc9da02b6b17d925f0170c4ef69 *R/lsirm1pl_fixed_gamma_mar.R
+8058ce150de99a0b9edba55aa88db63c *R/lsirm1pl_fixed_gamma_mar.R
 60362ee26ccba3b92d21ed57eb1353a2 *R/lsirm1pl_fixed_gamma_mcar.R
 4d8ee489a654ffd3c04bd445934bc0c4 *R/lsirm1pl_mar.R
 8b35f943d0e510765618642ef960b53c *R/lsirm1pl_mar_ss.R
@@ -49,8 +49,8 @@ a866a5f28f52adb429fcf3e1c5dbf434 *R/lsirm2pl_ss.R
 2361e886927111441a755411aee3f15c *R/summary.lsirm.R
 a93575f09726707163df37de5b11cc70 *R/twopl.R
 dfb7e403f1b2865c255f7f56b7547e44 *R/utilities.R
-f71ea9de11b83101039ee7c127a7e0cb *data/BFPT.csv
-41e3d3fc840d3a1b80b10ede4aa6f4e2 *data/TDRI.csv
+45325e000e51124ac97e8cbb8e6a97e4 *data/BFPT.csv.gz
+69cf40ab3491f3081d5ab57170fc87a7 *data/TDRI.csv.gz
 24635bb6edd378d01fa17c18703d74b1 *man/BFPT.Rd
 8c81642830e2122c29bfc090125f5973 *man/TDRI.Rd
 c2d60a9268d831b5f97de72ec94e1eed *man/diagnostic.Rd

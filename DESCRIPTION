@@ -1,19 +1,19 @@
 Package: lsirm12pl
 Type: Package
 Title: Latent Space Item Response Model
-Version: 1.3.3
-Date: 2024-08-28
+Version: 1.3.4
+Date: 2025-02-26
 Authors@R: c(person("Dongyoung", "Go", role = c("aut"),
                      email = "dongyoung.gr@yonsei.ac.kr"),
-	      person("Gwanghee", "Kim", role = c("aut"),
+	            person("Gwanghee", "Kim", role = c("aut", "cre"),
                      email = "musagh08@yonsei.ac.kr"),
-              person("Jina", "Park", role = c("aut", "cre"),
+              person("Jina", "Park", role = c("aut"),
                      email = "pja070707@gmail.com"),       
               person("Ickhoon", "Jin", role = c("ctb"),
                      email = "ijin@yonsei.ac.kr"),
               person("Minjeong", "Jeon", role = "ctb",
                      email = "mjjeon@ucla.edu"))
-Maintainer: Jina Park <pja070707@gmail.com>
+Maintainer: Gwanghee Kim <musagh08@yonsei.ac.kr>
 Description: Analysis of dichotomous and continuous response data using latent factor by both 1PL LSIRM and 2PL LSIRM as described in Jeon et al. (2021) <doi:10.1007/s11336-021-09762-5>. It includes original 1PL LSIRM and 2PL LSIRM provided for binary response data and its extension for continuous response data. Bayesian model selection with spike-and-slab prior and method for dealing data with missing value under missing at random, missing completely at random are also supported. Various diagnostic plots are available to inspect the latent space and summary of estimated parameters.
 License: GPL-3
 Imports: Rcpp (>= 1.0.5), MCMCpack, ggplot2, GPArotation, dplyr (>=
@@ -27,11 +27,11 @@ Suggests: knitr, testthat
 Depends: R (>= 3.1.0)
 LazyData: true
 NeedsCompilation: yes
-Packaged: 2024-08-28 13:01:24 UTC; jina
+Packaged: 2025-03-06 05:12:39 UTC; ghk
 Author: Dongyoung Go [aut],
-  Gwanghee Kim [aut],
-  Jina Park [aut, cre],
+  Gwanghee Kim [aut, cre],
+  Jina Park [aut],
   Ickhoon Jin [ctb],
   Minjeong Jeon [ctb]
 Repository: CRAN
-Date/Publication: 2024-08-28 23:00:02 UTC
+Date/Publication: 2025-03-06 10:40:06 UTC
