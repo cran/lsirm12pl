@@ -3,7 +3,7 @@
 #' @description \code{diagnostic} checks the convergence of MCMC for LSIRM parameters using various diagnostic tools, such as trace plots, posterior density distributions, autocorrelation functions (ACF), and Gelman-Rubin-Brooks plots.
 #'
 #' @param object Object of class \code{lsirm}.
-#' @param draw.item List; Each key in the list corresponds to a specific parameters such as "beta", "theta", "gamma", "alpha", "sigma", "sigma_sd", and "zw.dist". The values of the list indicate the indices of these parameters. For the key "zw.dist", the value is a matrix with two columns: the first column represents the indices of respondents, and the second column represents the indices of items.
+#' @param draw.item List; Each key in the list corresponds to a specific parameters such as "beta", "theta", "gamma", "alpha", "theta_sd", "sigma" and "zw.dist". The values of the list indicate the indices of these parameters. For the key "zw.dist", the value is a matrix with two columns: the first column represents the indices of respondents, and the second column represents the indices of items.
 #' @param gelman.diag Logical; If TRUE, the Gelman-Rubin convergence diagnostic will be printed. Default is FALSE.
 #'
 #' @return \code{diagnostic} returns plots for checking MCMC convergence for selected parameters.
@@ -39,7 +39,7 @@ diagnostic.lsirm <- function(object,
 
   ACF <- Chain <- Iteration <- Lag <- PSRF <- Type <- iteration <- var1 <- NULL
   orders = data.frame(idx = c(1:7),
-                      param = c("beta", "theta", "gamma", "alpha", "sigma", "sigma_sd", "zw.dist"))
+                      param = c("beta", "theta", "gamma", "alpha", "sigma", "theta_sd", "zw.dist"))
   which.draw = names(draw.item)
   porder = orders[orders$param %in% which.draw,]
 

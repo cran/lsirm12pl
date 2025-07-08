@@ -1,8 +1,8 @@
-b9d688a97b052a2be8092e37b2e4343d *DESCRIPTION
+aff32f39c2b5c81db6805e0621e17d5a *DESCRIPTION
 a226ccf05390eeca9fb94114b806cbfa *NAMESPACE
 8e77c85893ddfed1002c18f0a2c35d10 *R/RcppExports.R
 cc84e37681b430435afd5b0a30ccbbdf *R/data.R
-b1c58b860634e50a740195722f4a5a20 *R/diagnostic.lsirm.R
+37f8f9ae58a1e7b9e68fddae71c34ece *R/diagnostic.lsirm.R
 60c4cbc20e3b1ff12a17df11a4d0c9b5 *R/gof.lsirm.R
 b8b8d0dbf03abf5b77bde27e666cce0f *R/lsirm.R
 11b32533c858691502c699ac05cdf460 *R/lsirm12pl-package.R
@@ -53,7 +53,7 @@ dfb7e403f1b2865c255f7f56b7547e44 *R/utilities.R
 69cf40ab3491f3081d5ab57170fc87a7 *data/TDRI.csv.gz
 24635bb6edd378d01fa17c18703d74b1 *man/BFPT.Rd
 8c81642830e2122c29bfc090125f5973 *man/TDRI.Rd
-c2d60a9268d831b5f97de72ec94e1eed *man/diagnostic.Rd
+38d41bba0fc7d5e4c8d768f2b96d8827 *man/diagnostic.Rd
 b97d8a637278f7e122b3941f860356ee *man/gof.Rd
 dafa294b84673aec51716d93ac6a61e4 *man/lsirm.Rd
 c47d9ead4eab6f94dfc2a45e9816fd01 *man/lsirm.formula.Rd
