@@ -119,7 +119,7 @@ cat("\n")
   # cat("\n\nCalculate BIC\n")
   log_like = log_likelihood_normal_cpp(as.matrix(data), ndim, as.matrix(beta.estimate), as.matrix(theta.estimate), gamma.estimate, z.est, w.est, sigma.estimate, 99)
   p = nitem + nsample + 1 + 1 + ndim * nitem + ndim * nsample + 1
-  bic = -2 * log_like[[1]] + p * log(nsample * nsample)
+  bic = -2 * log_like[[1]] + p * log(nsample * nitem)
 
   result <- list(data = data,
               bic = bic,

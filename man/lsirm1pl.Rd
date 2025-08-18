@@ -19,13 +19,17 @@ lsirm1pl(
   nprint = 500,
   jump_beta = 0.4,
   jump_theta = 1,
+  jump_gamma = 0.025,
   jump_z = 0.5,
   jump_w = 0.5,
   pr_mean_beta = 0,
   pr_sd_beta = 1,
   pr_mean_theta = 0,
+  pr_mean_gamma = 0.5,
+  pr_sd_gamma = 1,
   pr_a_theta = 0.001,
   pr_b_theta = 0.001,
+  verbose = FALSE,
   ...
 )
 }
@@ -58,6 +62,8 @@ lsirm1pl(
 
 \item{jump_theta}{Numeric; the jumping rule for the theta proposal density. Default is 1.0.}
 
+\item{jump_gamma}{Numeric; the jumping rule for the gamma proposal density. Default is 0.025.}
+
 \item{jump_z}{Numeric; the jumping rule for the z proposal density. Default is 0.5.}
 
 \item{jump_w}{Numeric; the jumping rule for the w proposal density. Default is 0.5.}
@@ -68,9 +74,15 @@ lsirm1pl(
 
 \item{pr_mean_theta}{Numeric; the mean of the normal prior for theta. Default is 0.}
 
+\item{pr_mean_gamma}{Numeric; mean of log normal prior for gamma. Default is 0.5.}
+
+\item{pr_sd_gamma}{Numeric; standard deviation of log normal prior for gamma. Default is 1.0.}
+
 \item{pr_a_theta}{Numeric; the shape parameter of the inverse gamma prior for the variance of theta. Default is 0.001.}
 
 \item{pr_b_theta}{Numeric; the scale parameter of the inverse gamma prior for the variance of theta. Default is 0.001.}
+
+\item{verbose}{Logical; If TRUE, MCMC samples are printed for each \code{nprint}. Default is FALSE.}
 
 \item{\dots}{Additional arguments for the for various settings. Refer to the functions in the Details.}
 }

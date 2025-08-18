@@ -127,7 +127,7 @@ cat("\n")
   data[data == missing.val] = missing_est
   log_like = log_likelihood_cpp(as.matrix(data), ndim, as.matrix(beta.estimate), as.matrix(theta.estimate), gamma.estimate, z.est, w.est, missing.val)
   p = nitem + nsample + 1 + 1 + ndim * nitem + ndim * nsample
-  bic = -2 * log_like[[1]] + p * log(nsample * nsample)
+  bic = -2 * log_like[[1]] + p * log(nsample * nitem)
 
   result <- list(data = data,
               missing.val = missing.val,

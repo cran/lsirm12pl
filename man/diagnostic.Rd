@@ -13,7 +13,7 @@ diagnostic(
 \arguments{
 \item{object}{Object of class \code{lsirm}.}
 
-\item{draw.item}{List; Each key in the list corresponds to a specific parameters such as "beta", "theta", "gamma", "alpha", "theta_sd", "sigma" and "zw.dist". The values of the list indicate the indices of these parameters. For the key "zw.dist", the value is a matrix with two columns: the first column represents the indices of respondents, and the second column represents the indices of items.}
+\item{draw.item}{List; Each key in the list corresponds to a specific parameters such as "beta", "theta", "gamma", "alpha", "sigma", "theta_sd", "z", "w", and "zw.dist". The values of the list indicate the indices of these parameters. For the key "zw.dist", the value is a matrix with two columns: the first column represents the indices of respondents, and the second column represents the indices of items. For the keys "z" and "w", the value is a matrix with two columns: the first column represents the indices of respondents/items, and the second column represents the dimension indices.}
 
 \item{gelman.diag}{Logical; If TRUE, the Gelman-Rubin convergence diagnostic will be printed. Default is FALSE.}
 }
@@ -35,6 +35,10 @@ diagnostic(lsirm_result)
 # For 2PL LSIRM
 lsirm_result <- lsirm(data ~ lsirm2pl(spikenslab = FALSE, fixed_gamma = FALSE))
 diagnostic(lsirm_result)
+
+# For specific latent positions
+diagnostic(lsirm_result, draw.item = list(z = matrix(c(1,1, 2,1, 1,2), ncol=2, byrow=TRUE),
+                                       w = matrix(c(1,1, 2,1), ncol=2, byrow=TRUE)))
 
 }
 }

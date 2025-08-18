@@ -20,11 +20,14 @@ lsirm2pl(
   jump_beta = 0.4,
   jump_theta = 1,
   jump_alpha = 1,
+  jump_gamma = 0.025,
   jump_z = 0.5,
   jump_w = 0.5,
   pr_mean_beta = 0,
   pr_sd_beta = 1,
   pr_mean_theta = 0,
+  pr_mean_gamma = 0.5,
+  pr_sd_gamma = 1,
   pr_a_theta = 0.001,
   pr_b_theta = 0.001,
   pr_mean_alpha = 0.5,
@@ -63,6 +66,8 @@ lsirm2pl(
 
 \item{jump_alpha}{Numeric; the jumping rule for the alpha proposal density. Default is 1.0.}
 
+\item{jump_gamma}{Numeric; the jumping rule for the gamma proposal density. Default is 0.025.}
+
 \item{jump_z}{Numeric; the jumping rule for the z proposal density. Default is 0.5.}
 
 \item{jump_w}{Numeric; the jumping rule for the w proposal density. Default is 0.5.}
@@ -72,6 +77,10 @@ lsirm2pl(
 \item{pr_sd_beta}{Numeric; the standard deviation of the normal prior for beta. Default is 1.0.}
 
 \item{pr_mean_theta}{Numeric; the mean of the normal prior for theta. Default is 0.}
+
+\item{pr_mean_gamma}{Numeric; mean of log normal prior for gamma. Default is 0.5.}
+
+\item{pr_sd_gamma}{Numeric; standard deviation of log normal prior for gamma. Default is 1.0.}
 
 \item{pr_a_theta}{Numeric; the shape parameter of the inverse gamma prior for the variance of theta. Default is 0.001.}
 
@@ -94,12 +103,14 @@ The basic return list containing the following components:
 \item{theta_estimate}{Posterior estimates of the theta parameter.}
 \item{sigma_theta_estimate}{Posterior estimates of the standard deviation of theta.}
 \item{alpha_estimate}{posterior estimates of alpha parameter..}
+\item{gamma_estimate}{Posterior estimates of gamma parameter.}
 \item{z_estimate}{Posterior estimates of the z parameter.}
 \item{w_estimate}{Posterior estimates of the w parameter.}
 \item{beta}{Posterior samples of the beta parameter.}
 \item{theta}{Posterior samples of the theta parameter.}
 \item{theta_sd}{Posterior samples of the standard deviation of theta.}
 \item{alpha}{Posterior samples of the alpha parameter.}
+\item{gamma}{Posterior samples of the gamma parameter.}
 \item{z}{Posterior samples of the z parameter, represented as a 3-dimensional matrix where the last axis denotes the dimension of the latent space.}
 \item{w}{Posterior samples of the w parameter, represented as a 3-dimensional matrix where the last axis denotes the dimension of the latent space.}
 \item{accept_beta}{Acceptance ratio for the beta parameter.}
@@ -107,6 +118,7 @@ The basic return list containing the following components:
 \item{accept_z}{Acceptance ratio for the z parameter.}
 \item{accept_w}{Acceptance ratio for the w parameter.}
 \item{accept_alpha}{Acceptance ratio for the alpha parameter.}
+\item{accept_gamma}{Acceptance ratio for the gamma parameter.}
 \item{...}{Additional return values for various settings. Refer to the functions in the Details.}
 }
 \description{

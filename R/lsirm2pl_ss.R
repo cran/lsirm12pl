@@ -137,7 +137,7 @@ cat("\n")
     log_like = log_likelihood_2pl_cpp(as.matrix(data), ndim, as.matrix(beta.estimate), as.matrix(alpha.estimate), as.matrix(theta.estimate), 0, z.est, w.est, 99)
   }
   p = 2 * nitem + nsample + 1 + 1 + ndim * nitem + ndim * nsample + 2
-  bic = -2 * log_like[[1]] + p * log(nsample * nsample)
+  bic = -2 * log_like[[1]] + p * log(nitem * nsample)
 
   result <- list(data = data,
               bic = bic,
