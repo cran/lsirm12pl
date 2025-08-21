@@ -1,8 +1,8 @@
-e31992768c8fd8374fb9d4e6dcf0d437 *DESCRIPTION
+f1e304a2cc0e2f4eaff8f357ddb33609 *DESCRIPTION
 a226ccf05390eeca9fb94114b806cbfa *NAMESPACE
 8e77c85893ddfed1002c18f0a2c35d10 *R/RcppExports.R
 cc84e37681b430435afd5b0a30ccbbdf *R/data.R
-aea9be7d7067fc34ea9e9a49d64240be *R/diagnostic.lsirm.R
+633570ffd039c87daed3f8434b54166b *R/diagnostic.lsirm.R
 60c4cbc20e3b1ff12a17df11a4d0c9b5 *R/gof.lsirm.R
 c8f6ac751e80cd80d3aba0192d4524cb *R/lsirm.R
 11b32533c858691502c699ac05cdf460 *R/lsirm12pl-package.R

@@ -222,7 +222,7 @@ diagnostic.lsirm <- function(object,
           labs(title = "", x = "Last Iteration in chain", y = "Shrink Factor") +
           theme_minimal() +
           theme(legend.title = element_blank(),
-                legend.position = c(1, 1),  # Place legend inside the plot at top-right
+                legend.position.inside = c(1, 1),  # Place legend inside the plot at top-right
                 legend.justification = c("right", "top")  # Anchor the legend at its top-right corner
 
           )
@@ -451,7 +451,7 @@ diagnostic.lsirm <- function(object,
           labs(title = "", x = "Last Iteration in chain", y = "Shrink Factor") +
           theme_minimal() +
           theme(legend.title = element_blank(),
-                legend.position = c(1, 1),  # Place legend inside the plot at top-right
+                legend.position.inside = c(1, 1),  # Place legend inside the plot at top-right
                 legend.justification = c("right", "top")  # Anchor the legend at its top-right corner
 
           )
@@ -609,14 +609,6 @@ diagnostic.lsirm <- function(object,
           geom_hline(aes(yintercept = (exp(2*1.96/sqrt(nmcmc-3)-1)/(exp(2*1.96/sqrt(nmcmc-3)+1)))), linetype='dotted', col = 'blue') +
           ylab("Autocorrelation") +
           theme(legend.position = "none")
-        # autocorrelation_plot <- ggplot(acf_combined,
-        #                                aes(x = Lag, y = ACF,
-        #                                    color = factor(Chain), group = Chain)) +
-        #   geom_hline(aes(yintercept = 0)) +
-        #   geom_segment(mapping = aes(xend = Lag, yend = 0)) +
-        #   xlab("Lag") +
-        #   ylab("Autocorrelation") +
-        #   theme(legend.position = "none")
 
         pdf(file = NULL)
         # Call gelman.plot
@@ -650,7 +642,7 @@ diagnostic.lsirm <- function(object,
           labs(title = "", x = "Last Iteration in chain", y = "Shrink Factor") +
           theme_minimal() +
           theme(legend.title = element_blank(),
-                legend.position = c(1, 1),  # Place legend inside the plot at top-right
+                legend.position.inside = c(1, 1),  # Place legend inside the plot at top-right
                 legend.justification = c("right", "top")  # Anchor the legend at its top-right corner
 
           )
@@ -823,7 +815,8 @@ diagnostic.lsirm <- function(object,
         autocorrelation_plot <- ggplot(acf_combined, aes(x = Lag, y = ACF, color = factor(Chain), group = Chain)) +
           geom_line() +  # Changed to line plot
           xlab("Lag") +
-          geom_hline(aes(yintercept = (exp(2*1.96/sqrt(nmcmc-3)-1)/(exp(2*1.96/sqrt(nmcmc-3)+1)))), linetype='dotted', col = 'blue') +
+          geom_hline(aes(yintercept = (exp(2*1.96/sqrt(nmcmc-3)-1)/(exp(2*1.96/sqrt(nmcmc-3)+1)))),
+                     linetype='dotted', col = 'blue') +
           ylab("Autocorrelation") +
           theme(legend.position = "none")
 
@@ -859,7 +852,7 @@ diagnostic.lsirm <- function(object,
           labs(title = "", x = "Last Iteration in chain", y = "Shrink Factor") +
           theme_minimal() +
           theme(legend.title = element_blank(),
-                legend.position = c(1, 1),  # Place legend inside the plot at top-right
+                legend.position.inside = c(1, 1),  # Place legend inside the plot at top-right
                 legend.justification = c("right", "top")  # Anchor the legend at its top-right corner
 
           )
@@ -903,11 +896,6 @@ diagnostic.lsirm <- function(object,
 
         # Merge autocorrelation data and plot
         acf_combined <- do.call(rbind, autocorrelation_plots)
-        # autocorrelation_plot <- ggplot(acf_combined, aes(x = Lag, y = ACF, color = factor(Chain), group = Chain)) +
-        #   geom_line(color = "#268bd2") +  # Changed to line plot
-        #   xlab("Lag") +
-        #   ylab("Autocorrelation") +
-        #   theme(legend.position = "none")
         autocorrelation_plot <- ggplot(acf_combined,
                                        aes(x = Lag, y = ACF,
                                            color = factor(Chain), group = Chain)) +
@@ -1014,25 +1002,16 @@ diagnostic.lsirm <- function(object,
         autocorrelation_plot <- ggplot(acf_combined, aes(x = Lag, y = ACF, color = factor(Chain), group = Chain)) +
           geom_line() +  # Changed to line plot
           xlab("Lag") +
-          geom_hline(aes(yintercept = (exp(2*1.96/sqrt(nmcmc-3)-1)/(exp(2*1.96/sqrt(nmcmc-3)+1)))), linetype='dotted', col = 'blue') +
+          geom_hline(aes(yintercept = (exp(2*1.96/sqrt(nmcmc-3)-1)/(exp(2*1.96/sqrt(nmcmc-3)+1)))),
+                     linetype='dotted', col = 'blue') +
           ylab("Autocorrelation") +
           theme(legend.position = "none")
-        # autocorrelation_plot <- ggplot(acf_combined,
-        #                                aes(x = Lag, y = ACF,
-        #                                    color = factor(Chain), group = Chain)) +
-        #   geom_hline(aes(yintercept = 0)) +
-        #   geom_segment(mapping = aes(xend = Lag, yend = 0)) +
-        #   xlab("Lag") +
-        #   ylab("Autocorrelation") +
-        #   theme(legend.position = "none")
 
         pdf(file = NULL)
         # Call gelman.plot
         gelman_plot <- gelman.plot(chain_data)
         # Close the null device
         dev.off()
-
-
 
         median_values <- gelman_plot$shrink[,, "median"]
         upper_values <- gelman_plot$shrink[,, "97.5%"]
@@ -1058,7 +1037,7 @@ diagnostic.lsirm <- function(object,
           labs(title = "", x = "Last Iteration in chain", y = "Shrink Factor") +
           theme_minimal() +
           theme(legend.title = element_blank(),
-                legend.position = c(1, 1),  # Place legend inside the plot at top-right
+                legend.position.inside = c(1, 1),  # Place legend inside the plot at top-right
                 legend.justification = c("right", "top")  # Anchor the legend at its top-right corner
 
           )
@@ -1098,11 +1077,6 @@ diagnostic.lsirm <- function(object,
 
         # Merge autocorrelation data and plot
         acf_combined <- do.call(rbind, autocorrelation_plots)
-        # autocorrelation_plot <- ggplot(acf_combined, aes(x = Lag, y = ACF, color = factor(Chain), group = Chain)) +
-        #   geom_line(color = "#268bd2") +  # Changed to line plot
-        #   xlab("Lag") +
-        #   ylab("Autocorrelation") +
-        #   theme(legend.position = "none")
         autocorrelation_plot <- ggplot(acf_combined,
                                        aes(x = Lag, y = ACF,
                                            color = factor(Chain), group = Chain)) +
@@ -1208,14 +1182,6 @@ diagnostic.lsirm <- function(object,
           geom_hline(aes(yintercept = (exp(2*1.96/sqrt(nmcmc-3)-1)/(exp(2*1.96/sqrt(nmcmc-3)+1)))), linetype='dotted', col = 'blue') +
           ylab("Autocorrelation") +
           theme(legend.position = "none")
-        # autocorrelation_plot <- ggplot(acf_combined,
-        #                                aes(x = Lag, y = ACF,
-        #                                    color = factor(Chain), group = Chain)) +
-        #   geom_hline(aes(yintercept = 0)) +
-        #   geom_segment(mapping = aes(xend = Lag, yend = 0)) +
-        #   xlab("Lag") +
-        #   ylab("Autocorrelation") +
-        #   theme(legend.position = "none")
 
         pdf(file = NULL)
         # Call gelman.plot
@@ -1249,7 +1215,7 @@ diagnostic.lsirm <- function(object,
           labs(title = "", x = "Last Iteration in chain", y = "Shrink Factor") +
           theme_minimal() +
           theme(legend.title = element_blank(),
-                legend.position = c(1, 1),  # Place legend inside the plot at top-right
+                legend.position.inside = c(1, 1),  # Place legend inside the plot at top-right
                 legend.justification = c("right", "top")  # Anchor the legend at its top-right corner
 
           )
@@ -1289,11 +1255,6 @@ diagnostic.lsirm <- function(object,
 
         # Merge autocorrelation data and plot
         acf_combined <- do.call(rbind, autocorrelation_plots)
-        # autocorrelation_plot <- ggplot(acf_combined, aes(x = Lag, y = ACF, color = factor(Chain), group = Chain)) +
-        #   geom_line(color = "#268bd2") +  # Changed to line plot
-        #   xlab("Lag") +
-        #   ylab("Autocorrelation") +
-        #   theme(legend.position = "none")
         autocorrelation_plot <- ggplot(acf_combined,
                                        aes(x = Lag, y = ACF,
                                            color = factor(Chain), group = Chain)) +
@@ -1320,243 +1281,13 @@ diagnostic.lsirm <- function(object,
     which.draw.temp <- setdiff(which.draw.temp, c("theta_sd"))
   } ## Sigma theta
 
-  ## zw.dist ---------
-  if("zw.dist" %in% which.draw){
-
-    if(multi_chain){
-
-
-      draw.item.temp <- apply(draw.item$zw.dist, 1, function(row) paste(row, collapse = "-"))
-      draw.item.num <- length(draw.item.temp)
-
-      pnames <- c(paste('zw.dist [', draw.item.temp, ']', sep = ''))
-      chains <- object$chains
-
-      chain_list <- list()
-      nmcmc <- dim(object[[1]]$w)[1]
-
-      for(i in 1:chains){
-        dist_temp <- matrix(0, nrow = nmcmc, ncol = nrow(draw.item$zw.dist))
-        for(j in 1:nrow(draw.item$zw.dist)){
-
-          iz = draw.item$zw.dist[j,1]
-          iw = draw.item$zw.dist[j,2]
-
-          if(is.vector(object[[i]]$z[,j,])){
-            dist_temp[,j] <- sum((object[[i]]$z[,iz,] - object[[i]]$w[,iw,])^2)
-          }else{
-            dist_temp[,j] <- apply(apply(object[[i]]$z[,iz,] - object[[i]]$w[,iw,], 1, function(x) x^2), 2, sum)
-          }
-        }
-        chain_list[[i]] <- matrix(dist_temp, ncol = length(pnames),
-                                  dimnames= list(NULL,pnames))
-        if(length(chain_list_all[[i]]) == 0){
-          chain_list_all[[i]] <- chain_list[[i]]
-        }else{
-          chain_list_all[[i]] <- cbind(chain_list_all[[i]], chain_list[[i]])
-        }
-      }
-    }else{
-
-      draw.item.temp <- apply(draw.item$zw.dist, 1, function(row) paste(row, collapse = "-"))
-      draw.item.num <- length(draw.item.temp)
-
-      pnames <- c(paste('zw.dist [', draw.item.temp, ']', sep = ''))
-
-      chain_list <- list()
-      nmcmc <- dim(object$w)[1]
-
-      dist_temp <- matrix(0, nrow = nmcmc, ncol = nrow(draw.item$zw.dist))
-
-      for(j in 1:nrow(draw.item$zw.dist)){
-
-        iz = draw.item$zw.dist[j,1]
-        iw = draw.item$zw.dist[j,2]
-
-        if(is.vector(object$z[,j,])){
-          dist_temp[,j] <- sum((object$z[,iz,] - object$w[,iw,])^2)
-        }else{
-          dist_temp[,j] <- apply(apply(object$z[,iz,] - object$w[,iw,], 1, function(x) x^2), 2, sum)
-        }
-
-      }
-      chain_list[[1]] <- matrix(dist_temp, ncol = length(pnames),
-                                dimnames= list(NULL,pnames))
-
-
-    }
-
-    # mcmc_chains <- lapply(chain_list, coda::mcmc, thin = 1)
-    mcmc_chains <- lapply(chain_list, function(x) coda::mcmc(x, thin = 1))
-    # Convert the list of mcmc objects to an mcmc.list object
-    mcmclist <- coda::as.mcmc.list(mcmc_chains)
-    params <- dimnames(mcmclist[[1]])[[2]]
-
-    plots_list <- list()
-
-    for(i in 1:draw.item.num){
-      # Extract data for each parameter from each chain
-      param <- colnames(mcmclist[[1]])[i]
-      chain_data <- lapply(mcmclist, function(chain) chain[, param])
-
-      # Create data frame
-      combined_data <- do.call(rbind, lapply(seq_along(chain_data), function(j) {
-        data.frame(iteration = seq_along(chain_data[[j]]), value = chain_data[[j]], Chain = j)
-      }))
-
-
-      if(multi_chain){
-
-        # Trace Plot
-        trace_plot <- ggplot(combined_data, aes(x = iteration, y = var1, group = Chain, color = factor(Chain))) +
-          geom_line() +
-          xlab("Iterations") +
-          ylab("Value") + theme(legend.position = "none")
-
-        # Density Plot
-        density_plot <- ggplot(combined_data, aes(x = var1, fill = factor(Chain), color = factor(Chain))) +
-          geom_density(alpha = 0.1) +
-          xlab("Value") +
-          ylab("Density") +
-          theme(legend.position = "none")
-
-        # Autocorrelation Plot
-        autocorrelation_plots <- lapply(seq_along(chain_data), function(j) {
-          acf_data <- acf(chain_data[[j]], plot = FALSE, lag.max = 60)
-          data.frame(Lag = acf_data$lag, ACF = acf_data$acf, Chain = j)
-        })
-
-        # Merge autocorrelation data and plot
-        acf_combined <- do.call(rbind, autocorrelation_plots)
-        autocorrelation_plot <- ggplot(acf_combined, aes(x = Lag, y = ACF, color = factor(Chain), group = Chain)) +
-          geom_line() +  # Changed to line plot
-          xlab("Lag") +
-          geom_hline(aes(yintercept = (exp(2*1.96/sqrt(nmcmc-3)-1)/(exp(2*1.96/sqrt(nmcmc-3)+1)))), linetype='dotted', col = 'blue') +
-          ylab("Autocorrelation") +
-          theme(legend.position = "none")
-
-        # autocorrelation_plot <- ggplot(acf_combined,
-        #                                aes(x = Lag, y = ACF,
-        #                                    color = factor(Chain), group = Chain)) +
-        #   geom_hline(aes(yintercept = 0)) +
-        #   geom_segment(mapping = aes(xend = Lag, yend = 0)) +
-        #   xlab("Lag") +
-        #   ylab("Autocorrelation") +
-        #   theme(legend.position = "none")
-
-        pdf(file = NULL)
-        # Call gelman.plot
-        gelman_plot <- gelman.plot(chain_data)
-        # Close the null device
-        dev.off()
-
-
-
-        median_values <- gelman_plot$shrink[,, "median"]
-        upper_values <- gelman_plot$shrink[,, "97.5%"]
-        iterations <- gelman_plot$last.iter
-
-        # Create a data frame
-        psrf_data <- data.frame(
-          Iteration = iterations,
-          MedianPSRF = as.vector(median_values),
-          UpperPSRF = as.vector(upper_values)
-        )
-
-        # Reshape for plotting
-        psrf_long <- pivot_longer(psrf_data, cols = c("MedianPSRF", "UpperPSRF"), names_to = "Type", values_to = "PSRF") %>%
-          mutate(Type = recode(Type, "UpperPSRF" = "97.5%", "MedianPSRF" = "Median"))
-        # Check the data
-
-        psrf_plot <- ggplot(psrf_long, aes(x = Iteration, y = PSRF, group = Type)) +
-          geom_line(aes(linetype = Type, color = Type)) +  # Specify line type and color in aes to merge legends
-          # geom_hline(yintercept = 1.1, linetype = "dashed", color = "black", size = 1) +
-          scale_linetype_manual(values = c("97.5%" = "dashed", "Median" = "solid")) +
-          scale_color_manual(values = c("97.5%" = "#377EB8", "Median" = "#E41A1C")) +
-          labs(title = "", x = "Last Iteration in chain", y = "Shrink Factor") +
-          theme_minimal() +
-          theme(legend.title = element_blank(),
-                legend.position = c(1, 1),  # Place legend inside the plot at top-right
-                legend.justification = c("right", "top")  # Anchor the legend at its top-right corner
-
-          )
-
-
-        # Combine plots using grid.arrange
-        combined_plot <- grid.arrange(arrangeGrob(trace_plot,
-                                                  density_plot,
-                                                  autocorrelation_plot,
-                                                  psrf_plot,
-                                                  top = textGrob(param, vjust = 1, gp = gpar(fontface = "bold", cex = 1)),
-                                                  ncol = 2))
-
-        if((draw.item.num > 1)&(i < draw.item.num)){
-          readline(prompt = "Hit <Return> to see next plot")
-        }
-      }else{
-
-        # Trace Plot
-        trace_plot <- ggplot(combined_data, aes(x = iteration, y = var1, group = Chain, color = factor(Chain))) +
-          geom_line(color = "#268bd2") +
-          xlab("Iterations") +
-          ylab("Value") + theme(legend.position = "none")
-
-        # Density Plot
-        density_plot <- ggplot(combined_data, aes(x = var1)) +
-          geom_density(color = "#268bd2", fill = "#268bd2", alpha = 0.1) +
-          xlab("Value") +
-          ylab("Density") +
-          theme(legend.position = "none")
-
-        # Autocorrelation Plot
-        autocorrelation_plots <- lapply(seq_along(chain_data), function(j) {
-          acf_data <- acf(chain_data[[j]], plot = FALSE, lag.max = 60)
-          data.frame(Lag = acf_data$lag, ACF = acf_data$acf, Chain = j)
-        })
-
-        # Merge autocorrelation data and plot
-        acf_combined <- do.call(rbind, autocorrelation_plots)
-        # autocorrelation_plot <- ggplot(acf_combined, aes(x = Lag, y = ACF, color = factor(Chain), group = Chain)) +
-        #   geom_line(color = "#268bd2") +  # Changed to line plot
-        #   xlab("Lag") +
-        #   ylab("Autocorrelation") +
-        #   theme(legend.position = "none")
-        autocorrelation_plot <- ggplot(acf_combined,
-                                       aes(x = Lag, y = ACF,
-                                           color = factor(Chain), group = Chain)) +
-          geom_hline(aes(yintercept = 0)) +
-          geom_segment(mapping = aes(xend = Lag, yend = 0)) +
-          xlab("Lag") +
-          geom_hline(aes(yintercept = (exp(2*1.96/sqrt(nmcmc-3)-1)/(exp(2*1.96/sqrt(nmcmc-3)+1)))), linetype='dotted', col = 'blue') +
-          ylab("Autocorrelation") +
-          theme(legend.position = "none")
-
-
-        # Combine plots using grid.arrange
-        combined_plot <- grid.arrange(arrangeGrob(trace_plot,
-                                                  density_plot,
-                                                  autocorrelation_plot,
-                                                  top = textGrob(param, vjust = 1, gp = gpar(fontface = "bold", cex = 1)),
-                                                  ncol = 2))
-
-
-        if((draw.item.num > 1)&(i < draw.item.num)){
-          readline(prompt = "Hit <Return> to see next plot")
-        }
-      }
-    }
-
-    # coda::gelman.diag(mcmclist)
-    which.draw.temp <- setdiff(which.draw.temp, c("zw.dist"))
-  } ## Dist
-
   ## z ---------
   if("z" %in% which.draw){
 
     if(multi_chain){
 
       draw.item.temp <- apply(draw.item$z, 1, function(row) paste(row, collapse = "-"))
-      draw.item.num <- length(draw.item.temp)
+      draw.item.num <- nrow(draw.item$z)
 
       pnames <- c(paste('z [', draw.item.temp, ']', sep = ''))
       chains <- object$chains
@@ -1584,7 +1315,7 @@ diagnostic.lsirm <- function(object,
     }else{
 
       draw.item.temp <- apply(draw.item$z, 1, function(row) paste(row, collapse = "-"))
-      draw.item.num <- length(draw.item.temp)
+      draw.item.num <- nrow(draw.item$z)
 
       pnames <- c(paste('z [', draw.item.temp, ']', sep = ''))
 
@@ -1671,7 +1402,7 @@ diagnostic.lsirm <- function(object,
           labs(title = "", x = "Last Iteration in chain", y = "Shrink Factor") +
           theme_minimal() +
           theme(legend.title = element_blank(),
-                legend.position = c(1, 1),
+                legend.position.inside = c(1, 1),
                 legend.justification = c("right", "top")
           )
 
@@ -1681,10 +1412,14 @@ diagnostic.lsirm <- function(object,
                                                   psrf_plot,
                                                   top = textGrob(param, vjust = 1, gp = gpar(fontface = "bold", cex = 1)),
                                                   ncol = 2))
-
-        if((draw.item.num > 1)&(i < draw.item.num)){
+        if(porder[porder$param == "z",]$idx == max(porder$idx)){
+          if(((draw.item.num) > 1)&(i < (draw.item.num))){
+            readline(prompt = "Hit <Return> to see next plot")
+          }
+        }else{
           readline(prompt = "Hit <Return> to see next plot")
         }
+        
       }else{
 
         trace_plot <- ggplot(combined_data, aes(x = iteration, y = var1, group = Chain, color = factor(Chain))) +
@@ -1720,7 +1455,11 @@ diagnostic.lsirm <- function(object,
                                                   top = textGrob(param, vjust = 1, gp = gpar(fontface = "bold", cex = 1)),
                                                   ncol = 2))
 
-        if((draw.item.num > 1)&(i < draw.item.num)){
+        if(porder[porder$param == "z",]$idx == max(porder$idx)){
+          if(((draw.item.num) > 1)&(i < (draw.item.num))){
+            readline(prompt = "Hit <Return> to see next plot")
+          }
+        }else{
           readline(prompt = "Hit <Return> to see next plot")
         }
       }
@@ -1850,7 +1589,7 @@ diagnostic.lsirm <- function(object,
           labs(title = "", x = "Last Iteration in chain", y = "Shrink Factor") +
           theme_minimal() +
           theme(legend.title = element_blank(),
-                legend.position = c(1, 1),
+                legend.position.inside = c(1, 1),
                 legend.justification = c("right", "top")
           )
 
@@ -1861,7 +1600,11 @@ diagnostic.lsirm <- function(object,
                                                   top = textGrob(param, vjust = 1, gp = gpar(fontface = "bold", cex = 1)),
                                                   ncol = 2))
 
-        if((draw.item.num > 1)&(i < draw.item.num)){
+        if(porder[porder$param == "w",]$idx == max(porder$idx)){
+          if(((draw.item.num) > 1)&(i < (draw.item.num))){
+            readline(prompt = "Hit <Return> to see next plot")
+          }
+        }else{
           readline(prompt = "Hit <Return> to see next plot")
         }
       }else{
@@ -1899,7 +1642,11 @@ diagnostic.lsirm <- function(object,
                                                   top = textGrob(param, vjust = 1, gp = gpar(fontface = "bold", cex = 1)),
                                                   ncol = 2))
 
-        if((draw.item.num > 1)&(i < draw.item.num)){
+        if(porder[porder$param == "w",]$idx == max(porder$idx)){
+          if(((draw.item.num) > 1)&(i < (draw.item.num))){
+            readline(prompt = "Hit <Return> to see next plot")
+          }
+        }else{
           readline(prompt = "Hit <Return> to see next plot")
         }
       }
@@ -1907,12 +1654,228 @@ diagnostic.lsirm <- function(object,
 
     which.draw.temp <- setdiff(which.draw.temp, c("w"))
   } ## w
+  
+  ## zw.dist ---------
+  if("zw.dist" %in% which.draw){
+    
+    if(multi_chain){
+      
+      
+      draw.item.temp <- apply(draw.item$zw.dist, 1, function(row) paste(row, collapse = "-"))
+      draw.item.num <- length(draw.item.temp)
+      
+      pnames <- c(paste('zw.dist [', draw.item.temp, ']', sep = ''))
+      chains <- object$chains
+      
+      chain_list <- list()
+      nmcmc <- dim(object[[1]]$w)[1]
+      
+      for(i in 1:chains){
+        dist_temp <- matrix(0, nrow = nmcmc, ncol = nrow(draw.item$zw.dist))
+        for(j in 1:nrow(draw.item$zw.dist)){
+          
+          iz = draw.item$zw.dist[j,1]
+          iw = draw.item$zw.dist[j,2]
+          
+          if(is.vector(object[[i]]$z[,j,])){
+            dist_temp[,j] <- sum((object[[i]]$z[,iz,] - object[[i]]$w[,iw,])^2)
+          }else{
+            dist_temp[,j] <- apply(apply(object[[i]]$z[,iz,] - object[[i]]$w[,iw,], 1, function(x) x^2), 2, sum)
+          }
+        }
+        chain_list[[i]] <- matrix(dist_temp, ncol = length(pnames),
+                                  dimnames= list(NULL,pnames))
+        if(length(chain_list_all[[i]]) == 0){
+          chain_list_all[[i]] <- chain_list[[i]]
+        }else{
+          chain_list_all[[i]] <- cbind(chain_list_all[[i]], chain_list[[i]])
+        }
+      }
+    }else{
+      
+      draw.item.temp <- apply(draw.item$zw.dist, 1, function(row) paste(row, collapse = "-"))
+      draw.item.num <- length(draw.item.temp)
+      
+      pnames <- c(paste('zw.dist [', draw.item.temp, ']', sep = ''))
+      
+      chain_list <- list()
+      nmcmc <- dim(object$w)[1]
+      
+      dist_temp <- matrix(0, nrow = nmcmc, ncol = nrow(draw.item$zw.dist))
+      
+      for(j in 1:nrow(draw.item$zw.dist)){
+        
+        iz = draw.item$zw.dist[j,1]
+        iw = draw.item$zw.dist[j,2]
+        
+        if(is.vector(object$z[,j,])){
+          dist_temp[,j] <- sum((object$z[,iz,] - object$w[,iw,])^2)
+        }else{
+          dist_temp[,j] <- apply(apply(object$z[,iz,] - object$w[,iw,], 1, function(x) x^2), 2, sum)
+        }
+        
+      }
+      chain_list[[1]] <- matrix(dist_temp, ncol = length(pnames),
+                                dimnames= list(NULL,pnames))
+      
+      
+    }
+    
+    mcmc_chains <- lapply(chain_list, function(x) coda::mcmc(x, thin = 1))
+    mcmclist <- coda::as.mcmc.list(mcmc_chains)
+    params <- dimnames(mcmclist[[1]])[[2]]
+    
+    plots_list <- list()
+    
+    for(i in 1:draw.item.num){
+      # Extract data for each parameter from each chain
+      param <- colnames(mcmclist[[1]])[i]
+      chain_data <- lapply(mcmclist, function(chain) chain[, param])
+      
+      # Create data frame
+      combined_data <- do.call(rbind, lapply(seq_along(chain_data), function(j) {
+        data.frame(iteration = seq_along(chain_data[[j]]), value = chain_data[[j]], Chain = j)
+      }))
+      
+      
+      if(multi_chain){
+        
+        # Trace Plot
+        trace_plot <- ggplot(combined_data, aes(x = iteration, y = var1, group = Chain, color = factor(Chain))) +
+          geom_line() +
+          xlab("Iterations") +
+          ylab("Value") + theme(legend.position = "none")
+        
+        # Density Plot
+        density_plot <- ggplot(combined_data, aes(x = var1, fill = factor(Chain), color = factor(Chain))) +
+          geom_density(alpha = 0.1) +
+          xlab("Value") +
+          ylab("Density") +
+          theme(legend.position = "none")
+        
+        # Autocorrelation Plot
+        autocorrelation_plots <- lapply(seq_along(chain_data), function(j) {
+          acf_data <- acf(chain_data[[j]], plot = FALSE, lag.max = 60)
+          data.frame(Lag = acf_data$lag, ACF = acf_data$acf, Chain = j)
+        })
+        
+        # Merge autocorrelation data and plot
+        acf_combined <- do.call(rbind, autocorrelation_plots)
+        autocorrelation_plot <- ggplot(acf_combined, aes(x = Lag, y = ACF, color = factor(Chain), group = Chain)) +
+          geom_line() +  
+          xlab("Lag") +
+          geom_hline(aes(yintercept = (exp(2*1.96/sqrt(nmcmc-3)-1)/(exp(2*1.96/sqrt(nmcmc-3)+1)))), linetype='dotted', col = 'blue') +
+          ylab("Autocorrelation") +
+          theme(legend.position = "none")
+        
+        pdf(file = NULL)
+        gelman_plot <- gelman.plot(chain_data)
+        dev.off()
+        
+        median_values <- gelman_plot$shrink[,, "median"]
+        upper_values <- gelman_plot$shrink[,, "97.5%"]
+        iterations <- gelman_plot$last.iter
+        
+        # Create a data frame
+        psrf_data <- data.frame(
+          Iteration = iterations,
+          MedianPSRF = as.vector(median_values),
+          UpperPSRF = as.vector(upper_values)
+        )
+        
+        # Reshape for plotting
+        psrf_long <- pivot_longer(psrf_data, cols = c("MedianPSRF", "UpperPSRF"), names_to = "Type", values_to = "PSRF") %>%
+          mutate(Type = recode(Type, "UpperPSRF" = "97.5%", "MedianPSRF" = "Median"))
+        
+        psrf_plot <- ggplot(psrf_long, aes(x = Iteration, y = PSRF, group = Type)) +
+          geom_line(aes(linetype = Type, color = Type)) +  
+          scale_linetype_manual(values = c("97.5%" = "dashed", "Median" = "solid")) +
+          scale_color_manual(values = c("97.5%" = "#377EB8", "Median" = "#E41A1C")) +
+          labs(title = "", x = "Last Iteration in chain", y = "Shrink Factor") +
+          theme_minimal() +
+          theme(legend.title = element_blank(),
+                legend.position.inside = c(1, 1), 
+                legend.justification = c("right", "top")  
+                
+          )
+        
+        
+        # Combine plots using grid.arrange
+        combined_plot <- grid.arrange(arrangeGrob(trace_plot,
+                                                  density_plot,
+                                                  autocorrelation_plot,
+                                                  psrf_plot,
+                                                  top = textGrob(param, vjust = 1, gp = gpar(fontface = "bold", cex = 1)),
+                                                  ncol = 2))
+        
+        if(porder[porder$param == "zw.dist",]$idx == max(porder$idx)){
+          if(((draw.item.num) > 1)&(i < (draw.item.num))){
+            readline(prompt = "Hit <Return> to see next plot")
+          }
+        }else{
+          readline(prompt = "Hit <Return> to see next plot")
+        }
+        
+      }else{
+        
+        # Trace Plot
+        trace_plot <- ggplot(combined_data, aes(x = iteration, y = var1, group = Chain, color = factor(Chain))) +
+          geom_line(color = "#268bd2") +
+          xlab("Iterations") +
+          ylab("Value") + theme(legend.position = "none")
+        
+        # Density Plot
+        density_plot <- ggplot(combined_data, aes(x = var1)) +
+          geom_density(color = "#268bd2", fill = "#268bd2", alpha = 0.1) +
+          xlab("Value") +
+          ylab("Density") +
+          theme(legend.position = "none")
+        
+        # Autocorrelation Plot
+        autocorrelation_plots <- lapply(seq_along(chain_data), function(j) {
+          acf_data <- acf(chain_data[[j]], plot = FALSE, lag.max = 60)
+          data.frame(Lag = acf_data$lag, ACF = acf_data$acf, Chain = j)
+        })
+        
+        # Merge autocorrelation data and plot
+        acf_combined <- do.call(rbind, autocorrelation_plots)
+        autocorrelation_plot <- ggplot(acf_combined,
+                                       aes(x = Lag, y = ACF,
+                                           color = factor(Chain), group = Chain)) +
+          geom_hline(aes(yintercept = 0)) +
+          geom_segment(mapping = aes(xend = Lag, yend = 0)) +
+          xlab("Lag") +
+          geom_hline(aes(yintercept = (exp(2*1.96/sqrt(nmcmc-3)-1)/(exp(2*1.96/sqrt(nmcmc-3)+1)))), linetype='dotted', col = 'blue') +
+          ylab("Autocorrelation") +
+          theme(legend.position = "none")
+        
+        
+        # Combine plots using grid.arrange
+        combined_plot <- grid.arrange(arrangeGrob(trace_plot,
+                                                  density_plot,
+                                                  autocorrelation_plot,
+                                                  top = textGrob(param, vjust = 1, gp = gpar(fontface = "bold", cex = 1)),
+                                                  ncol = 2))
+        
+        
+        if(porder[porder$param == "zw.dist",]$idx == max(porder$idx)){
+          if(((draw.item.num) > 1)&(i < (draw.item.num))){
+            readline(prompt = "Hit <Return> to see next plot")
+          }
+        }else{
+          readline(prompt = "Hit <Return> to see next plot")
+        }
+        
+      }
+    }
+    
+    # coda::gelman.diag(mcmclist)
+    which.draw.temp <- setdiff(which.draw.temp, c("zw.dist"))
+  } ## Dist
 
   if(gelman.diag == TRUE){
     if(object$chains > 1){
-      # mcmc_chains <- lapply(chain_list, coda::mcmc, thin = 1)
       mcmc_chains <- lapply(chain_list_all, function(x) coda::mcmc(x, thin = 1))
-      # Convert the list of mcmc objects to an mcmc.list object
       mcmclist <- coda::as.mcmc.list(mcmc_chains)
       print(coda::gelman.diag(mcmclist))
     }else{
