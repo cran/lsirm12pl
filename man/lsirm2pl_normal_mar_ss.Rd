@@ -108,6 +108,8 @@ lsirm2pl_normal_mar_ss(
 \item{gamma_estimate}{posterior estimates of gamma parameter.}
 \item{z_estimate}{Posterior estimates of the z parameter.}
 \item{w_estimate}{Posterior estimates of the w parameter.}
+\item{z_raw}{Posterior samples of the z parameter without procrustes matching.}
+\item{w_raw}{Posterior samples of the w parameter without procrustes matching.}
 \item{beta}{Posterior samples of the beta parameter.}
 \item{theta}{Posterior samples of the theta parameter.}
 \item{gamma}{Posterior samples of the gamma parameter.}

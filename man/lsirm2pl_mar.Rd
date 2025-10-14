@@ -97,6 +97,8 @@ lsirm2pl_mar(
 \item{theta_sd}{Posterior samples of the standard deviation of theta.}
 \item{z}{Posterior samples of the z parameter, represented as a 3-dimensional matrix where the last axis denotes the dimension of the latent space.}
 \item{w}{Posterior samples of the w parameter, represented as a 3-dimensional matrix where the last axis denotes the dimension of the latent space.}
+\item{z_raw}{Posterior samples of the z parameter without procrustes matching.}
+\item{w_raw}{Posterior samples of the w parameter without procrustes matching.}
  \item{imp}{Imputation for missing Values using posterior samples.}
 \item{accept_beta}{Acceptance ratio for the beta parameter.}
 \item{accept_theta}{Acceptance ratio for the theta parameter.}

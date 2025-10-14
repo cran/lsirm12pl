@@ -99,6 +99,8 @@ lsirm1pl_mar_ss(
 \item{theta_sd}{Posterior samples of the standard deviation of theta.}
 \item{z}{Posterior samples of the z parameter, represented as a 3-dimensional matrix where the last axis denotes the dimension of the latent space.}
 \item{w}{Posterior samples of the w parameter, represented as a 3-dimensional matrix where the last axis denotes the dimension of the latent space.}
+\item{z_raw}{Posterior samples of the z parameter without procrustes matching.}
+\item{w_raw}{Posterior samples of the w parameter without procrustes matching.}
 \item{pi}{Posterior samples of phi which is indicator of spike and slab prior. If phi is 1, log gamma follows the slab prior, otherwise follows the spike prior. }
  \item{imp}{Imputation for missing Values using posterior samples.}
 \item{accept_beta}{Acceptance ratio for the beta parameter.}

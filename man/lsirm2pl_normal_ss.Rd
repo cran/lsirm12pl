@@ -113,6 +113,8 @@ lsirm2pl_normal_ss(
  \item{gamma}{posterior samples of gamma.}
  \item{z}{posterior samples of z. The output is 3-dimensional matrix with last axis represent the dimension of latent space.}
  \item{w}{posterior samples of w. The output is 3-dimensional matrix with last axis represent the dimension of latent space.}
+ \item{z_raw}{Posterior samples of the z parameter without procrustes matching.}
+ \item{w_raw}{Posterior samples of the w parameter without procrustes matching.}
  \item{pi}{posterior samples of phi which is indicator of spike and slab prior. If phi is 1, log gamma follows the slab prior, otherwise follows the spike prior. }
  \item{accept_beta}{accept ratio of beta.}
  \item{accept_theta}{accept ratio of theta.}
