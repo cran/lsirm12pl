@@ -74,11 +74,11 @@
 #' @export
 lsirm2pl_normal_mar_ss = function(data, ndim = 2, niter = 15000, nburn = 2500, nthin = 5, nprint = 500,
                                   jump_beta = 0.4, jump_theta = 1.0, jump_alpha = 1.0, jump_gamma = 1.0, jump_z = 0.5, jump_w = 0.5,
-                                  pr_mean_beta = 0, pr_sd_beta = 1.0, pr_mean_theta = 0,
+                                  pr_mean_beta = 0, pr_sd_beta = 1.0, pr_mean_theta = 0, pr_sd_theta = 1.0,
                                   pr_spike_mean = -3, pr_spike_sd = 1.0, pr_slab_mean = 0.5, pr_slab_sd = 1.0,
                                   pr_mean_alpha = 0.5, pr_sd_alpha = 1,
                                   pr_a_eps = 0.001, pr_b_eps = 0.001, pr_a_theta = 0.001, pr_b_theta = 0.001, pr_xi_a = 0.001, pr_xi_b = 0.001,
-                                  missing.val = 99, verbose=FALSE){
+                                  missing.val = 99, verbose=FALSE, fix_theta_sd=FALSE, fix_alpha_1=TRUE){
   if(niter < nburn){
     stop("niter must be greater than burn-in process.")
   }
@@ -91,13 +91,13 @@ lsirm2pl_normal_mar_ss = function(data, ndim = 2, niter = 15000, nburn = 2500, n
   # cat("\n\nFitting with MCMC algorithm\n")
 
 
-  output <- lsirm2pl_normal_mar_ss_cpp(as.matrix(data), ndim, niter, nburn, nthin, nprint,
-                                       jump_beta, jump_theta, jump_alpha, jump_gamma, jump_z, jump_w,
-                                       pr_mean_beta, pr_sd_beta, pr_mean_theta,
-                                       pr_spike_mean, pr_spike_sd, pr_slab_mean, pr_slab_sd,
-                                       pr_mean_alpha, pr_sd_alpha,
-                                       pr_a_eps,  pr_b_eps, pr_a_theta, pr_b_theta,
-                                       pr_xi_a, pr_xi_b, missing.val, verbose=verbose)
+  output <- lsirm2pl_normal_mar_ss_cpp(data=as.matrix(data), ndim=ndim, niter=niter, nburn=nburn, nthin=nthin, nprint=nprint,
+                                       jump_beta=jump_beta, jump_theta=jump_theta, jump_alpha=jump_gamma, jump_gamma=jump_gamma, jump_z=jump_z, jump_w=jump_w,
+                                       pr_mean_beta=pr_mean_beta, pr_sd_beta=pr_sd_beta, pr_mean_theta=pr_mean_theta, pr_sd_theta=pr_sd_theta,
+                                       pr_spike_mean=pr_spike_mean, pr_spike_sd=pr_spike_sd, pr_slab_mean=pr_slab_mean, pr_slab_sd=pr_slab_sd,
+                                       pr_mean_alpha=pr_mean_alpha, pr_sd_alpha=pr_sd_alpha,
+                                       pr_a_eps=pr_a_eps,  pr_b_eps=pr_b_eps, pr_a_theta=pr_a_theta, pr_b_theta=pr_b_theta,
+                                       pr_beta_a=pr_xi_a, pr_beta_b=pr_xi_b, missing=missing.val, verbose=verbose, fix_theta_sd=fix_theta_sd, fix_alpha_1=fix_alpha_1)
 
   mcmc.inf = list(nburn=nburn, niter=niter, nthin=nthin)
   nsample <- nrow(data)

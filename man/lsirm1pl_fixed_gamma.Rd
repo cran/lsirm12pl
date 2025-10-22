@@ -18,9 +18,11 @@ lsirm1pl_fixed_gamma(
   pr_mean_beta = 0,
   pr_sd_beta = 1,
   pr_mean_theta = 0,
+  pr_sd_theta = 1,
   pr_a_theta = 0.001,
   pr_b_theta = 0.001,
-  verbose = FALSE
+  verbose = FALSE,
+  fix_theta_sd = FALSE
 )
 }
 \arguments{
@@ -50,11 +52,15 @@ lsirm1pl_fixed_gamma(
 
 \item{pr_mean_theta}{Numeric; the mean of the normal prior for theta. Default is 0.}
 
+\item{pr_sd_theta}{Numeric; the standard deviation of the normal prior for theta. Default is 1.0.}
+
 \item{pr_a_theta}{Numeric; the shape parameter of the inverse gamma prior for the variance of theta. Default is 0.001.}
 
 \item{pr_b_theta}{Numeric; the scale parameter of the inverse gamma prior for the variance of theta. Default is 0.001.}
 
 \item{verbose}{Logical; If TRUE, MCMC samples are printed for each \code{nprint}. default value is FALSE}
+
+\item{fix_theta_sd}{Logical; If TRUE, the standard deviation of the theta parameter is fixed. Default is FALSE.}
 }
 \value{
 \code{lsirm1pl_fixed_gamma} returns an object of  list containing the following components:

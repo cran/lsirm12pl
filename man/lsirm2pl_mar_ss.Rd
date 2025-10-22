@@ -20,6 +20,7 @@ lsirm2pl_mar_ss(
   pr_mean_beta = 0,
   pr_sd_beta = 1,
   pr_mean_theta = 0,
+  pr_sd_theta = 1,
   pr_spike_mean = -3,
   pr_spike_sd = 1,
   pr_slab_mean = 0.5,
@@ -31,7 +32,9 @@ lsirm2pl_mar_ss(
   pr_xi_a = 1,
   pr_xi_b = 1,
   missing.val = 99,
-  verbose = FALSE
+  verbose = FALSE,
+  fix_theta_sd = FALSE,
+  fix_alpha_1 = TRUE
 )
 }
 \arguments{
@@ -65,6 +68,8 @@ lsirm2pl_mar_ss(
 
 \item{pr_mean_theta}{Numeric; the mean of the normal prior for theta. Default is 0.}
 
+\item{pr_sd_theta}{Numeric; the standard deviation of the normal prior for theta. Default is 1.0.}
+
 \item{pr_spike_mean}{Numeric; the mean of spike prior for log gamma. Default is -3.}
 
 \item{pr_spike_sd}{Numeric; the standard deviation of spike prior for log gamma. Default is 1.}
@@ -88,6 +93,10 @@ lsirm2pl_mar_ss(
 \item{missing.val}{Numeric; a number to replace missing values. Default is 99.}
 
 \item{verbose}{Logical; If TRUE, MCMC samples are printed for each \code{nprint}. Default is FALSE.}
+
+\item{fix_theta_sd}{Logical; If TRUE, the standard deviation of the theta parameter is fixed. Default is FALSE.}
+
+\item{fix_alpha_1}{Logical; If TRUE, the first element of the alpha parameter is fixed to 1. Default is TRUE.}
 }
 \value{
 \code{lsirm2pl_mar_ss} returns an object of  list containing the following components:

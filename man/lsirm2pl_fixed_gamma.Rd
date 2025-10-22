@@ -19,11 +19,14 @@ lsirm2pl_fixed_gamma(
   pr_mean_beta = 0,
   pr_sd_beta = 1,
   pr_mean_theta = 0,
+  pr_sd_theta = 1,
   pr_mean_alpha = 0.5,
   pr_sd_alpha = 1,
   pr_a_theta = 0.001,
   pr_b_theta = 0.001,
-  verbose = FALSE
+  verbose = FALSE,
+  fix_theta_sd = FALSE,
+  fix_alpha_1 = TRUE
 )
 }
 \arguments{
@@ -55,6 +58,8 @@ lsirm2pl_fixed_gamma(
 
 \item{pr_mean_theta}{Numeric; the mean of the normal prior for theta. Default is 0.}
 
+\item{pr_sd_theta}{Numeric; the standard deviation of the normal prior for theta. Default is 1.0.}
+
 \item{pr_mean_alpha}{Numeric; the mean of the log normal prior for alpha. Default is 0.5.}
 
 \item{pr_sd_alpha}{Numeric; the standard deviation of the log normal prior for alpha. Default is 1.0.}
@@ -64,6 +69,10 @@ lsirm2pl_fixed_gamma(
 \item{pr_b_theta}{Numeric; the scale parameter of the inverse gamma prior for the variance of theta. Default is 0.001.}
 
 \item{verbose}{Logical; If TRUE, MCMC samples are printed for each \code{nprint}. Default is FALSE.}
+
+\item{fix_theta_sd}{Logical; If TRUE, the standard deviation of the theta parameter is fixed. Default is FALSE.}
+
+\item{fix_alpha_1}{Logical; If TRUE, the first element of the alpha parameter is fixed to 1. Default is TRUE.}
 }
 \value{
 \code{lsirm2pl_fixed_gamma} returns an object of  list containing the following components:

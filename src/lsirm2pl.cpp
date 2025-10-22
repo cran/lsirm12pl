@@ -17,11 +17,12 @@ using namespace arma;
 // [[Rcpp::export]]
 Rcpp::List lsirm2pl_cpp (arma::mat data, const int ndim, const int niter, const int nburn, const int nthin, const int nprint,
                        const double jump_beta, const double jump_theta, const double jump_alpha, const double jump_gamma, const double jump_z, const double jump_w,
-                       const double pr_mean_beta, const double pr_sd_beta, const double pr_mean_theta, const double pr_mean_gamma, const double pr_sd_gamma,
-                       const double pr_mean_alpha, const double pr_sd_alpha, const double pr_a_theta, const double pr_b_theta, const bool verbose){
+                       const double pr_mean_beta, const double pr_sd_beta, const double pr_mean_theta, double pr_sd_theta,
+                       const double pr_mean_gamma, const double pr_sd_gamma,
+                       const double pr_mean_alpha, const double pr_sd_alpha, const double pr_a_theta, const double pr_b_theta, const bool verbose, const bool fix_theta_sd, const bool fix_alpha_1){
 
   int i, j, k, count, accept;
-  double num, den, old_like_beta, new_like_beta, old_like_theta, new_like_theta, pr_sd_theta = 1.0;
+  double num, den, old_like_beta, new_like_beta, old_like_theta, new_like_theta;
   double old_like_z, new_like_z, old_like_w, new_like_w, old_like_gamma, new_like_gamma, old_like_alpha, new_like_alpha ;
   double ratio, un, post_a, post_b, dist_temp, dist_old_temp, dist_new_temp;
   double pr_mean_z = 0.0, pr_sd_z = 1.0, pr_mean_w = 0.0, pr_sd_w = 1.0, mle;
@@ -181,7 +182,7 @@ Rcpp::List lsirm2pl_cpp (arma::mat data, const int ndim, const int niter, const 
     else newgamma = oldgamma;
 
     // alpha update
-    for(i = 1; i < nitem; i++){
+    for(i = (fix_alpha_1 ? 1 : 0); i < nitem; i++){
       newalpha(i) = R::rlnorm(std::log(oldalpha(i)) , jump_alpha);
       old_like_alpha = new_like_alpha = 0.0;
 
@@ -314,10 +315,13 @@ Rcpp::List lsirm2pl_cpp (arma::mat data, const int ndim, const int niter, const 
     }
 
     //sigma_theta update with gibbs
-    post_a = 2 * pr_a_theta  + nsample;
-    post_b = pr_b_theta;
-    for(j = 0; j < nsample; j++) post_b += std::pow((oldtheta(j) - pr_mean_theta), 2.0) / 2;
-    pr_sd_theta = std::sqrt(2 * post_b *(1.0 /  R::rchisq(post_a)));
+    if(!fix_theta_sd){
+      post_a = 2 * pr_a_theta  + nsample;
+      post_b = pr_b_theta;
+      for(j = 0; j < nsample; j++) post_b += std::pow((oldtheta(j) - pr_mean_theta), 2.0) / 2;
+      pr_sd_theta = std::sqrt(2 * post_b *(1.0 /  R::rchisq(post_a)));  
+    }
+    
 
 
     if(iter >= nburn && iter % nthin == 0){
@@ -413,8 +417,8 @@ Rcpp::List lsirm2pl_normal_fixed_gamma_cpp(arma::mat data,
                                            const int ndim, const int niter, const int nburn, const int nthin, const int nprint,
                                            const double jump_beta, const double jump_theta, const double jump_alpha, const double jump_z, const double jump_w,
                                            const double pr_mean_beta, const double pr_sd_beta, const double pr_a_theta, const double pr_b_theta,
-                                           const double pr_mean_theta,
-                                           const double pr_a_eps, const double pr_b_eps, const double pr_mean_alpha, const double pr_sd_alpha, const bool verbose){
+                                           const double pr_mean_theta, double pr_sd_theta,
+                                           const double pr_a_eps, const double pr_b_eps, const double pr_mean_alpha, const double pr_sd_alpha, const bool verbose, const bool fix_theta_sd, const bool fix_alpha_1){
 
   const int nsample = data.n_rows;
   const int nitem = data.n_cols;
@@ -424,7 +428,7 @@ Rcpp::List lsirm2pl_normal_fixed_gamma_cpp(arma::mat data,
   double old_like_z, new_like_z, old_like_w, new_like_w;
   double ratio, un, dist_temp, dist_old_temp, dist_new_temp;
   double post_a_sigma, post_b_sigma, post_a_th_sigma, post_b_th_sigma;
-  double pr_mean_z = 0.0, pr_sd_z = 1.0, pr_mean_w = 0.0, pr_sd_w = 1.0, pr_sd = 1.0, pr_sd_theta = 1.0, mle;
+  double pr_mean_z = 0.0, pr_sd_z = 1.0, pr_mean_w = 0.0, pr_sd_w = 1.0, pr_sd = 1.0, mle;
 
 
   arma::dvec oldbeta(nitem, fill::randu);
@@ -545,7 +549,7 @@ Rcpp::List lsirm2pl_normal_fixed_gamma_cpp(arma::mat data,
 
 
     // alpha update
-    for(i = 1; i < nitem; i++){
+    for(i = (fix_alpha_1 ? 1 : 0); i < nitem; i++){
       newalpha(i) = R::rlnorm(std::log(oldalpha(i)) , jump_alpha);
       old_like_alpha = new_like_alpha = 0.0;
 
@@ -671,12 +675,13 @@ Rcpp::List lsirm2pl_normal_fixed_gamma_cpp(arma::mat data,
       }
     }
 
-
-    //sigma_theta update with gibbs
-    post_a_th_sigma = 2 * pr_a_theta  + nsample;
-    post_b_th_sigma = pr_b_theta;
-    for(j = 0; j < nsample; j++) post_b_th_sigma += std::pow((oldtheta(j) - pr_mean_theta), 2.0) / 2;
-    pr_sd_theta = std::sqrt(2 * post_b_th_sigma *(1.0 /  R::rchisq(post_a_th_sigma)));
+    if(!fix_theta_sd){
+      //sigma_theta update with gibbs
+      post_a_th_sigma = 2 * pr_a_theta  + nsample;
+      post_b_th_sigma = pr_b_theta;
+      for(j = 0; j < nsample; j++) post_b_th_sigma += std::pow((oldtheta(j) - pr_mean_theta), 2.0) / 2;
+      pr_sd_theta = std::sqrt(2 * post_b_th_sigma *(1.0 /  R::rchisq(post_a_th_sigma)));
+    }    
 
     //dist(j,i) is distance of z_j and w_i
     dist.fill(0.0);
@@ -688,8 +693,7 @@ Rcpp::List lsirm2pl_normal_fixed_gamma_cpp(arma::mat data,
       }
     }
 
-
-    //sigma update with gibbs
+    //sigma update with gibbs    
     post_a_sigma = 2 * pr_a_eps  + nsample * nitem ;
     post_b_sigma = pr_b_eps;
     for(j = 0; j < nsample; j++){
@@ -776,8 +780,8 @@ Rcpp::List lsirm2pl_normal_fixed_gamma_cpp(arma::mat data,
 Rcpp::List lsirm2pl_normal_fixed_gamma_mar_cpp(arma::mat data,
                                                const int ndim, const int niter, const int nburn, const int nthin, const int nprint,
                                                const double jump_beta, const double jump_theta, const double jump_alpha, const double jump_z, const double jump_w,
-                                               const double pr_mean_beta, const double pr_sd_beta, const double pr_a_theta, const double pr_b_theta, const double pr_mean_theta,
-                                               const double pr_a_eps, const double pr_b_eps, const double pr_mean_alpha, const double pr_sd_alpha, const double missing, const bool verbose){
+                                               const double pr_mean_beta, const double pr_sd_beta, const double pr_a_theta, const double pr_b_theta, const double pr_mean_theta, double pr_sd_theta,
+                                               const double pr_a_eps, const double pr_b_eps, const double pr_mean_alpha, const double pr_sd_alpha, const double missing, const bool verbose, const bool fix_theta_sd, const bool fix_alpha_1){
 
   const int nsample = data.n_rows;
   const int nitem = data.n_cols;
@@ -787,7 +791,7 @@ Rcpp::List lsirm2pl_normal_fixed_gamma_mar_cpp(arma::mat data,
   double old_like_z, new_like_z, old_like_w, new_like_w;
   double ratio, un, dist_temp, dist_old_temp, dist_new_temp;
   double post_a_sigma, post_b_sigma, post_a_th_sigma, post_b_th_sigma;
-  double pr_mean_z = 0.0, pr_sd_z = 1.0, pr_mean_w = 0.0, pr_sd_w = 1.0, pr_sd = 1.0, pr_sd_theta = 1.0, mle;
+  double pr_mean_z = 0.0, pr_sd_z = 1.0, pr_mean_w = 0.0, pr_sd_w = 1.0, pr_sd = 1.0, mle;
 
 
   arma::dvec oldbeta(nitem, fill::randu);
@@ -939,7 +943,7 @@ Rcpp::List lsirm2pl_normal_fixed_gamma_mar_cpp(arma::mat data,
     }
 
     // alpha update
-    for(i = 1; i < nitem; i++){
+    for(i = (fix_alpha_1 ? 1 : 0); i < nitem; i++){
       newalpha(i) = R::rlnorm(std::log(oldalpha(i)) , jump_alpha);
       old_like_alpha = new_like_alpha = 0.0;
 
@@ -1067,10 +1071,12 @@ Rcpp::List lsirm2pl_normal_fixed_gamma_mar_cpp(arma::mat data,
 
 
     //sigma_theta update with gibbs
-    post_a_th_sigma = 2 * pr_a_theta  + nsample;
-    post_b_th_sigma = pr_b_theta;
-    for(j = 0; j < nsample; j++) post_b_th_sigma += std::pow((oldtheta(j) - pr_mean_theta), 2.0) / 2;
-    pr_sd_theta = std::sqrt(2 * post_b_th_sigma *(1.0 /  R::rchisq(post_a_th_sigma)));
+    if(!fix_theta_sd){
+      post_a_th_sigma = 2 * pr_a_theta  + nsample;
+      post_b_th_sigma = pr_b_theta;
+      for(j = 0; j < nsample; j++) post_b_th_sigma += std::pow((oldtheta(j) - pr_mean_theta), 2.0) / 2;
+      pr_sd_theta = std::sqrt(2 * post_b_th_sigma *(1.0 /  R::rchisq(post_a_th_sigma)));
+    }
 
     //dist(j,i) is distance of z_j and w_i
     dist.fill(0.0);
@@ -1171,11 +1177,11 @@ Rcpp::List lsirm2pl_normal_fixed_gamma_mar_cpp(arma::mat data,
 // [[Rcpp::export]]
 Rcpp::List lsirm2pl_fixed_gamma_cpp(arma::mat data, const int ndim, const int niter, const int nburn, const int nthin, const int nprint,
                                     const double jump_beta, const double jump_theta, const double jump_alpha, const double jump_z, const double jump_w,
-                                    const double pr_mean_beta, const double pr_sd_beta, const double pr_mean_theta,
-                                    const double pr_mean_alpha, const double pr_sd_alpha, const double pr_a_theta, const double pr_b_theta, const bool verbose){
+                                    const double pr_mean_beta, const double pr_sd_beta, const double pr_mean_theta, double pr_sd_theta,
+                                    const double pr_mean_alpha, const double pr_sd_alpha, const double pr_a_theta, const double pr_b_theta, const bool verbose, const bool fix_theta_sd, const bool fix_alpha_1){
 
   int i, j, k, count, accept;
-  double num, den, old_like_beta, new_like_beta, old_like_theta, new_like_theta, pr_sd_theta = 1.0, old_like_alpha, new_like_alpha;
+  double num, den, old_like_beta, new_like_beta, old_like_theta, new_like_theta, old_like_alpha, new_like_alpha;
   double old_like_z, new_like_z, old_like_w, new_like_w;
   double ratio, un, post_a, post_b, dist_temp, dist_old_temp, dist_new_temp;
   double pr_mean_z = 0.0, pr_sd_z = 1.0, pr_mean_w = 0.0, pr_sd_w = 1.0, mle;
@@ -1302,7 +1308,7 @@ Rcpp::List lsirm2pl_fixed_gamma_cpp(arma::mat data, const int ndim, const int ni
     }
 
     // alpha update
-    for(i = 1; i < nitem; i++){
+    for(i = (fix_alpha_1 ? 1 : 0); i < nitem; i++){
       newalpha(i) = R::rlnorm(std::log(oldalpha(i)) , jump_alpha);
       old_like_alpha = new_like_alpha = 0.0;
 
@@ -1432,10 +1438,12 @@ Rcpp::List lsirm2pl_fixed_gamma_cpp(arma::mat data, const int ndim, const int ni
     }
 
     //sigma_theta update with gibbs
-    post_a = 2 * pr_a_theta  + nsample;
-    post_b = pr_b_theta;
-    for(j = 0; j < nsample; j++) post_b += std::pow((oldtheta(j) - pr_mean_theta), 2.0) / 2;
-    pr_sd_theta = std::sqrt(2 * post_b *(1.0 /  R::rchisq(post_a)));
+    if(!fix_theta_sd){
+      post_a = 2 * pr_a_theta  + nsample;
+      post_b = pr_b_theta;
+      for(j = 0; j < nsample; j++) post_b += std::pow((oldtheta(j) - pr_mean_theta), 2.0) / 2;
+      pr_sd_theta = std::sqrt(2 * post_b *(1.0 /  R::rchisq(post_a)));
+    }
 
 
     // Burn in
@@ -1520,11 +1528,11 @@ Rcpp::List lsirm2pl_fixed_gamma_cpp(arma::mat data, const int ndim, const int ni
 // [[Rcpp::export]]
 Rcpp::List lsirm2pl_fixed_gamma_mar_cpp(arma::mat data, const int ndim, const int niter, const int nburn, const int nthin, const int nprint,
                                         const double jump_beta, const double jump_theta, const double jump_alpha, const double jump_z, const double jump_w,
-                                        const double pr_mean_beta, const double pr_sd_beta, const double pr_mean_theta,
-                                        const double pr_mean_alpha, const double pr_sd_alpha, const double pr_a_theta, const double pr_b_theta, const double missing, const bool verbose){
+                                        const double pr_mean_beta, const double pr_sd_beta, const double pr_mean_theta, double pr_sd_theta,
+                                        const double pr_mean_alpha, const double pr_sd_alpha, const double pr_a_theta, const double pr_b_theta, const double missing, const bool verbose, const bool fix_theta_sd, const bool fix_alpha_1){
 
   int i, j, k, count, accept;
-  double num, den, old_like_beta, new_like_beta, old_like_theta, new_like_theta, pr_sd_theta = 1.0, old_like_alpha, new_like_alpha;
+  double num, den, old_like_beta, new_like_beta, old_like_theta, new_like_theta, old_like_alpha, new_like_alpha;
   double old_like_z, new_like_z, old_like_w, new_like_w;
   double ratio, un, post_a, post_b, dist_temp, dist_old_temp, dist_new_temp;
   double pr_mean_z = 0.0, pr_sd_z = 1.0, pr_mean_w = 0.0, pr_sd_w = 1.0, mle;
@@ -1684,7 +1692,7 @@ Rcpp::List lsirm2pl_fixed_gamma_mar_cpp(arma::mat data, const int ndim, const in
     }
 
     // alpha update
-    for(i = 1; i < nitem; i++){
+    for(i = (fix_alpha_1 ? 1 : 0); i < nitem; i++){
       newalpha(i) = R::rlnorm(std::log(oldalpha(i)) , jump_alpha);
       old_like_alpha = new_like_alpha = 0.0;
 
@@ -1814,10 +1822,12 @@ Rcpp::List lsirm2pl_fixed_gamma_mar_cpp(arma::mat data, const int ndim, const in
     }
 
     //sigma_theta update with gibbs
-    post_a = 2 * pr_a_theta  + nsample;
-    post_b = pr_b_theta;
-    for(j = 0; j < nsample; j++) post_b += std::pow((oldtheta(j) - pr_mean_theta), 2.0) / 2;
-    pr_sd_theta = std::sqrt(2 * post_b *(1.0 /  R::rchisq(post_a)));
+    if(!fix_theta_sd){
+      post_a = 2 * pr_a_theta  + nsample;
+      post_b = pr_b_theta;
+      for(j = 0; j < nsample; j++) post_b += std::pow((oldtheta(j) - pr_mean_theta), 2.0) / 2;
+      pr_sd_theta = std::sqrt(2 * post_b *(1.0 /  R::rchisq(post_a)));
+    }
 
 
     //Burn in
@@ -1904,13 +1914,13 @@ Rcpp::List lsirm2pl_fixed_gamma_mar_cpp(arma::mat data, const int ndim, const in
 // [[Rcpp::export]]
 Rcpp::List lsirm2pl_fixed_gamma_mcar_cpp(arma::mat data, const int ndim, const int niter, const int nburn, const int nthin, const int nprint,
                                          const double jump_beta, const double jump_theta, const double jump_alpha, const double jump_z, const double jump_w,
-                                         const double pr_mean_beta, const double pr_sd_beta, const double pr_mean_theta,
+                                         const double pr_mean_beta, const double pr_sd_beta, const double pr_mean_theta, double pr_sd_theta,
                                          const double pr_mean_alpha, const double pr_sd_alpha,
                                          const double pr_a_theta, const double pr_b_theta,
-                                         const double missing, const bool verbose){
+                                         const double missing, const bool verbose, const bool fix_theta_sd, const bool fix_alpha_1){
 
   int i, j, k, count, accept;
-  double num, den, old_like_beta, new_like_beta, old_like_theta, new_like_theta, pr_sd_theta = 1.0;
+  double num, den, old_like_beta, new_like_beta, old_like_theta, new_like_theta;
   double old_like_z, new_like_z, old_like_w, new_like_w, old_like_alpha, new_like_alpha ;
   double ratio, un, post_a, post_b, dist_temp, dist_old_temp, dist_new_temp;
   double pr_mean_z = 0.0, pr_sd_z = 1.0, pr_mean_w = 0.0, pr_sd_w = 1.0, mle;
@@ -2044,7 +2054,7 @@ Rcpp::List lsirm2pl_fixed_gamma_mcar_cpp(arma::mat data, const int ndim, const i
 
 
     // alpha update
-    for(i = 1; i < nitem; i++){
+    for(i = (fix_alpha_1 ? 1 : 0); i < nitem; i++){
       newalpha(i) = R::rlnorm(std::log(oldalpha(i)) , jump_alpha);
       old_like_alpha = new_like_alpha = 0.0;
 
@@ -2183,11 +2193,12 @@ Rcpp::List lsirm2pl_fixed_gamma_mcar_cpp(arma::mat data, const int ndim, const i
     }
 
     //sigma_theta update with gibbs
-    post_a = 2 * pr_a_theta  + nsample;
-    post_b = pr_b_theta;
-    for(j = 0; j < nsample; j++) post_b += std::pow((oldtheta(j) - pr_mean_theta), 2.0) / 2;
-    pr_sd_theta = std::sqrt(2 * post_b *(1.0 /  R::rchisq(post_a)));
-
+    if(!fix_theta_sd){
+      post_a = 2 * pr_a_theta  + nsample;
+      post_b = pr_b_theta;
+      for(j = 0; j < nsample; j++) post_b += std::pow((oldtheta(j) - pr_mean_theta), 2.0) / 2;
+      pr_sd_theta = std::sqrt(2 * post_b *(1.0 /  R::rchisq(post_a)));
+    }
     //Burn in
     if(iter >= nburn && iter % nthin == 0){
       for(i = 0; i < nitem; i++) samp_beta(count,i) = oldbeta(i);
@@ -2277,11 +2288,12 @@ Rcpp::List lsirm2pl_fixed_gamma_mcar_cpp(arma::mat data, const int ndim, const i
 // [[Rcpp::export]]
 Rcpp::List lsirm2pl_mar_cpp(arma::mat data, const int ndim, const int niter, const int nburn, const int nthin, const int nprint,
                             const double jump_beta, const double jump_theta, const double jump_alpha, const double jump_gamma, const double jump_z, const double jump_w,
-                            const double pr_mean_beta, const double pr_sd_beta, const double pr_mean_theta, const double pr_mean_gamma, const double pr_sd_gamma,
-                            const double pr_mean_alpha, const double pr_sd_alpha, const double pr_a_theta, const double pr_b_theta, const double missing, const bool verbose){
+                            const double pr_mean_beta, const double pr_sd_beta, const double pr_mean_theta, double pr_sd_theta,
+                            const double pr_mean_gamma, const double pr_sd_gamma,
+                            const double pr_mean_alpha, const double pr_sd_alpha, const double pr_a_theta, const double pr_b_theta, const double missing, const bool verbose, const bool fix_theta_sd, const bool fix_alpha_1){
 
   int i, j, k, count, accept;
-  double num, den, old_like_beta, new_like_beta, old_like_theta, new_like_theta, pr_sd_theta = 1.0;
+  double num, den, old_like_beta, new_like_beta, old_like_theta, new_like_theta;
   double old_like_z, new_like_z, old_like_w, new_like_w, old_like_gamma, new_like_gamma, old_like_alpha, new_like_alpha ;
   double ratio, un, post_a, post_b, dist_temp, dist_old_temp, dist_new_temp;
   double pr_mean_z = 0.0, pr_sd_z = 1.0, pr_mean_w = 0.0, pr_sd_w = 1.0, mle;
@@ -2476,7 +2488,7 @@ Rcpp::List lsirm2pl_mar_cpp(arma::mat data, const int ndim, const int niter, con
     else newgamma = oldgamma;
 
     // alpha update
-    for(i = 1; i < nitem; i++){
+    for(i = (fix_alpha_1 ? 1 : 0); i < nitem; i++){
       newalpha(i) = R::rlnorm(std::log(oldalpha(i)) , jump_alpha);
       old_like_alpha = new_like_alpha = 0.0;
 
@@ -2609,10 +2621,12 @@ Rcpp::List lsirm2pl_mar_cpp(arma::mat data, const int ndim, const int niter, con
     }
 
     //sigma_theta update with gibbs
-    post_a = 2 * pr_a_theta  + nsample;
-    post_b = pr_b_theta;
-    for(j = 0; j < nsample; j++) post_b += std::pow((oldtheta(j) - pr_mean_theta), 2.0) / 2;
-    pr_sd_theta = std::sqrt(2 * post_b *(1.0 /  R::rchisq(post_a)));
+    if(!fix_theta_sd){
+      post_a = 2 * pr_a_theta  + nsample;
+      post_b = pr_b_theta;
+      for(j = 0; j < nsample; j++) post_b += std::pow((oldtheta(j) - pr_mean_theta), 2.0) / 2;
+      pr_sd_theta = std::sqrt(2 * post_b *(1.0 /  R::rchisq(post_a)));
+    }
 
     //Burn in
     if(iter >= nburn && iter % nthin == 0){
@@ -2708,12 +2722,12 @@ Rcpp::List lsirm2pl_mar_cpp(arma::mat data, const int ndim, const int niter, con
 // [[Rcpp::export]]
 Rcpp::List lsirm2pl_mar_ss_cpp(arma::mat data, const int ndim, const int niter, const int nburn, const int nthin, const int nprint,
                                const double jump_beta, const double jump_theta, const double jump_alpha, const double jump_gamma, const double jump_z, const double jump_w,
-                               const double pr_mean_beta, const double pr_sd_beta, const double pr_mean_theta,
+                               const double pr_mean_beta, const double pr_sd_beta, const double pr_mean_theta, double pr_sd_theta,
                                const double pr_spike_mean, const double pr_spike_sd, const double pr_slab_mean, const double pr_slab_sd,
-                               const double pr_mean_alpha, const double pr_sd_alpha, const double pr_a_theta, const double pr_b_theta, const double pr_beta_a, const double pr_beta_b, const double missing, const bool verbose){
+                               const double pr_mean_alpha, const double pr_sd_alpha, const double pr_a_theta, const double pr_b_theta, const double pr_beta_a, const double pr_beta_b, const double missing, const bool verbose, const bool fix_theta_sd, const bool fix_alpha_1){
 
   int i, j, k, count, accept;
-  double num, den, old_like_beta, new_like_beta, old_like_theta, new_like_theta, pr_sd_theta = 1.0;
+  double num, den, old_like_beta, new_like_beta, old_like_theta, new_like_theta;
   double old_like_z, new_like_z, old_like_w, new_like_w, old_like_gamma, new_like_gamma, old_like_alpha, new_like_alpha ;
   double ratio, un, post_a, post_b, dist_temp, dist_old_temp, dist_new_temp;
   double pr_mean_z = 0.0, pr_sd_z = 1.0, pr_mean_w = 0.0, pr_sd_w = 1.0, mle;
@@ -2929,7 +2943,7 @@ Rcpp::List lsirm2pl_mar_ss_cpp(arma::mat data, const int ndim, const int niter, 
     xi = R::rbeta(pr_beta_a + pi, pr_beta_b + 1.0 - pi);
 
     // alpha update
-    for(i = 1; i < nitem; i++){
+    for(i = (fix_alpha_1 ? 1 : 0); i < nitem; i++){
       newalpha(i) = R::rlnorm(std::log(oldalpha(i)) , jump_alpha);
       old_like_alpha = new_like_alpha = 0.0;
 
@@ -3062,10 +3076,12 @@ Rcpp::List lsirm2pl_mar_ss_cpp(arma::mat data, const int ndim, const int niter, 
     }
 
     //sigma_theta update with gibbs
-    post_a = 2 * pr_a_theta  + nsample;
-    post_b = pr_b_theta;
-    for(j = 0; j < nsample; j++) post_b += std::pow((oldtheta(j) - pr_mean_theta), 2.0) / 2;
-    pr_sd_theta = std::sqrt(2 * post_b *(1.0 /  R::rchisq(post_a)));
+    if(!fix_theta_sd){
+      post_a = 2 * pr_a_theta  + nsample;
+      post_b = pr_b_theta;
+      for(j = 0; j < nsample; j++) post_b += std::pow((oldtheta(j) - pr_mean_theta), 2.0) / 2;
+      pr_sd_theta = std::sqrt(2 * post_b *(1.0 /  R::rchisq(post_a)));
+    }
 
     //Burn in
     if(iter >= nburn && iter % nthin == 0){
@@ -3168,13 +3184,13 @@ Rcpp::List lsirm2pl_mar_ss_cpp(arma::mat data, const int ndim, const int niter, 
 // [[Rcpp::export]]
 Rcpp::List lsirm2pl_mcar_cpp (arma::mat data, const int ndim, const int niter, const int nburn, const int nthin, const int nprint,
                               const double jump_beta, const double jump_theta, const double jump_alpha, const double jump_gamma, const double jump_z, const double jump_w,
-                              const double pr_mean_beta, const double pr_sd_beta, const double pr_mean_theta,
+                              const double pr_mean_beta, const double pr_sd_beta, const double pr_mean_theta, double pr_sd_theta,
                               const double pr_mean_gamma, const double pr_sd_gamma,
                               const double pr_mean_alpha, const double pr_sd_alpha, const double pr_a_theta, const double pr_b_theta,
-                              const double missing, const bool verbose){
+                              const double missing, const bool verbose, const bool fix_theta_sd, const bool fix_alpha_1){
 
   int i, j, k, count, accept;
-  double num, den, old_like_beta, new_like_beta, old_like_theta, new_like_theta, pr_sd_theta = 1.0;
+  double num, den, old_like_beta, new_like_beta, old_like_theta, new_like_theta;
   double old_like_z, new_like_z, old_like_w, new_like_w, old_like_gamma, new_like_gamma, old_like_alpha, new_like_alpha ;
   double ratio, un, post_a, post_b, dist_temp, dist_old_temp, dist_new_temp;
   double pr_mean_z = 0.0, pr_sd_z = 1.0, pr_mean_w = 0.0, pr_sd_w = 1.0, mle;
@@ -3340,7 +3356,7 @@ Rcpp::List lsirm2pl_mcar_cpp (arma::mat data, const int ndim, const int niter, c
     else newgamma = oldgamma;
 
     // alpha update
-    for(i = 1; i < nitem; i++){
+    for(i = (fix_alpha_1 ? 1 : 0); i < nitem; i++){
       newalpha(i) = R::rlnorm(std::log(oldalpha(i)) , jump_alpha);
       old_like_alpha = new_like_alpha = 0.0;
 
@@ -3479,10 +3495,12 @@ Rcpp::List lsirm2pl_mcar_cpp (arma::mat data, const int ndim, const int niter, c
     }
 
     //sigma_theta update with gibbs
-    post_a = 2 * pr_a_theta  + nsample;
-    post_b = pr_b_theta;
-    for(j = 0; j < nsample; j++) post_b += std::pow((oldtheta(j) - pr_mean_theta), 2.0) / 2;
-    pr_sd_theta = std::sqrt(2 * post_b *(1.0 /  R::rchisq(post_a)));
+    if(!fix_theta_sd){
+      post_a = 2 * pr_a_theta  + nsample;
+      post_b = pr_b_theta;
+      for(j = 0; j < nsample; j++) post_b += std::pow((oldtheta(j) - pr_mean_theta), 2.0) / 2;
+      pr_sd_theta = std::sqrt(2 * post_b *(1.0 /  R::rchisq(post_a)));
+    }
 
     //Burn in
     if(iter >= nburn && iter % nthin == 0){
@@ -3578,14 +3596,14 @@ Rcpp::List lsirm2pl_mcar_cpp (arma::mat data, const int ndim, const int niter, c
 // [[Rcpp::export]]
 Rcpp::List lsirm2pl_mcar_ss_cpp(arma::mat data, const int ndim, const int niter, const int nburn, const int nthin, const int nprint,
                                 const double jump_beta, const double jump_theta, const double jump_alpha, const double jump_gamma, const double jump_z, const double jump_w,
-                                const double pr_mean_beta, const double pr_sd_beta, const double pr_mean_theta,
+                                const double pr_mean_beta, const double pr_sd_beta, const double pr_mean_theta, double pr_sd_theta,
                                 const double pr_spike_mean, const double pr_spike_sd, const double pr_slab_mean, const double pr_slab_sd,
                                 const double pr_mean_alpha, const double pr_sd_alpha,
                                 const double pr_a_theta, const double pr_b_theta, const double pr_beta_a, const double pr_beta_b,
-                                const double missing, const bool verbose){
+                                const double missing, const bool verbose, const bool fix_theta_sd, const bool fix_alpha_1){
 
   int i, j, k, count, accept;
-  double num, den, old_like_beta, new_like_beta, old_like_theta, new_like_theta, pr_sd_theta = 1.0;
+  double num, den, old_like_beta, new_like_beta, old_like_theta, new_like_theta;
   double old_like_z, new_like_z, old_like_w, new_like_w, old_like_gamma, new_like_gamma, old_like_alpha, new_like_alpha ;
   double ratio, un, post_a, post_b, dist_temp, dist_old_temp, dist_new_temp;
   double pr_mean_z = 0.0, pr_sd_z = 1.0, pr_mean_w = 0.0, pr_sd_w = 1.0, mle;
@@ -3773,7 +3791,7 @@ Rcpp::List lsirm2pl_mcar_ss_cpp(arma::mat data, const int ndim, const int niter,
     xi = R::rbeta(pr_beta_a + pi, pr_beta_b + 1.0 - pi);
 
     // alpha update
-    for(i = 1; i < nitem; i++){
+    for(i = (fix_alpha_1 ? 1 : 0); i < nitem; i++){
       newalpha(i) = R::rlnorm(std::log(oldalpha(i)) , jump_alpha);
       old_like_alpha = new_like_alpha = 0.0;
 
@@ -3912,10 +3930,12 @@ Rcpp::List lsirm2pl_mcar_ss_cpp(arma::mat data, const int ndim, const int niter,
     }
 
     //sigma_theta update with gibbs
-    post_a = 2 * pr_a_theta  + nsample;
-    post_b = pr_b_theta;
-    for(j = 0; j < nsample; j++) post_b += std::pow((oldtheta(j) - pr_mean_theta), 2.0) / 2;
-    pr_sd_theta = std::sqrt(2 * post_b *(1.0 /  R::rchisq(post_a)));
+    if(!fix_theta_sd){
+      post_a = 2 * pr_a_theta  + nsample;
+      post_b = pr_b_theta;
+      for(j = 0; j < nsample; j++) post_b += std::pow((oldtheta(j) - pr_mean_theta), 2.0) / 2;
+      pr_sd_theta = std::sqrt(2 * post_b *(1.0 /  R::rchisq(post_a)));
+    }
 
 
     if(iter >= nburn && iter % nthin == 0){
@@ -4018,8 +4038,8 @@ Rcpp::List lsirm2pl_mcar_ss_cpp(arma::mat data, const int ndim, const int niter,
 Rcpp::List lsirm2pl_normal_cpp(arma::mat data,
                                const int ndim, const int niter, const int nburn, const int nthin, const int nprint,
                                const double jump_beta, const double jump_theta, const double jump_alpha, const double jump_gamma, const double jump_z, const double jump_w,
-                               const double pr_mean_beta, const double pr_sd_beta, const double pr_a_theta, const double pr_b_theta, const double pr_mean_theta,
-                               const double pr_a_eps, const double pr_b_eps, const double pr_mean_gamma, const double pr_sd_gamma, const double pr_mean_alpha, const double pr_sd_alpha, const bool verbose){
+                               const double pr_mean_beta, const double pr_sd_beta, const double pr_a_theta, const double pr_b_theta, const double pr_mean_theta, double pr_sd_theta,
+                               const double pr_a_eps, const double pr_b_eps, const double pr_mean_gamma, const double pr_sd_gamma, const double pr_mean_alpha, const double pr_sd_alpha, const bool verbose, const bool fix_theta_sd, const bool fix_alpha_1){
 
   const int nsample = data.n_rows;
   const int nitem = data.n_cols;
@@ -4029,7 +4049,7 @@ Rcpp::List lsirm2pl_normal_cpp(arma::mat data,
   double old_like_z, new_like_z, old_like_w, new_like_w, old_like_gamma, new_like_gamma;
   double ratio, un, dist_temp, dist_old_temp, dist_new_temp;
   double post_a_sigma, post_b_sigma, post_a_th_sigma, post_b_th_sigma;
-  double pr_mean_z = 0.0, pr_sd_z = 1.0, pr_mean_w = 0.0, pr_sd_w = 1.0, pr_sd = 1.0, pr_sd_theta = 1.0, mle;
+  double pr_mean_z = 0.0, pr_sd_z = 1.0, pr_mean_w = 0.0, pr_sd_w = 1.0, pr_sd = 1.0, mle;
 
 
   arma::dvec oldbeta(nitem, fill::randu);
@@ -4179,7 +4199,7 @@ Rcpp::List lsirm2pl_normal_cpp(arma::mat data,
     else newgamma = oldgamma;
 
     // alpha update
-    for(i = 1; i < nitem; i++){
+    for(i = (fix_alpha_1 ? 1 : 0); i < nitem; i++){
       newalpha(i) = R::rlnorm(std::log(oldalpha(i)) , jump_alpha);
       old_like_alpha = new_like_alpha = 0.0;
 
@@ -4307,11 +4327,12 @@ Rcpp::List lsirm2pl_normal_cpp(arma::mat data,
 
 
     //sigma_theta update with gibbs
-    post_a_th_sigma = 2 * pr_a_theta  + nsample;
-    post_b_th_sigma = pr_b_theta;
-    for(j = 0; j < nsample; j++) post_b_th_sigma += std::pow((oldtheta(j) - pr_mean_theta), 2.0) / 2;
-    pr_sd_theta = std::sqrt(2 * post_b_th_sigma *(1.0 /  R::rchisq(post_a_th_sigma)));
-
+    if(!fix_theta_sd){
+      post_a_th_sigma = 2 * pr_a_theta  + nsample;
+      post_b_th_sigma = pr_b_theta;
+      for(j = 0; j < nsample; j++) post_b_th_sigma += std::pow((oldtheta(j) - pr_mean_theta), 2.0) / 2;
+      pr_sd_theta = std::sqrt(2 * post_b_th_sigma *(1.0 /  R::rchisq(post_a_th_sigma)));
+    }
     //dist(j,i) is distance of z_j and w_i
     dist.fill(0.0);
     for(i = 0; i < nitem; i++){
@@ -4415,10 +4436,10 @@ Rcpp::List lsirm2pl_normal_cpp(arma::mat data,
 Rcpp::List lsirm2pl_normal_mcar_cpp(arma::mat data,
                                     const int ndim, const int niter, const int nburn, const int nthin, const int nprint,
                                     const double jump_beta, const double jump_theta, const double jump_alpha, const double jump_gamma, const double jump_z, const double jump_w,
-                                    const double pr_mean_beta, const double pr_sd_beta, const double pr_a_theta, const double pr_b_theta, const double pr_mean_theta,
+                                    const double pr_mean_beta, const double pr_sd_beta, const double pr_a_theta, const double pr_b_theta, const double pr_mean_theta, double pr_sd_theta,
                                     const double pr_a_eps, const double pr_b_eps,
                                     const double pr_mean_gamma, const double pr_sd_gamma,
-                                    const double pr_mean_alpha, const double pr_sd_alpha, const double missing, const bool verbose){
+                                    const double pr_mean_alpha, const double pr_sd_alpha, const double missing, const bool verbose, const bool fix_theta_sd, const bool fix_alpha_1){
 
   const int nsample = data.n_rows;
   const int nitem = data.n_cols;
@@ -4428,7 +4449,7 @@ Rcpp::List lsirm2pl_normal_mcar_cpp(arma::mat data,
   double old_like_z, new_like_z, old_like_w, new_like_w, old_like_gamma, new_like_gamma;
   double ratio, un, dist_temp, dist_old_temp, dist_new_temp;
   double post_a_sigma, post_b_sigma, post_a_th_sigma, post_b_th_sigma;
-  double pr_mean_z = 0.0, pr_sd_z = 1.0, pr_mean_w = 0.0, pr_sd_w = 1.0, pr_sd = 1.0, pr_sd_theta = 1.0, mle;
+  double pr_mean_z = 0.0, pr_sd_z = 1.0, pr_mean_w = 0.0, pr_sd_w = 1.0, pr_sd = 1.0, mle;
 
 
   arma::dvec oldbeta(nitem, fill::randu);
@@ -4585,7 +4606,7 @@ Rcpp::List lsirm2pl_normal_mcar_cpp(arma::mat data,
     else newgamma = oldgamma;
 
     // alpha update
-    for(i = 1; i < nitem; i++){
+    for(i = (fix_alpha_1 ? 1 : 0); i < nitem; i++){
       newalpha(i) = R::rlnorm(std::log(oldalpha(i)) , jump_alpha);
       old_like_alpha = new_like_alpha = 0.0;
 
@@ -4719,10 +4740,12 @@ Rcpp::List lsirm2pl_normal_mcar_cpp(arma::mat data,
 
 
     //sigma_theta update with gibbs
-    post_a_th_sigma = 2 * pr_a_theta  + nsample;
-    post_b_th_sigma = pr_b_theta;
-    for(j = 0; j < nsample; j++) post_b_th_sigma += std::pow((oldtheta(j) - pr_mean_theta), 2.0) / 2;
-    pr_sd_theta = std::sqrt(2 * post_b_th_sigma *(1.0 /  R::rchisq(post_a_th_sigma)));
+    if(!fix_theta_sd){
+      post_a_th_sigma = 2 * pr_a_theta  + nsample;
+      post_b_th_sigma = pr_b_theta;
+      for(j = 0; j < nsample; j++) post_b_th_sigma += std::pow((oldtheta(j) - pr_mean_theta), 2.0) / 2;
+      pr_sd_theta = std::sqrt(2 * post_b_th_sigma *(1.0 /  R::rchisq(post_a_th_sigma)));
+    }
 
     //dist(j,i) is distance of z_j and w_i
     dist.fill(0.0);
@@ -4842,11 +4865,11 @@ Rcpp::List lsirm2pl_normal_mcar_cpp(arma::mat data,
 // [[Rcpp::export]]
 Rcpp::List lsirm2pl_normal_mcar_ss_cpp(arma::mat data, const int ndim, const int niter, const int nburn, const int nthin, const int nprint,
                                        const double jump_beta, const double jump_theta, const double jump_alpha, const double jump_gamma, const double jump_z, const double jump_w,
-                                       const double pr_mean_beta, const double pr_sd_beta, const double pr_mean_theta,
+                                       const double pr_mean_beta, const double pr_sd_beta, const double pr_mean_theta, double pr_sd_theta,
                                        const double pr_spike_mean, const double pr_spike_sd, const double pr_slab_mean, const double pr_slab_sd,
                                        const double pr_mean_alpha, const double pr_sd_alpha,
                                        const double pr_a_eps, const double pr_b_eps, const double pr_a_theta, const double pr_b_theta,
-                                       const double pr_beta_a, const double pr_beta_b, const double missing, const bool verbose){
+                                       const double pr_beta_a, const double pr_beta_b, const double missing, const bool verbose, const bool fix_theta_sd, const bool fix_alpha_1){
 
   const int nsample = data.n_rows;
   const int nitem = data.n_cols;
@@ -4856,7 +4879,7 @@ Rcpp::List lsirm2pl_normal_mcar_ss_cpp(arma::mat data, const int ndim, const int
   double old_like_z, new_like_z, old_like_w, new_like_w, old_like_gamma, new_like_gamma;
   double ratio, un, dist_temp, dist_old_temp, dist_new_temp;
   double post_a_sigma, post_b_sigma, post_a_th_sigma, post_b_th_sigma;
-  double pr_mean_z = 0.0, pr_sd_z = 1.0, pr_mean_w = 0.0, pr_sd_w = 1.0, pr_sd = 1.0, pr_sd_theta = 1.0, mle;
+  double pr_mean_z = 0.0, pr_sd_z = 1.0, pr_mean_w = 0.0, pr_sd_w = 1.0, pr_sd = 1.0, mle;
 
 
   arma::dvec oldbeta(nitem, fill::randu);
@@ -5035,7 +5058,7 @@ Rcpp::List lsirm2pl_normal_mcar_ss_cpp(arma::mat data, const int ndim, const int
 
 
     // alpha update
-    for(i = 1; i < nitem; i++){
+    for(i = (fix_alpha_1 ? 1 : 0); i < nitem; i++){
       newalpha(i) = R::rlnorm(std::log(oldalpha(i)) , jump_alpha);
       old_like_alpha = new_like_alpha = 0.0;
 
@@ -5169,10 +5192,12 @@ Rcpp::List lsirm2pl_normal_mcar_ss_cpp(arma::mat data, const int ndim, const int
 
 
     //sigma_theta update with gibbs
-    post_a_th_sigma = 2 * pr_a_theta  + nsample;
-    post_b_th_sigma = pr_b_theta;
-    for(j = 0; j < nsample; j++) post_b_th_sigma += std::pow((oldtheta(j) - pr_mean_theta), 2.0) / 2;
-    pr_sd_theta = std::sqrt(2 * post_b_th_sigma *(1.0 /  R::rchisq(post_a_th_sigma)));
+    if(!fix_theta_sd){
+      post_a_th_sigma = 2 * pr_a_theta  + nsample;
+      post_b_th_sigma = pr_b_theta;
+      for(j = 0; j < nsample; j++) post_b_th_sigma += std::pow((oldtheta(j) - pr_mean_theta), 2.0) / 2;
+      pr_sd_theta = std::sqrt(2 * post_b_th_sigma *(1.0 /  R::rchisq(post_a_th_sigma)));
+    }
 
     //dist(j,i) is distance of z_j and w_i
     dist.fill(0.0);
@@ -5295,11 +5320,11 @@ Rcpp::List lsirm2pl_normal_mcar_ss_cpp(arma::mat data, const int ndim, const int
 // [[Rcpp::export]]
 Rcpp::List lsirm2pl_normal_ss_cpp(arma::mat data, const int ndim, const int niter, const int nburn, const int nthin, const int nprint,
                                   const double jump_beta, const double jump_theta, const double jump_alpha, const double jump_gamma, const double jump_z, const double jump_w,
-                                  const double pr_mean_beta, const double pr_sd_beta, const double pr_mean_theta,
+                                  const double pr_mean_beta, const double pr_sd_beta, const double pr_mean_theta, double pr_sd_theta,
                                   const double pr_spike_mean, const double pr_spike_sd, const double pr_slab_mean, const double pr_slab_sd,
                                   const double pr_mean_alpha, const double pr_sd_alpha,
                                   const double pr_a_eps, const double pr_b_eps, const double pr_a_theta, const double pr_b_theta,
-                                  const double pr_beta_a, const double pr_beta_b, const bool verbose){
+                                  const double pr_beta_a, const double pr_beta_b, const bool verbose, const bool fix_theta_sd, const bool fix_alpha_1){
 
   const int nsample = data.n_rows;
   const int nitem = data.n_cols;
@@ -5309,7 +5334,7 @@ Rcpp::List lsirm2pl_normal_ss_cpp(arma::mat data, const int ndim, const int nite
   double old_like_z, new_like_z, old_like_w, new_like_w, old_like_gamma, new_like_gamma;
   double ratio, un, dist_temp, dist_old_temp, dist_new_temp;
   double post_a_sigma, post_b_sigma, post_a_th_sigma, post_b_th_sigma;
-  double pr_mean_z = 0.0, pr_sd_z = 1.0, pr_mean_w = 0.0, pr_sd_w = 1.0, pr_sd = 1.0, pr_sd_theta = 1.0, mle;
+  double pr_mean_z = 0.0, pr_sd_z = 1.0, pr_mean_w = 0.0, pr_sd_w = 1.0, pr_sd = 1.0, mle;
 
 
   arma::dvec oldbeta(nitem, fill::randu);
@@ -5480,7 +5505,7 @@ Rcpp::List lsirm2pl_normal_ss_cpp(arma::mat data, const int ndim, const int nite
     // xi update(spike slab parameter)
     xi = R::rbeta(pr_beta_a + pi, pr_beta_b + 1.0 - pi);
     // alpha update
-    for(i = 1; i < nitem; i++){
+    for(i = (fix_alpha_1 ? 1 : 0); i < nitem; i++){
       newalpha(i) = R::rlnorm(std::log(oldalpha(i)) , jump_alpha);
       old_like_alpha = new_like_alpha = 0.0;
 
@@ -5608,10 +5633,12 @@ Rcpp::List lsirm2pl_normal_ss_cpp(arma::mat data, const int ndim, const int nite
 
 
     //sigma_theta update with gibbs
-    post_a_th_sigma = 2 * pr_a_theta  + nsample;
-    post_b_th_sigma = pr_b_theta;
-    for(j = 0; j < nsample; j++) post_b_th_sigma += std::pow((oldtheta(j) - pr_mean_theta), 2.0) / 2;
-    pr_sd_theta = std::sqrt(2 * post_b_th_sigma *(1.0 /  R::rchisq(post_a_th_sigma)));
+    if(!fix_theta_sd){
+      post_a_th_sigma = 2 * pr_a_theta  + nsample;
+      post_b_th_sigma = pr_b_theta;
+      for(j = 0; j < nsample; j++) post_b_th_sigma += std::pow((oldtheta(j) - pr_mean_theta), 2.0) / 2;
+      pr_sd_theta = std::sqrt(2 * post_b_th_sigma *(1.0 /  R::rchisq(post_a_th_sigma)));
+    }
 
     //dist(j,i) is distance of z_j and w_i
     dist.fill(0.0);
@@ -5721,12 +5748,12 @@ Rcpp::List lsirm2pl_normal_ss_cpp(arma::mat data, const int ndim, const int nite
 // [[Rcpp::export]]
 Rcpp::List lsirm2pl_ss_cpp(arma::mat data, const int ndim, const int niter, const int nburn, const int nthin, const int nprint,
                            const double jump_beta, const double jump_theta, const double jump_alpha, const double jump_gamma, const double jump_z, const double jump_w,
-                           const double pr_mean_beta, const double pr_sd_beta, const double pr_mean_theta,
+                           const double pr_mean_beta, const double pr_sd_beta, const double pr_mean_theta, double pr_sd_theta,
                            const double pr_spike_mean, const double pr_spike_sd, const double pr_slab_mean, const double pr_slab_sd,
-                           const double pr_mean_alpha, const double pr_sd_alpha, const double pr_a_theta, const double pr_b_theta, const double pr_beta_a, const double pr_beta_b, const bool verbose){
+                           const double pr_mean_alpha, const double pr_sd_alpha, const double pr_a_theta, const double pr_b_theta, const double pr_beta_a, const double pr_beta_b, const bool verbose, const bool fix_theta_sd, const bool fix_alpha_1){
 
   int i, j, k, count, accept;
-  double num, den, old_like_beta, new_like_beta, old_like_theta, new_like_theta, pr_sd_theta = 1.0;
+  double num, den, old_like_beta, new_like_beta, old_like_theta, new_like_theta;
   double old_like_z, new_like_z, old_like_w, new_like_w, old_like_gamma, new_like_gamma, old_like_alpha, new_like_alpha ;
   double ratio, un, post_a, post_b, dist_temp, dist_old_temp, dist_new_temp;
   double pr_mean_z = 0.0, pr_sd_z = 1.0, pr_mean_w = 0.0, pr_sd_w = 1.0, mle;
@@ -6041,11 +6068,12 @@ Rcpp::List lsirm2pl_ss_cpp(arma::mat data, const int ndim, const int niter, cons
     }
 
     //sigma_theta update with gibbs
-    post_a = 2 * pr_a_theta  + nsample;
-    post_b = pr_b_theta;
-    for(j = 0; j < nsample; j++) post_b += std::pow((oldtheta(j) - pr_mean_theta), 2.0) / 2;
-    pr_sd_theta = std::sqrt(2 * post_b *(1.0 /  R::rchisq(post_a)));
-
+    if(!fix_theta_sd){
+      post_a = 2 * pr_a_theta  + nsample;
+      post_b = pr_b_theta;
+      for(j = 0; j < nsample; j++) post_b += std::pow((oldtheta(j) - pr_mean_theta), 2.0) / 2;
+      pr_sd_theta = std::sqrt(2 * post_b *(1.0 /  R::rchisq(post_a)));
+    }
 
     if(iter >= nburn && iter % nthin == 0){
       for(i = 0; i < nitem; i++) samp_beta(count,i) = oldbeta(i);
@@ -6145,9 +6173,9 @@ Rcpp::List lsirm2pl_ss_cpp(arma::mat data, const int ndim, const int niter, cons
 Rcpp::List lsirm2pl_normal_fixed_gamma_mcar_cpp(arma::mat data,
                                                 const int ndim, const int niter, const int nburn, const int nthin, const int nprint,
                                                 const double jump_beta, const double jump_theta, const double jump_alpha, const double jump_z, const double jump_w,
-                                                const double pr_mean_beta, const double pr_sd_beta, const double pr_a_theta, const double pr_b_theta, const double pr_mean_theta,
+                                                const double pr_mean_beta, const double pr_sd_beta, const double pr_a_theta, const double pr_b_theta, const double pr_mean_theta, double pr_sd_theta,
                                                 const double pr_a_eps, const double pr_b_eps,
-                                                const double pr_mean_alpha, const double pr_sd_alpha, const double missing, const bool verbose){
+                                                const double pr_mean_alpha, const double pr_sd_alpha, const double missing, const bool verbose, const bool fix_theta_sd, const bool fix_alpha_1){
 
   const int nsample = data.n_rows;
   const int nitem = data.n_cols;
@@ -6157,7 +6185,7 @@ Rcpp::List lsirm2pl_normal_fixed_gamma_mcar_cpp(arma::mat data,
   double old_like_z, new_like_z, old_like_w, new_like_w;
   double ratio, un, dist_temp, dist_old_temp, dist_new_temp;
   double post_a_sigma, post_b_sigma, post_a_th_sigma, post_b_th_sigma;
-  double pr_mean_z = 0.0, pr_sd_z = 1.0, pr_mean_w = 0.0, pr_sd_w = 1.0, pr_sd = 1.0, pr_sd_theta = 1.0, mle;
+  double pr_mean_z = 0.0, pr_sd_z = 1.0, pr_mean_w = 0.0, pr_sd_w = 1.0, pr_sd = 1.0, mle;
 
 
   arma::dvec oldbeta(nitem, fill::randu);
@@ -6282,7 +6310,7 @@ Rcpp::List lsirm2pl_normal_fixed_gamma_mcar_cpp(arma::mat data,
 
 
     // alpha update
-    for(i = 1; i < nitem; i++){
+    for(i = (fix_alpha_1 ? 1 : 0); i < nitem; i++){
       newalpha(i) = R::rlnorm(std::log(oldalpha(i)) , jump_alpha);
       old_like_alpha = new_like_alpha = 0.0;
 
@@ -6416,10 +6444,12 @@ Rcpp::List lsirm2pl_normal_fixed_gamma_mcar_cpp(arma::mat data,
 
 
     //sigma_theta update with gibbs
-    post_a_th_sigma = 2 * pr_a_theta  + nsample;
-    post_b_th_sigma = pr_b_theta;
-    for(j = 0; j < nsample; j++) post_b_th_sigma += std::pow((oldtheta(j) - pr_mean_theta), 2.0) / 2;
-    pr_sd_theta = std::sqrt(2 * post_b_th_sigma *(1.0 /  R::rchisq(post_a_th_sigma)));
+    if(!fix_theta_sd){
+      post_a_th_sigma = 2 * pr_a_theta  + nsample;
+      post_b_th_sigma = pr_b_theta;
+      for(j = 0; j < nsample; j++) post_b_th_sigma += std::pow((oldtheta(j) - pr_mean_theta), 2.0) / 2;
+      pr_sd_theta = std::sqrt(2 * post_b_th_sigma *(1.0 /  R::rchisq(post_a_th_sigma)));
+    }
 
     //dist(j,i) is distance of z_j and w_i
     dist.fill(0.0);
@@ -6535,8 +6565,8 @@ Rcpp::List lsirm2pl_normal_fixed_gamma_mcar_cpp(arma::mat data,
 Rcpp::List lsirm2pl_normal_mar_cpp(arma::mat data,
                                    const int ndim, const int niter, const int nburn, const int nthin, const int nprint,
                                    const double jump_beta, const double jump_theta, const double jump_alpha, const double jump_gamma, const double jump_z, const double jump_w,
-                                   const double pr_mean_beta, const double pr_sd_beta, const double pr_a_theta, const double pr_b_theta, const double pr_mean_theta,
-                                   const double pr_a_eps, const double pr_b_eps, const double pr_mean_gamma, const double pr_sd_gamma, const double pr_mean_alpha, const double pr_sd_alpha, const double missing, const bool verbose){
+                                   const double pr_mean_beta, const double pr_sd_beta, const double pr_a_theta, const double pr_b_theta, const double pr_mean_theta, double pr_sd_theta,
+                                   const double pr_a_eps, const double pr_b_eps, const double pr_mean_gamma, const double pr_sd_gamma, const double pr_mean_alpha, const double pr_sd_alpha, const double missing, const bool verbose, const bool fix_theta_sd, const bool fix_alpha_1){
 
   const int nsample = data.n_rows;
   const int nitem = data.n_cols;
@@ -6546,7 +6576,7 @@ Rcpp::List lsirm2pl_normal_mar_cpp(arma::mat data,
   double old_like_z, new_like_z, old_like_w, new_like_w, old_like_gamma, new_like_gamma;
   double ratio, un, dist_temp, dist_old_temp, dist_new_temp;
   double post_a_sigma, post_b_sigma, post_a_th_sigma, post_b_th_sigma;
-  double pr_mean_z = 0.0, pr_sd_z = 1.0, pr_mean_w = 0.0, pr_sd_w = 1.0, pr_sd = 1.0, pr_sd_theta = 1.0, mle;
+  double pr_mean_z = 0.0, pr_sd_z = 1.0, pr_mean_w = 0.0, pr_sd_w = 1.0, pr_sd = 1.0, mle;
 
 
   arma::dvec oldbeta(nitem, fill::randu);
@@ -6730,7 +6760,7 @@ Rcpp::List lsirm2pl_normal_mar_cpp(arma::mat data,
     else newgamma = oldgamma;
 
     // alpha update
-    for(i = 1; i < nitem; i++){
+    for(i = (fix_alpha_1 ? 1 : 0); i < nitem; i++){
       newalpha(i) = R::rlnorm(std::log(oldalpha(i)) , jump_alpha);
       old_like_alpha = new_like_alpha = 0.0;
 
@@ -6858,10 +6888,12 @@ Rcpp::List lsirm2pl_normal_mar_cpp(arma::mat data,
 
 
     //sigma_theta update with gibbs
-    post_a_th_sigma = 2 * pr_a_theta  + nsample;
-    post_b_th_sigma = pr_b_theta;
-    for(j = 0; j < nsample; j++) post_b_th_sigma += std::pow((oldtheta(j) - pr_mean_theta), 2.0) / 2;
-    pr_sd_theta = std::sqrt(2 * post_b_th_sigma *(1.0 /  R::rchisq(post_a_th_sigma)));
+    if(!fix_theta_sd){
+      post_a_th_sigma = 2 * pr_a_theta  + nsample;
+      post_b_th_sigma = pr_b_theta;
+      for(j = 0; j < nsample; j++) post_b_th_sigma += std::pow((oldtheta(j) - pr_mean_theta), 2.0) / 2;
+      pr_sd_theta = std::sqrt(2 * post_b_th_sigma *(1.0 /  R::rchisq(post_a_th_sigma)));
+    }
 
     //dist(j,i) is distance of z_j and w_i
     dist.fill(0.0);
@@ -6967,11 +6999,11 @@ Rcpp::List lsirm2pl_normal_mar_cpp(arma::mat data,
 // [[Rcpp::export]]
 Rcpp::List lsirm2pl_normal_mar_ss_cpp(arma::mat data, const int ndim, const int niter, const int nburn, const int nthin, const int nprint,
                                       const double jump_beta, const double jump_theta, const double jump_alpha, const double jump_gamma, const double jump_z, const double jump_w,
-                                      const double pr_mean_beta, const double pr_sd_beta, const double pr_mean_theta,
+                                      const double pr_mean_beta, const double pr_sd_beta, const double pr_mean_theta, double pr_sd_theta,
                                       const double pr_spike_mean, const double pr_spike_sd, const double pr_slab_mean, const double pr_slab_sd,
                                       const double pr_mean_alpha, const double pr_sd_alpha,
                                       const double pr_a_eps, const double pr_b_eps, const double pr_a_theta, const double pr_b_theta,
-                                      const double pr_beta_a, const double pr_beta_b, const double missing, const bool verbose){
+                                      const double pr_beta_a, const double pr_beta_b, const double missing, const bool verbose, const bool fix_theta_sd, const bool fix_alpha_1){
 
   const int nsample = data.n_rows;
   const int nitem = data.n_cols;
@@ -6981,7 +7013,7 @@ Rcpp::List lsirm2pl_normal_mar_ss_cpp(arma::mat data, const int ndim, const int 
   double old_like_z, new_like_z, old_like_w, new_like_w, old_like_gamma, new_like_gamma;
   double ratio, un, dist_temp, dist_old_temp, dist_new_temp;
   double post_a_sigma, post_b_sigma, post_a_th_sigma, post_b_th_sigma;
-  double pr_mean_z = 0.0, pr_sd_z = 1.0, pr_mean_w = 0.0, pr_sd_w = 1.0, pr_sd = 1.0, pr_sd_theta = 1.0, mle;
+  double pr_mean_z = 0.0, pr_sd_z = 1.0, pr_mean_w = 0.0, pr_sd_w = 1.0, pr_sd = 1.0, mle;
 
 
   arma::dvec oldbeta(nitem, fill::randu);
@@ -7187,7 +7219,7 @@ Rcpp::List lsirm2pl_normal_mar_ss_cpp(arma::mat data, const int ndim, const int 
     // xi update(spike slab parameter)
     xi = R::rbeta(pr_beta_a + pi, pr_beta_b + 1.0 - pi);
     // alpha update
-    for(i = 1; i < nitem; i++){
+    for(i = (fix_alpha_1 ? 1 : 0); i < nitem; i++){
       newalpha(i) = R::rlnorm(std::log(oldalpha(i)) , jump_alpha);
       old_like_alpha = new_like_alpha = 0.0;
 
@@ -7315,10 +7347,12 @@ Rcpp::List lsirm2pl_normal_mar_ss_cpp(arma::mat data, const int ndim, const int 
 
 
     //sigma_theta update with gibbs
-    post_a_th_sigma = 2 * pr_a_theta  + nsample;
-    post_b_th_sigma = pr_b_theta;
-    for(j = 0; j < nsample; j++) post_b_th_sigma += std::pow((oldtheta(j) - pr_mean_theta), 2.0) / 2;
-    pr_sd_theta = std::sqrt(2 * post_b_th_sigma *(1.0 /  R::rchisq(post_a_th_sigma)));
+    if(!fix_theta_sd){
+      post_a_th_sigma = 2 * pr_a_theta  + nsample;
+      post_b_th_sigma = pr_b_theta;
+      for(j = 0; j < nsample; j++) post_b_th_sigma += std::pow((oldtheta(j) - pr_mean_theta), 2.0) / 2;
+      pr_sd_theta = std::sqrt(2 * post_b_th_sigma *(1.0 /  R::rchisq(post_a_th_sigma)));
+    }
 
     //dist(j,i) is distance of z_j and w_i
     dist.fill(0.0);

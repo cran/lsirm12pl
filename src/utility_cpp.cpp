@@ -209,51 +209,62 @@ void progressbar(int step, int total)
 {
   // progress width
   const int pwidth = 72;
-
+  
+  // Prevent division by zero or incorrect display at the very beginning
+  if (step <= 0 || total <= 0) return;
+  if (step > total) step = total; // Ensure step doesn't exceed total
+  
   // minus label len
-  int pos = (step * pwidth) / total;
-  int percent = (step * 100) / total;
-
-  // calculate elapsed time in seconds
-  //auto current_time = std::chrono::steady_clock::now();
+  int pos = (static_cast<long long>(step) * pwidth) / total; // Use long long for intermediate calc
+  int percent = (static_cast<long long>(step) * 100) / total;
+  
+  // calculate elapsed time
   auto current_time = std::chrono::system_clock::now();
-  static auto start_time = current_time;  // static to keep the initial value
-  if (step == 1) {
+  static auto start_time = current_time; // static to keep the initial value across calls *within the same load*
+  if (step == 1) { // Reset start time when starting a new progress sequence
     start_time = current_time;
   }
-
-  auto elapsed_seconds = std::chrono::duration_cast<std::chrono::seconds>(current_time - start_time).count();
-
-  // calculate remaining time in seconds
-  auto remaining_seconds = ((total - step) * elapsed_seconds) / step;
-
-  // Calculate remaining time in hours, minutes, and seconds
-  int hours = remaining_seconds / 3600;
-  int minutes = (remaining_seconds % 3600) / 60;
-  int seconds = remaining_seconds % 60;
-
-  // Format start time as HH:MM:SS
-  std::time_t start_time_t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-  std::tm* start_time_tm = std::localtime(&start_time_t);
-  char start_time_str[9];
-  std::strftime(start_time_str, sizeof(start_time_str), "%H:%M:%S", start_time_tm);
-
-  // fill progress bar with =
-  Rcpp::Rcout << "[";
-  for (int i = 0; i < pos; ++i) {
-    Rprintf("%c", '=');
+  auto elapsed_duration = current_time - start_time;
+  // Use milliseconds for potentially more precision in ETA for short tasks
+  auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed_duration).count();
+  
+  // calculate estimated time of arrival (ETA)
+  long long remaining_ms = 0;
+  if (step > 0 && elapsed_ms > 0) {
+    // Estimate remaining time based on average time per step so far
+    remaining_ms = (static_cast<long long>(total - step) * elapsed_ms) / step;
   }
-
-  // fill progress bar with spaces
-  Rprintf("%*c", pwidth - pos + 1, ']');
-
-  // print percentage, ETA, and total elapsed time
-  Rprintf(" %3d%% ETA: %02d:%02d:%02d \r", percent, hours, minutes, seconds);
-
-  // flush output to make sure it's displayed immediately
-  R_FlushConsole();
+  long long remaining_seconds_total = remaining_ms / 1000;
+  
+  // Calculate remaining time in hours, minutes, and seconds
+  int hours = remaining_seconds_total / 3600;
+  int minutes = (remaining_seconds_total % 3600) / 60;
+  int seconds = remaining_seconds_total % 60;
+  
+  // Use Rprintf for output compatible with R console/RStudio
+  Rprintf("[");
+  for (int i = 0; i < pos; ++i) Rprintf("=");
+  Rprintf("%*s", pwidth - pos, ""); // Print spaces to fill the bar
+  Rprintf("] %3d%% ", percent);
+  
+  // Only print ETA if it's meaningful (elapsed time > 0)
+  if (elapsed_ms > 0 && step < total) {
+    Rprintf("ETA: %02d:%02d:%02d", hours, minutes, seconds);
+  } else if (step == total) {
+    // Optionally print total time instead of ETA when done
+    long long elapsed_seconds_total = elapsed_ms / 1000;
+    int elapsed_h = elapsed_seconds_total / 3600;
+    int elapsed_m = (elapsed_seconds_total % 3600) / 60;
+    int elapsed_s = elapsed_seconds_total % 60;
+    Rprintf("Total: %02d:%02d:%02d", elapsed_h, elapsed_m, elapsed_s);
+  } else {
+    Rprintf("ETA: --:--:--"); // Indicate unknown ETA at the beginning
+  }
+  
+  // Use \r (carriage return) to move cursor to the beginning of the line
+  // This overwrites the previous progress bar line.
+  Rprintf("\r");
+  
+  // Note: R's console often handles flushing automatically with \r or \n.
+  // Explicit flushing (like fflush(stdout)) is usually not needed with Rprintf.
 }
-
-
-
-

@@ -56,9 +56,9 @@
 #' @export
 lsirm1pl_ss = function(data, ndim = 2, niter = 15000, nburn = 2500, nthin = 5, nprint = 500,
                        jump_beta = 0.4, jump_theta = 1.0, jump_gamma = 1.0, jump_z = 0.5, jump_w = 0.5,
-                       pr_mean_beta = 0, pr_sd_beta = 1.0, pr_mean_theta = 0,
+                       pr_mean_beta = 0, pr_sd_beta = 1.0, pr_mean_theta = 0, pr_sd_theta = 1.0,
                        pr_spike_mean = -3, pr_spike_sd = 1.0, pr_slab_mean = 0.5, pr_slab_sd = 1.0,
-                       pr_a_theta = 0.001, pr_b_theta = 0.001, pr_xi_a  = 1, pr_xi_b = 1, verbose=FALSE){
+                       pr_a_theta = 0.001, pr_b_theta = 0.001, pr_xi_a  = 1, pr_xi_b = 1, verbose=FALSE, fix_theta_sd=FALSE){
   if(niter < nburn){
     stop("niter must be greater than burn-in process.")
   }
@@ -71,9 +71,9 @@ lsirm1pl_ss = function(data, ndim = 2, niter = 15000, nburn = 2500, nthin = 5, n
 
   output <- lsirm1pl_ss_cpp(data=as.matrix(data), ndim=ndim, niter=niter, nburn=nburn, nthin=nthin, nprint=nprint,
                             jump_beta=jump_beta, jump_theta=jump_theta, jump_gamma=jump_gamma, jump_z=jump_z, jump_w=jump_w,
-                            pr_mean_beta=pr_mean_beta, pr_sd_beta=pr_sd_beta, pr_mean_theta=pr_mean_theta,
+                            pr_mean_beta=pr_mean_beta, pr_sd_beta=pr_sd_beta, pr_mean_theta=pr_mean_theta, pr_sd_theta=pr_sd_theta,
                             pr_spike_mean=pr_spike_mean, pr_spike_sd=pr_spike_sd, pr_slab_mean=pr_slab_mean, pr_slab_sd=pr_slab_sd,
-                            pr_a_theta=pr_a_theta, pr_b_theta=pr_b_theta, pr_beta_a=pr_xi_a, pr_beta_b=pr_xi_b,verbose=verbose)
+                            pr_a_theta=pr_a_theta, pr_b_theta=pr_b_theta, pr_beta_a=pr_xi_a, pr_beta_b=pr_xi_b,verbose=verbose, fix_theta_sd=fix_theta_sd)
 
   mcmc.inf = list(nburn=nburn, niter=niter, nthin=nthin)
   nsample <- nrow(data)

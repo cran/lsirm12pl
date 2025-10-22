@@ -19,6 +19,7 @@ lsirm1pl_normal_mar(
   pr_mean_beta = 0,
   pr_sd_beta = 1,
   pr_mean_theta = 0,
+  pr_sd_theta = 1,
   pr_mean_gamma = 0.5,
   pr_sd_gamma = 1,
   pr_a_theta = 0.001,
@@ -26,7 +27,8 @@ lsirm1pl_normal_mar(
   pr_a_eps = 0.001,
   pr_b_eps = 0.001,
   missing.val = 99,
-  verbose = FALSE
+  verbose = FALSE,
+  fix_theta_sd = FALSE
 )
 }
 \arguments{
@@ -58,6 +60,8 @@ lsirm1pl_normal_mar(
 
 \item{pr_mean_theta}{Numeric; the mean of the normal prior for theta. Default is 0.}
 
+\item{pr_sd_theta}{Numeric; the standard deviation of the normal prior for theta. Default is 1.0.}
+
 \item{pr_mean_gamma}{Numeric; mean of log normal prior for gamma. Default is 0.5.}
 
 \item{pr_sd_gamma}{Numeric; standard deviation of log normal prior for gamma. Default is 1.0.}
@@ -73,6 +77,8 @@ lsirm1pl_normal_mar(
 \item{missing.val}{Numeric; a number to replace missing values. Default is 99.}
 
 \item{verbose}{Logical; If TRUE, MCMC samples are printed for each \code{nprint}. Default is FALSE.}
+
+\item{fix_theta_sd}{Logical; If TRUE, the standard deviation of the theta parameter is fixed. Default is FALSE.}
 }
 \value{
 \code{lsirm1pl_normal_mar} returns an object of  list containing the following components:

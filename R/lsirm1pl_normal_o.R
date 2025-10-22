@@ -52,8 +52,8 @@
 #' @export
 lsirm1pl_normal_o = function(data, ndim = 2, niter = 15000, nburn = 2500, nthin = 5, nprint = 500,
                              jump_beta = 0.4, jump_theta = 1.0, jump_gamma = 1.0, jump_z = 0.5, jump_w = 0.5,
-                             pr_mean_beta = 0, pr_sd_beta = 1.0, pr_mean_theta = 0, pr_mean_gamma = 0.5, pr_sd_gamma =1.0,
-                             pr_a_theta = 0.001, pr_b_theta = 0.001, pr_a_eps = 0.001, pr_b_eps = 0.001, verbose=FALSE){
+                             pr_mean_beta = 0, pr_sd_beta = 1.0, pr_mean_theta = 0, pr_sd_theta = 1.0, pr_mean_gamma = 0.5, pr_sd_gamma =1.0,
+                             pr_a_theta = 0.001, pr_b_theta = 0.001, pr_a_eps = 0.001, pr_b_eps = 0.001, verbose=FALSE, fix_theta_sd=FALSE){
   if(niter < nburn){
     stop("niter must be greater than burn-in process.")
   }
@@ -66,10 +66,10 @@ lsirm1pl_normal_o = function(data, ndim = 2, niter = 15000, nburn = 2500, nthin 
   # cat("\n\nFitting with MCMC algorithm\n")
 
 
-  output <- lsirm1pl_normal_cpp(as.matrix(data), ndim, niter, nburn, nthin, nprint,
-                                jump_beta, jump_theta, jump_gamma, jump_z, jump_w,
-                                pr_mean_beta, pr_sd_beta, pr_mean_theta, pr_mean_gamma, pr_sd_gamma,
-                                pr_a_theta, pr_b_theta, pr_a_eps, pr_b_eps, verbose=verbose)
+  output <- lsirm1pl_normal_cpp(data = as.matrix(data), ndim=ndim, niter=niter, nburn=nburn, nthin=nthin, nprint=nprint,
+                                jump_beta=jump_beta, jump_theta=jump_theta, jump_gamma=jump_gamma, jump_z=jump_z, jump_w=jump_w,
+                                pr_mean_beta=pr_mean_beta, pr_sd_beta=pr_sd_beta, pr_mean_theta=pr_mean_theta, pr_sd_theta=pr_sd_theta, pr_mean_gamma=pr_mean_gamma, pr_sd_gamma=pr_sd_gamma,
+                                pr_a_theta=pr_a_theta, pr_b_theta=pr_b_theta, pr_a_eps=pr_a_eps, pr_b_eps=pr_b_eps, verbose=verbose, fix_theta_sd=fix_theta_sd)
 
   mcmc.inf = list(nburn=nburn, niter=niter, nthin=nthin)
   nsample <- nrow(data)
