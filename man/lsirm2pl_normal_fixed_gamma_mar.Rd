@@ -47,9 +47,9 @@ lsirm2pl_normal_fixed_gamma_mar(
 
 \item{jump_beta}{Numeric; the jumping rule for the beta proposal density. Default is 0.4.}
 
-\item{jump_theta}{Numeric; the jumping rule for the theta proposal density. Default is 1.0.}
+\item{jump_theta}{Numeric; the jumping rule for the theta proposal density. Default is 1.}
 
-\item{jump_alpha}{Numeric; the jumping rule for the alpha proposal density. Default is 1.0.}
+\item{jump_alpha}{Numeric; the jumping rule for the alpha proposal density. Default is 1.}
 
 \item{jump_z}{Numeric; the jumping rule for the z proposal density. Default is 0.5.}
 
@@ -57,15 +57,15 @@ lsirm2pl_normal_fixed_gamma_mar(
 
 \item{pr_mean_beta}{Numeric; the mean of the normal prior for beta. Default is 0.}
 
-\item{pr_sd_beta}{Numeric; the standard deviation of the normal prior for beta. Default is 1.0.}
+\item{pr_sd_beta}{Numeric; the standard deviation of the normal prior for beta. Default is 1.}
 
 \item{pr_mean_theta}{Numeric; the mean of the normal prior for theta. Default is 0.}
 
-\item{pr_sd_theta}{Numeric; the standard deviation of the normal prior for theta. Default is 1.0.}
+\item{pr_sd_theta}{Numeric; the standard deviation of the normal prior for theta. Default is 1.}
 
 \item{pr_mean_alpha}{Numeric; the mean of the log normal prior for alpha. Default is 0.5.}
 
-\item{pr_sd_alpha}{Numeric; the standard deviation of the log normal prior for alpha. Default is 1.0.}
+\item{pr_sd_alpha}{Numeric; the standard deviation of the log normal prior for alpha. Default is 1.}
 
 \item{pr_a_theta}{Numeric; the shape parameter of the inverse gamma prior for the variance of theta. Default is 0.001.}
 

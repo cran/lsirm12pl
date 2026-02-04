@@ -19,7 +19,7 @@ lsirm1pl(
   nprint = 500,
   jump_beta = 0.4,
   jump_theta = 1,
-  jump_gamma = 0.025,
+  jump_gamma = 0.2,
   jump_z = 0.5,
   jump_w = 0.5,
   pr_mean_beta = 0,
@@ -32,6 +32,7 @@ lsirm1pl(
   pr_b_theta = 0.001,
   verbose = FALSE,
   fix_theta_sd = FALSE,
+  adapt = NULL,
   ...
 )
 }
@@ -62,9 +63,9 @@ lsirm1pl(
 
 \item{jump_beta}{Numeric; the jumping rule for the beta proposal density. Default is 0.4.}
 
-\item{jump_theta}{Numeric; the jumping rule for the theta proposal density. Default is 1.0.}
+\item{jump_theta}{Numeric; the jumping rule for the theta proposal density. Default is 1.}
 
-\item{jump_gamma}{Numeric; the jumping rule for the gamma proposal density. Default is 0.025.}
+\item{jump_gamma}{Numeric; the jumping rule for the gamma proposal density. Default is 0.2.}
 
 \item{jump_z}{Numeric; the jumping rule for the z proposal density. Default is 0.5.}
 
@@ -72,15 +73,15 @@ lsirm1pl(
 
 \item{pr_mean_beta}{Numeric; the mean of the normal prior for beta. Default is 0.}
 
-\item{pr_sd_beta}{Numeric; the standard deviation of the normal prior for beta. Default is 1.0.}
+\item{pr_sd_beta}{Numeric; the standard deviation of the normal prior for beta. Default is 1.}
 
 \item{pr_mean_theta}{Numeric; the mean of the normal prior for theta. Default is 0.}
 
-\item{pr_sd_theta}{Numeric; the standard deviation of the normal prior for theta. Default is 1.0.}
+\item{pr_sd_theta}{Numeric; the standard deviation of the normal prior for theta. Default is 1.}
 
 \item{pr_mean_gamma}{Numeric; mean of log normal prior for gamma. Default is 0.5.}
 
-\item{pr_sd_gamma}{Numeric; standard deviation of log normal prior for gamma. Default is 1.0.}
+\item{pr_sd_gamma}{Numeric; standard deviation of log normal prior for gamma. Default is 1.}
 
 \item{pr_a_theta}{Numeric; the shape parameter of the inverse gamma prior for the variance of theta. Default is 0.001.}
 
@@ -90,7 +91,20 @@ lsirm1pl(
 
 \item{fix_theta_sd}{Logical; If TRUE, the standard deviation of the theta parameter is fixed. Default is FALSE.}
 
-\item{\dots}{Additional arguments for the for various settings. Refer to the functions in the Details.}
+\item{adapt}{List; optional adaptive MCMC control. If not \code{NULL}, proposal standard deviations are adapted during the burn-in period to reach a target acceptance rate and are held fixed during the main MCMC sampling.
+When adaptation is enabled, the reported acceptance ratios in the output (\code{accept_beta}, \code{accept_theta}, etc.) are computed only from iterations after burn-in, reflecting the performance of the adapted proposal distributions.
+Elements of the list can include:
+\itemize{
+  \item \code{use_adapt}: Logical; if \code{TRUE}, adaptive MCMC is used. Default is \code{FALSE}.
+  \item \code{adapt_interval}: Integer; the number of iterations between each update of the proposal SDs. Default is \code{100}.
+  \item \code{adapt_rate}: Numeric; Robbins-Monro scaling constant (c) in step size formula: adapt_rate / iteration^decay_rate. Default is \code{1.0}. Valid range: any positive value. Recommended: 0.5-2.0.
+  \item \code{decay_rate}: Numeric; Robbins-Monro decay exponent (alpha) in step size formula. Default is \code{0.5}. Valid range: (0.5, 1]. Recommended: 0.5-0.8.
+  \item \code{target_accept}: Numeric; target acceptance rate for scalar parameters (beta, theta, gamma, alpha). Default is \code{0.44}.
+  \item \code{target_accept_zw}: Numeric; target acceptance rate for multi-dimensional latent positions z and w. Default is \code{0.234}.
+  \item \code{target_accept_beta/theta/gamma}: Numeric; (optional) parameter-specific target acceptance rates to override \code{target_accept}.
+}}
+
+\item{\dots}{Additional arguments passed to the underlying model-fitting functions.}
 }
 \value{
 \code{lsirm1pl} returns an object of list.
@@ -144,6 +158,9 @@ lsirm_result <- lsirm1pl(data)
 
 # The code following can achieve the same result.
 lsirm_result <- lsirm(data~lsirm1pl())
+
+# Fit with adaptive MCMC
+lsirm_result <- lsirm1pl(data, adapt = list(use_adapt = TRUE))
 
 }
 }

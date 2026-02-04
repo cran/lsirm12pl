@@ -45,7 +45,7 @@
 #' }
 #' @export
 lsirm2pl_fixed_gamma = function(data, ndim = 2, niter = 15000, nburn = 2500, nthin = 5, nprint = 500,
-                                jump_beta = 0.4, jump_theta = 1, jump_alpha = 1.0, jump_z = 0.5, jump_w = 0.5,
+                                jump_beta = 0.4, jump_theta = 1, jump_alpha = 1, jump_z = 0.5, jump_w = 0.5,
                                 pr_mean_beta = 0, pr_sd_beta = 1, pr_mean_theta = 0, pr_sd_theta = 1,
                                 pr_mean_alpha = 0.5, pr_sd_alpha = 1, pr_a_theta = 0.001, pr_b_theta = 0.001, verbose=FALSE, fix_theta_sd=FALSE, fix_alpha_1=TRUE){
   if(niter < nburn){
@@ -123,12 +123,14 @@ cat("\n")
                  beta_summary = beta.summary,
                  theta_estimate = theta.estimate,
                  sigma_theta_estimate    = sigma_theta.estimate,
-                 alhpa_estimate = alpha.estimate,
+              gamma_estimate = 1,
+              alpha_estimate = alpha.estimate,
                  z_estimate     = z.est,
                  w_estimate     = w.est,
                  beta           = output$beta,
                  theta          = output$theta,
                  theta_sd       = output$sigma_theta,
+              gamma          = rep(1, nmcmc),
                  alpha          = output$alpha,
                  z              = z.proc,
                  w              = w.proc,
@@ -140,6 +142,13 @@ cat("\n")
                  accept_w       = output$accept_w,
                  accept_z       = output$accept_z)
   class(result) = "lsirm"
+
+  result$call <- match.call()
+  result$method <- "lsirm2pl"
+  result$dtype <- "binary"
+  result$chains <- 1
+  result$varselect <- FALSE
+  result$fixed_gamma <- TRUE
 
   return(result)
 }

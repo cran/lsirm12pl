@@ -7,7 +7,7 @@
 lsirm(formula, ...)
 }
 \arguments{
-\item{formula}{The form of formula is \code{lsirm(A ~ <term 1>(<term 2>, <term 3> ...))}, where \code{A} is binary or continuous item response matrix to be analyzed, \code{<term1>} is the model you want to fit and has one of the following values: "lsirm1pl" and "lsirm2pl"., and \code{<term 2>}, \code{<term 3>}, etc. are each option for the model.}
+\item{formula}{The form of formula is \code{lsirm(A ~ <term 1>(<term 2>, <term 3> ...))}, where \code{A} is an item response matrix to be analyzed, \code{<term1>} is the model you want to fit and has one of the following values: "lsirm1pl", "lsirm2pl", "lsirmgrm", and "lsirmgrm2pl"., and \code{<term 2>}, \code{<term 3>}, etc. are each option for the model.}
 
 \item{...}{Additional arguments for the corresponding function.}
 }
@@ -17,10 +17,10 @@ lsirm(formula, ...)
 See corresponding functions such as \code{\link{lsirm1pl}} for 1PL LSIRM and \code{\link{lsirm2pl}} for 2PL LSIRM.
 }
 \description{
-\link{lsirm} is used to fit 1PL LSIRM and 2PL LSIRM using Bayesian method as described in Jeon et al. (2021).
+\link{lsirm} is used to fit 1PL LSIRM, 2PL LSIRM, and ordinal GRM LSIRM using Bayesian methods.
 }
 \details{
-The descriptions of options for each model, such as \code{<term 2>} and \code{<term 3>}, are included in \code{\link{lsirm1pl}} for 1PL LSIRM and \code{\link{lsirm2pl}} for 2PL LSIRM.
+The descriptions of options for each model, such as \code{<term 2>} and \code{<term 3>}, are included in \code{\link{lsirm1pl}} for 1PL LSIRM, \code{\link{lsirm2pl}} for 2PL LSIRM, and \code{\link{lsirmgrm}} for ordinal GRM LSIRM.
 }
 \examples{
 \donttest{
@@ -30,10 +30,26 @@ data     <- matrix(rbinom(500, size = 1, prob = 0.5),ncol=10,nrow=50)
 lsirm_result <- lsirm(data~lsirm1pl())
 lsirm_result <- lsirm(data~lsirm2pl())
 
+# Realistic example with BFPT data
+data(BFPT)
+dat <- BFPT
+dat[(dat == 0) | (dat == 6)] <- NA
+reverse <- c(2, 4, 6, 8, 10, 11, 13, 15, 16, 17, 18, 19, 20, 21, 23, 25, 27, 32, 34, 36, 42, 44, 46)
+dat[, reverse] <- 6 - dat[, reverse]
+dat <- dat[complete.cases(dat), ]
+# Fit model (subset for speed)
+fit_bfpt <- lsirm(dat[1:50, 1:10] ~ lsirmgrm(niter = 1000, nburn = 500))
+summary(fit_bfpt)
+
+# Fit with adaptive MCMC
+lsirm_result <- lsirm(data~lsirm1pl(adapt = list(use_adapt = TRUE)))
+
 }
 }
 \seealso{
 \code{\link{lsirm1pl}} for 1PL LSIRM.
 
 \code{\link{lsirm2pl}} for 2PL LSIRM.
+
+\code{\link{lsirmgrm}} for ordinal GRM LSIRM.
 }

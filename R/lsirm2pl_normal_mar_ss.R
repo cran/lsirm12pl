@@ -4,7 +4,7 @@
 #' \link{lsirm2pl_normal_mar_ss} factorizes item response matrix into column-wise item effect, row-wise respondent effect and further embeds interaction effect in a latent space, while considering the missing element under the assumption of missing at random. Unlike 1pl model, 2pl model assumes the item effect can vary according to respondent, allowing additional parameter multiplied with respondent effect. The resulting latent space provides an interaction map that represents interactions between respondents and items.
 #'
 #' @inheritParams lsirm2pl
-#' @param jump_gamma Numeric; the jumping rule for the theta proposal density. Default is 1.0.
+#' @param jump_gamma Numeric; the jumping rule for the theta proposal density. Default is 1.
 #' @param pr_spike_mean Numeric; the mean of spike prior for log gamma. Default is -3.
 #' @param pr_spike_sd Numeric; the standard deviation of spike prior for log gamma. Default is 1.
 #' @param pr_slab_mean Numeric; the mean of spike prior for log gamma. Default is 0.5.
@@ -73,7 +73,7 @@
 #'                       missing_data = "mar"))
 #' @export
 lsirm2pl_normal_mar_ss = function(data, ndim = 2, niter = 15000, nburn = 2500, nthin = 5, nprint = 500,
-                                  jump_beta = 0.4, jump_theta = 1.0, jump_alpha = 1.0, jump_gamma = 1.0, jump_z = 0.5, jump_w = 0.5,
+                                  jump_beta = 0.4, jump_theta = 1.0, jump_alpha = 1, jump_gamma = 1.0, jump_z = 0.5, jump_w = 0.5,
                                   pr_mean_beta = 0, pr_sd_beta = 1.0, pr_mean_theta = 0, pr_sd_theta = 1.0,
                                   pr_spike_mean = -3, pr_spike_sd = 1.0, pr_slab_mean = 0.5, pr_slab_sd = 1.0,
                                   pr_mean_alpha = 0.5, pr_sd_alpha = 1,
@@ -87,6 +87,9 @@ lsirm2pl_normal_mar_ss = function(data, ndim = 2, niter = 15000, nburn = 2500, n
   }else{
     cname = paste("item", 1:ncol(data), sep=" ")
   }
+  
+  # Convert NA to missing.val
+  data[is.na(data)] <- missing.val
 
   # cat("\n\nFitting with MCMC algorithm\n")
 
@@ -105,7 +108,7 @@ lsirm2pl_normal_mar_ss = function(data, ndim = 2, niter = 15000, nburn = 2500, n
 
   nmcmc = as.integer((niter - nburn) / nthin)
   max.address = min(which.max(output$map))
-  map.inf = data.frame(value = output$map[which.max(output$map)], iter = which.max(output$map))
+  map.inf = data.frame(value = output$map[max.address], iter = max.address)
   w.star = output$w[max.address,,]
   z.star = output$z[max.address,,]
   w.proc = array(0,dim=c(nmcmc,nitem,ndim))
@@ -152,14 +155,15 @@ cat("\n")
 
   # Calculate BIC
   # cat("\n\nCalculate BIC\n")
-  missing_est = ifelse(imp.estimate > 0.5, 1, 0)
-  data[data == missing.val] = missing_est
+  if (length(imp.estimate) > 0) {
+    data[data == missing.val] = imp.estimate
+  }
   if(pi.estimate > 0.5){
     log_like = log_likelihood_normal2pl_cpp(as.matrix(data), ndim, as.matrix(beta.estimate), as.matrix(alpha.estimate), as.matrix(theta.estimate), gamma.estimate, z.est, w.est, sigma.estimate, missing.val)
   }else{
     log_like = log_likelihood_normal2pl_cpp(as.matrix(data), ndim, as.matrix(beta.estimate), as.matrix(alpha.estimate), as.matrix(theta.estimate), 0, z.est, w.est, sigma.estimate, missing.val)
   }
-  p = 2 * nitem + nsample + 1 + 1 + ndim * nitem + ndim * nsample + 2 + 1
+  p = 2 * nitem + nsample + 1 + 1 + ndim * nitem + ndim * nsample + 2 + 1 + 1 # added sigma
   bic = -2 * log_like[[1]] + p * log(nitem * nsample)
 
   result <- list(data = data,
@@ -178,7 +182,7 @@ cat("\n")
                  w_estimate     = w.est,
                  imp_estimate   = imp.estimate,
                  pi_estimate    = pi.estimate,
-                 beta           = output$beta,
+                 xi_estimate    = xi.estimate,                 beta           = output$beta,
                  theta          = output$theta,
                  theta_sd       = output$sigma_theta,
                  sigma          = output$sigma,
@@ -190,12 +194,21 @@ cat("\n")
                  w_raw          = output$w,
                  imp            = output$impute,
                  pi             = output$pi,
-                 accept_beta    = output$accept_beta,
+                 xi             = output$xi,                 accept_beta    = output$accept_beta,
                  accept_theta   = output$accept_theta,
                  accept_w       = output$accept_w,
                  accept_z       = output$accept_z,
                  accept_gamma   = output$accept_gamma,
                  accept_alpha   = output$accept_alpha)
+
+  result$call <- match.call()
+  result$method <- "lsirm2pl"
+  result$missing <- "mar"
+  result$varselect <- TRUE
+  result$dtype <- "continuous"
+  result$chains <- 1
+  result$fixed_gamma <- FALSE
+
   class(result) = "lsirm"
 
   return(result)

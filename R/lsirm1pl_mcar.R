@@ -4,9 +4,9 @@
 #' \link{lsirm1pl_mcar} factorizes item response matrix into column-wise item effect, row-wise respondent effect and further embeds interaction effect in a latent space, while ignoring the missing element under the assumption of missing completely at random. The resulting latent space provides an interaction map that represents interactions between respondents and items.
 #'
 #' @inheritParams lsirm1pl
-#' @param jump_gamma Numeric; the jumping rule for the gamma proposal density. Default is 0.025.
+#' @param jump_gamma Numeric; the jumping rule for the gamma proposal density. Default is 0.2.
 #' @param pr_mean_gamma Numeric; mean of log normal prior for gamma. Default is 0.5.
-#' @param pr_sd_gamma Numeric; standard deviation of log normal prior for gamma. Default is 1.0.
+#' @param pr_sd_gamma Numeric; standard deviation of log normal prior for gamma. Default is 1.
 #' @param missing.val Numeric; A number to replace missing values. Default is 99.
 #' @param verbose Logical; If TRUE, MCMC samples are printed for each \code{nprint}. Default is FALSE.
 #'
@@ -58,7 +58,7 @@
 #' }
 #' @export
 lsirm1pl_mcar = function(data, ndim = 2, niter = 15000, nburn = 2500, nthin = 5, nprint = 500,
-                         jump_beta = 0.4, jump_theta = 1.0, jump_gamma = 0.025, jump_z = 0.5, jump_w = 0.5,
+                         jump_beta = 0.4, jump_theta = 1.0, jump_gamma = 0.2, jump_z = 0.5, jump_w = 0.5,
                          pr_mean_beta = 0, pr_sd_beta = 1.0, pr_mean_theta = 0, pr_sd_theta = 1.0, pr_mean_gamma = 0.5, pr_sd_gamma = 1.0,
                          pr_a_theta = 0.001, pr_b_theta = 0.001, missing.val = 99, verbose=FALSE, fix_theta_sd=FALSE){
   if(niter < nburn){
@@ -69,13 +69,17 @@ lsirm1pl_mcar = function(data, ndim = 2, niter = 15000, nburn = 2500, nthin = 5,
   }else{
     cname = paste("item", 1:ncol(data), sep=" ")
   }
+  
+  # Convert NA to missing.val
+  data[is.na(data)] <- missing.val
+  
   # cat("\n\nFitting with MCMC algorithm\n")
 
   output <- lsirm1pl_mcar_cpp(data=as.matrix(data), ndim=ndim, niter=niter, nburn=nburn, nthin=nthin, nprint=nprint,
                               jump_beta=jump_beta, jump_theta=jump_theta, jump_gamma = jump_gamma, jump_z=jump_z, jump_w=jump_w,
                               pr_mean_beta=pr_mean_beta, pr_sd_beta=pr_sd_beta, pr_mean_theta=pr_mean_theta, pr_sd_theta=pr_sd_theta,
                               pr_mean_gamma = pr_mean_gamma, pr_sd_gamma = pr_sd_gamma,
-                              pr_a_theta=pr_a_theta, pr_b_theta=pr_b_theta, missing = missing.val, verbose=verbose, fix_theta_sd=fix_theta_sd)
+                              pr_a_theta=pr_a_theta, pr_b_theta=pr_b_theta, missing = missing.val, verbose=verbose, fix_theta_sd=fix_theta_sd, fixed_gamma=FALSE, adapt = NULL)
 
   mcmc.inf = list(nburn=nburn, niter=niter, nthin=nthin)
   nsample <- nrow(data)
@@ -151,6 +155,14 @@ cat("\n")
                  accept_w       = output$accept_w,
                  accept_z       = output$accept_z,
                  accept_gamma   = output$accept_gamma)
+  result$call <- match.call()
+  result$method <- "lsirm1pl"
+  result$missing <- "mcar"
+  result$varselect <- FALSE
+  result$dtype <- "binary"
+  result$chains <- 1
+  result$fixed_gamma <- FALSE
+
   class(result) = "lsirm"
 
   return(result)

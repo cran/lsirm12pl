@@ -1,6 +1,6 @@
 #' lsirm12pl-package
 #'
-#' Analysis of dichotomous and continuous response data using latent factor by both 1PL LSIRM and 2PL LSIRM as described in Jeon et al. (2021) <doi:10.1007/s11336-021-09762-5>. It includes original 1PL LSIRM and 2PL LSIRM provided for binary response data and its extension for continuous response data. Bayesian model selection with spike-and-slab prior and method for dealing data with missing value under missing at random, missing completely at random are also supported. Various diagnostic plots are available to inspect the latent space and summary of estimated parameters.
+#' #' Analysis of dichotomous, continuous, and ordinal response data using latent space models. It includes 1PL and 2PL Latent Space Item Response Models (LSIRM) for binary and continuous data, and Graded Response Models (GRM) for ordinal data, as described in Jeon et al. (2021) <doi:10.1007/s11336-021-09762-5>. Bayesian model selection with spike-and-slab prior and method for dealing data with missing value under missing at random (MAR), missing completely at random (MCAR) are also supported. Various diagnostic plots are available to inspect the latent space and summary of estimated parameters.
 #'
 #' @name lsirm12pl
 #' @importFrom Rcpp evalCpp
@@ -21,6 +21,6 @@
 #' @importFrom grDevices dev.off pdf
 #' @importFrom utils stack
 #' @import ggplot2 GPArotation dplyr pROC spatstat grid purrr parallel coda grid tidyr
-#' @useDynLib lsirm12pl
+#' @useDynLib lsirm12pl, .registration = TRUE
 #'
 NULL

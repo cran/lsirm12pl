@@ -13,7 +13,7 @@ lsirm1pl_mcar(
   nprint = 500,
   jump_beta = 0.4,
   jump_theta = 1,
-  jump_gamma = 0.025,
+  jump_gamma = 0.2,
   jump_z = 0.5,
   jump_w = 0.5,
   pr_mean_beta = 0,
@@ -44,9 +44,9 @@ lsirm1pl_mcar(
 
 \item{jump_beta}{Numeric; the jumping rule for the beta proposal density. Default is 0.4.}
 
-\item{jump_theta}{Numeric; the jumping rule for the theta proposal density. Default is 1.0.}
+\item{jump_theta}{Numeric; the jumping rule for the theta proposal density. Default is 1.}
 
-\item{jump_gamma}{Numeric; the jumping rule for the gamma proposal density. Default is 0.025.}
+\item{jump_gamma}{Numeric; the jumping rule for the gamma proposal density. Default is 0.2.}
 
 \item{jump_z}{Numeric; the jumping rule for the z proposal density. Default is 0.5.}
 
@@ -54,15 +54,15 @@ lsirm1pl_mcar(
 
 \item{pr_mean_beta}{Numeric; the mean of the normal prior for beta. Default is 0.}
 
-\item{pr_sd_beta}{Numeric; the standard deviation of the normal prior for beta. Default is 1.0.}
+\item{pr_sd_beta}{Numeric; the standard deviation of the normal prior for beta. Default is 1.}
 
 \item{pr_mean_theta}{Numeric; the mean of the normal prior for theta. Default is 0.}
 
-\item{pr_sd_theta}{Numeric; the standard deviation of the normal prior for theta. Default is 1.0.}
+\item{pr_sd_theta}{Numeric; the standard deviation of the normal prior for theta. Default is 1.}
 
 \item{pr_mean_gamma}{Numeric; mean of log normal prior for gamma. Default is 0.5.}
 
-\item{pr_sd_gamma}{Numeric; standard deviation of log normal prior for gamma. Default is 1.0.}
+\item{pr_sd_gamma}{Numeric; standard deviation of log normal prior for gamma. Default is 1.}
 
 \item{pr_a_theta}{Numeric; the shape parameter of the inverse gamma prior for the variance of theta. Default is 0.001.}
 

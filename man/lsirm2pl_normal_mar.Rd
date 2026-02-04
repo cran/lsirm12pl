@@ -50,11 +50,11 @@ lsirm2pl_normal_mar(
 
 \item{jump_beta}{Numeric; the jumping rule for the beta proposal density. Default is 0.4.}
 
-\item{jump_theta}{Numeric; the jumping rule for the theta proposal density. Default is 1.0.}
+\item{jump_theta}{Numeric; the jumping rule for the theta proposal density. Default is 1.}
 
-\item{jump_alpha}{Numeric; the jumping rule for the alpha proposal density. Default is 1.0.}
+\item{jump_alpha}{Numeric; the jumping rule for the alpha proposal density. Default is 1.}
 
-\item{jump_gamma}{Numeric; the jumping rule for the gamma proposal density. Default is 0.025}
+\item{jump_gamma}{Numeric; the jumping rule for the gamma proposal density. Default is 0.2}
 
 \item{jump_z}{Numeric; the jumping rule for the z proposal density. Default is 0.5.}
 
@@ -62,19 +62,19 @@ lsirm2pl_normal_mar(
 
 \item{pr_mean_beta}{Numeric; the mean of the normal prior for beta. Default is 0.}
 
-\item{pr_sd_beta}{Numeric; the standard deviation of the normal prior for beta. Default is 1.0.}
+\item{pr_sd_beta}{Numeric; the standard deviation of the normal prior for beta. Default is 1.}
 
 \item{pr_mean_theta}{Numeric; the mean of the normal prior for theta. Default is 0.}
 
-\item{pr_sd_theta}{Numeric; the standard deviation of the normal prior for theta. Default is 1.0.}
+\item{pr_sd_theta}{Numeric; the standard deviation of the normal prior for theta. Default is 1.}
 
 \item{pr_mean_gamma}{Numeric; mean of log normal prior for gamma. Default is 0.5.}
 
-\item{pr_sd_gamma}{Numeric; standard deviation of log normal prior for gamma. Default is 1.0.}
+\item{pr_sd_gamma}{Numeric; standard deviation of log normal prior for gamma. Default is 1.}
 
 \item{pr_mean_alpha}{Numeric; the mean of the log normal prior for alpha. Default is 0.5.}
 
-\item{pr_sd_alpha}{Numeric; the standard deviation of the log normal prior for alpha. Default is 1.0.}
+\item{pr_sd_alpha}{Numeric; the standard deviation of the log normal prior for alpha. Default is 1.}
 
 \item{pr_a_theta}{Numeric; the shape parameter of the inverse gamma prior for the variance of theta. Default is 0.001.}
 
@@ -105,7 +105,7 @@ lsirm2pl_normal_mar(
 \item{gamma_estimate}{posterior estimates of gamma parameter.}
 \item{z_estimate}{Posterior estimates of the z parameter.}
 \item{w_estimate}{Posterior estimates of the w parameter.}
- \item{imp_estimate}{Probability of imputating a missing value with 1.}
+ \item{imp_estimate}{Posterior mean imputation for each missing cell.}
 \item{beta}{Posterior samples of the beta parameter.}
 \item{theta}{Posterior samples of the theta parameter.}
 \item{gamma}{Posterior samples of the gamma parameter.}
@@ -123,7 +123,7 @@ lsirm2pl_normal_mar(
 \item{sigma_estimate}{Posterior estimates of the standard deviation.}
 \item{sigma}{Posterior samples of the standard deviation.}
 \item{alpha_estimate}{Posterior estimates of the alpha parameter.}
- \item{alpha}{Posterior estimates of the alpha parameter.}
+ \item{alpha}{Posterior samples of the alpha parameter.}
  \item{accept_alpha}{Acceptance ratio for the alpha parameter.}
 }
 \description{
@@ -131,7 +131,7 @@ lsirm2pl_normal_mar(
 \link{lsirm2pl_normal_mar} factorizes item response matrix into column-wise item effect, row-wise respondent effect and further embeds interaction effect in a latent space, while considering the missing element under the assumption of missing at random. Unlike 1PL model, 2PL model assumes the item effect can vary according to respondent, allowing additional parameter multiplied with respondent effect. The resulting latent space provides an interaction map that represents interactions between respondents and items.
 }
 \details{
-\code{lsirm2pl_normal_mar} models the continuous value of response by respondent \eqn{j} to item \eqn{i} with item effect \eqn{\beta_i}, respondent effect \eqn{\theta_j} and the distance between latent position \eqn{w_i} of item \eqn{i} and latent position \eqn{z_j} of respondent \eqn{j} in the shared metric space, with \eqn{\gamma} represents the weight of the distance term. For 2pl model, the the item effect is assumed to have additional discrimination parameter \eqn{\alpha_i} multiplied by \eqn{\theta_j}: \deqn{Y_{j,i} = \theta_j+\beta_i-\gamma||z_j-w_i|| + e_{j,i}} where the error \eqn{e_{j,i} \sim N(0,\sigma^2)} Under the assumption of missing at random, the model takes the missing element into consideration in the sampling procedure. For the details of missing at random assumption and data augmentation, see References.
+\code{lsirm2pl_normal_mar} models the continuous value of response by respondent \eqn{j} to item \eqn{i} with item effect \eqn{\beta_i}, respondent effect \eqn{\theta_j} and the distance between latent position \eqn{w_i} of item \eqn{i} and latent position \eqn{z_j} of respondent \eqn{j} in the shared metric space, with \eqn{\gamma} represents the weight of the distance term. For 2pl model, the the item effect is assumed to have additional discrimination parameter \eqn{\alpha_i} multiplied by \eqn{\theta_j}: \deqn{Y_{j,i} = \alpha_i\theta_j+\beta_i-\gamma||z_j-w_i|| + e_{j,i}} where the error \eqn{e_{j,i} \sim N(0,\sigma^2)} Under the assumption of missing at random, the model takes the missing element into consideration in the sampling procedure. For the details of missing at random assumption and data augmentation, see References.
 }
 \examples{
 # generate example (continuous) item response matrix

@@ -1,13 +1,13 @@
 #' Fit a LSIRM ( Latent Space Item Response Model)
 #'
 #' @description
-#' \link{lsirm} is used to fit 1PL LSIRM and 2PL LSIRM using Bayesian method as described in Jeon et al. (2021).
+#' \link{lsirm} is used to fit 1PL LSIRM, 2PL LSIRM, and ordinal GRM LSIRM using Bayesian methods.
 #'
-#' @param formula The form of formula is \code{lsirm(A ~ <term 1>(<term 2>, <term 3> ...))}, where \code{A} is binary or continuous item response matrix to be analyzed, \code{<term1>} is the model you want to fit and has one of the following values: "lsirm1pl" and "lsirm2pl"., and \code{<term 2>}, \code{<term 3>}, etc. are each option for the model.
+#' @param formula The form of formula is \code{lsirm(A ~ <term 1>(<term 2>, <term 3> ...))}, where \code{A} is an item response matrix to be analyzed, \code{<term1>} is the model you want to fit and has one of the following values: "lsirm1pl", "lsirm2pl", "lsirmgrm", and "lsirmgrm2pl"., and \code{<term 2>}, \code{<term 3>}, etc. are each option for the model.
 #' @param ... Additional arguments for the corresponding function.
 #'
 #' @details
-#' The descriptions of options for each model, such as \code{<term 2>} and \code{<term 3>}, are included in \code{\link{lsirm1pl}} for 1PL LSIRM and \code{\link{lsirm2pl}} for 2PL LSIRM.
+#' The descriptions of options for each model, such as \code{<term 2>} and \code{<term 3>}, are included in \code{\link{lsirm1pl}} for 1PL LSIRM, \code{\link{lsirm2pl}} for 2PL LSIRM, and \code{\link{lsirmgrm}} for ordinal GRM LSIRM.
 #'
 #' @return \code{lsirm} returns an object of class \code{list}.
 #'
@@ -17,6 +17,8 @@
 #' \code{\link{lsirm1pl}} for 1PL LSIRM.
 #'
 #' \code{\link{lsirm2pl}} for 2PL LSIRM.
+#'
+#' \code{\link{lsirmgrm}} for ordinal GRM LSIRM.
 #' @examples
 #' \donttest{
 #' # generate example item response matrix
@@ -24,6 +26,20 @@
 #'
 #' lsirm_result <- lsirm(data~lsirm1pl())
 #' lsirm_result <- lsirm(data~lsirm2pl())
+#'
+#' # Realistic example with BFPT data
+#' data(BFPT)
+#' dat <- BFPT
+#' dat[(dat == 0) | (dat == 6)] <- NA
+#' reverse <- c(2, 4, 6, 8, 10, 11, 13, 15, 16, 17, 18, 19, 20, 21, 23, 25, 27, 32, 34, 36, 42, 44, 46)
+#' dat[, reverse] <- 6 - dat[, reverse]
+#' dat <- dat[complete.cases(dat), ]
+#' # Fit model (subset for speed)
+#' fit_bfpt <- lsirm(dat[1:50, 1:10] ~ lsirmgrm(niter = 1000, nburn = 500))
+#' summary(fit_bfpt)
+#'
+#' # Fit with adaptive MCMC
+#' lsirm_result <- lsirm(data~lsirm1pl(adapt = list(use_adapt = TRUE)))
 #'
 #' }
 #' @export
@@ -35,17 +51,22 @@ lsirm = function(formula, ...) UseMethod("lsirm")
 #'
 #' @description \link{lsirm.formula} is formula object.
 #'
-#' @param formula The form of formula is \code{lsirm(A ~ <term 1>(<term 2>, <term 3> ...))}, where \code{A} is binary or continuous item response matrix to be analyzed, \code{<term1>} is the model you want to fit and has one of the following values: "lsirm1pl" and "lsirm2pl"., and \code{<term 2>}, \code{<term 3>}, etc., are each option for the model.
+#' @param formula The form of formula is \code{lsirm(A ~ <term 1>(<term 2>, <term 3> ...))}, where \code{A} is an item response matrix to be analyzed, \code{<term1>} is the model you want to fit and has one of the following values: "lsirm1pl", "lsirm2pl", "lsirmgrm", and "lsirmgrm2pl"., and \code{<term 2>}, \code{<term 3>}, etc., are each option for the model.
 #' @param ... Additional arguments for the corresponding function.
 #'
 #' @export
 lsirm.formula = function(formula, ...){
-  data <- get(eval(formula)[[2]])
-  argument <- rlang::call_args(eval(formula)[[3]])
+  env <- environment(formula)
+  data <- eval(formula[[2]], envir = env)
+  
+  call_obj <- formula[[3]]
+  func <- as.character(call_obj[[1]])
+  argument <- rlang::call_args(call_obj)
   argument$data <- data
-  func <- as.character(eval(formula)[[3]][[1]])
-  output <- do.call(func,argument)
-  if((!is.null(argument$chains))&(output$chains > 1)){
+  
+  output <- do.call(func, argument)
+  
+  if((!is.null(argument$chains)) && (output$chains > 1)){
     for(i in 1:argument$chains){
       output[[i]]$call <- match.call()
       class(output[[i]]) <- "lsirm"
@@ -81,21 +102,33 @@ lsirm.formula = function(formula, ...){
 #' @param nthin Integer; the number of MCMC iterations to thin. Default is 5.
 #' @param nprint Integer; the interval at which MCMC samples are displayed during execution. Default is 500.
 #' @param jump_beta Numeric; the jumping rule for the beta proposal density. Default is 0.4.
-#' @param jump_theta Numeric; the jumping rule for the theta proposal density. Default is 1.0.
+#' @param jump_theta Numeric; the jumping rule for the theta proposal density. Default is 1.
 #' @param jump_z Numeric; the jumping rule for the z proposal density. Default is 0.5.
 #' @param jump_w Numeric; the jumping rule for the w proposal density. Default is 0.5.
 #' @param pr_mean_beta Numeric; the mean of the normal prior for beta. Default is 0.
-#' @param pr_sd_beta Numeric; the standard deviation of the normal prior for beta. Default is 1.0.
+#' @param pr_sd_beta Numeric; the standard deviation of the normal prior for beta. Default is 1.
 #' @param pr_mean_theta Numeric; the mean of the normal prior for theta. Default is 0.
-#' @param pr_sd_theta Numeric; the standard deviation of the normal prior for theta. Default is 1.0.
+#' @param pr_sd_theta Numeric; the standard deviation of the normal prior for theta. Default is 1.
 #' @param pr_a_theta Numeric; the shape parameter of the inverse gamma prior for the variance of theta. Default is 0.001.
 #' @param pr_b_theta Numeric; the scale parameter of the inverse gamma prior for the variance of theta. Default is 0.001.
-#' @param jump_gamma Numeric; the jumping rule for the gamma proposal density. Default is 0.025.
+#' @param jump_gamma Numeric; the jumping rule for the gamma proposal density. Default is 0.2.
 #' @param pr_mean_gamma Numeric; mean of log normal prior for gamma. Default is 0.5.
-#' @param pr_sd_gamma Numeric; standard deviation of log normal prior for gamma. Default is 1.0.
+#' @param pr_sd_gamma Numeric; standard deviation of log normal prior for gamma. Default is 1.
 #' @param verbose Logical; If TRUE, MCMC samples are printed for each \code{nprint}. Default is FALSE.
 #' @param fix_theta_sd Logical; If TRUE, the standard deviation of the theta parameter is fixed. Default is FALSE.
-#' @param \dots Additional arguments for the for various settings. Refer to the functions in the Details.
+#' @param adapt List; optional adaptive MCMC control. If not \code{NULL}, proposal standard deviations are adapted during the burn-in period to reach a target acceptance rate and are held fixed during the main MCMC sampling.
+#'   When adaptation is enabled, the reported acceptance ratios in the output (\code{accept_beta}, \code{accept_theta}, etc.) are computed only from iterations after burn-in, reflecting the performance of the adapted proposal distributions.
+#'   Elements of the list can include:
+#'   \itemize{
+#'     \item \code{use_adapt}: Logical; if \code{TRUE}, adaptive MCMC is used. Default is \code{FALSE}.
+#'     \item \code{adapt_interval}: Integer; the number of iterations between each update of the proposal SDs. Default is \code{100}.
+#'     \item \code{adapt_rate}: Numeric; Robbins-Monro scaling constant (c) in step size formula: adapt_rate / iteration^decay_rate. Default is \code{1.0}. Valid range: any positive value. Recommended: 0.5-2.0.
+#'     \item \code{decay_rate}: Numeric; Robbins-Monro decay exponent (alpha) in step size formula. Default is \code{0.5}. Valid range: (0.5, 1]. Recommended: 0.5-0.8.
+#'     \item \code{target_accept}: Numeric; target acceptance rate for scalar parameters (beta, theta, gamma, alpha). Default is \code{0.44}.
+#'     \item \code{target_accept_zw}: Numeric; target acceptance rate for multi-dimensional latent positions z and w. Default is \code{0.234}.
+#'     \item \code{target_accept_beta/theta/gamma}: Numeric; (optional) parameter-specific target acceptance rates to override \code{target_accept}.
+#'   }
+#' @param \dots Additional arguments passed to the underlying model-fitting functions.
 #'
 #' @return \code{lsirm1pl} returns an object of list.
 #' The basic return list containing the following components:
@@ -153,11 +186,14 @@ lsirm.formula = function(formula, ...){
 #'# The code following can achieve the same result.
 #' lsirm_result <- lsirm(data~lsirm1pl())
 #'
+#' # Fit with adaptive MCMC
+#' lsirm_result <- lsirm1pl(data, adapt = list(use_adapt = TRUE))
+#'
 #' }
 #' @export
 lsirm1pl = function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data = NA, chains = 1, multicore = 1, seed = NA,
-                    ndim = 2, niter = 15000, nburn = 2500, nthin = 5, nprint = 500, jump_beta = 0.4, jump_theta = 1, jump_gamma = 0.025, jump_z = 0.5, jump_w = 0.5,
-                    pr_mean_beta = 0, pr_sd_beta = 1, pr_mean_theta = 0, pr_sd_theta = 1, pr_mean_gamma = 0.5, pr_sd_gamma = 1, pr_a_theta = 0.001, pr_b_theta = 0.001, verbose = FALSE, fix_theta_sd = FALSE, ...) {
+                    ndim = 2, niter = 15000, nburn = 2500, nthin = 5, nprint = 500, jump_beta = 0.4, jump_theta = 1, jump_gamma = 0.2, jump_z = 0.5, jump_w = 0.5,
+                    pr_mean_beta = 0, pr_sd_beta = 1, pr_mean_theta = 0, pr_sd_theta = 1, pr_mean_gamma = 0.5, pr_sd_gamma = 1, pr_a_theta = 0.001, pr_b_theta = 0.001, verbose = FALSE, fix_theta_sd = FALSE, adapt = NULL, ...) {
 
   if(!is.na(seed)){
     set.seed(seed)
@@ -1482,24 +1518,36 @@ lsirm1pl = function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data 
 #' @param nthin Integer; the number of MCMC iterations to thin. Default is 5.
 #' @param nprint Integer; the interval at which MCMC samples are displayed during execution. Default is 500.
 #' @param jump_beta Numeric; the jumping rule for the beta proposal density. Default is 0.4.
-#' @param jump_theta Numeric; the jumping rule for the theta proposal density. Default is 1.0.
-#' @param jump_alpha Numeric; the jumping rule for the alpha proposal density. Default is 1.0.
-#' @param jump_gamma Numeric; the jumping rule for the gamma proposal density. Default is 0.025.
+#' @param jump_theta Numeric; the jumping rule for the theta proposal density. Default is 1.
+#' @param jump_alpha Numeric; the jumping rule for the alpha proposal density. Default is 1.
+#' @param jump_gamma Numeric; the jumping rule for the gamma proposal density. Default is 0.2.
 #' @param jump_z Numeric; the jumping rule for the z proposal density. Default is 0.5.
 #' @param jump_w Numeric; the jumping rule for the w proposal density. Default is 0.5.
 #' @param pr_mean_beta Numeric; the mean of the normal prior for beta. Default is 0.
-#' @param pr_sd_beta Numeric; the standard deviation of the normal prior for beta. Default is 1.0.
+#' @param pr_sd_beta Numeric; the standard deviation of the normal prior for beta. Default is 1.
 #' @param pr_mean_theta Numeric; the mean of the normal prior for theta. Default is 0.
-#' @param pr_sd_theta Numeric; the standard deviation of the normal prior for theta. Default is 1.0.
+#' @param pr_sd_theta Numeric; the standard deviation of the normal prior for theta. Default is 1.
 #' @param pr_mean_gamma Numeric; mean of log normal prior for gamma. Default is 0.5.
-#' @param pr_sd_gamma Numeric; standard deviation of log normal prior for gamma. Default is 1.0.
+#' @param pr_sd_gamma Numeric; standard deviation of log normal prior for gamma. Default is 1.
 #' @param pr_mean_alpha Numeric; the mean of the log normal prior for alpha. Default is 0.5.
-#' @param pr_sd_alpha Numeric; the standard deviation of the log normal prior for alpha. Default is 1.0.
+#' @param pr_sd_alpha Numeric; the standard deviation of the log normal prior for alpha. Default is 1.
 #' @param pr_a_theta Numeric; the shape parameter of the inverse gamma prior for the variance of theta. Default is 0.001.
 #' @param pr_b_theta Numeric; the scale parameter of the inverse gamma prior for the variance of theta. Default is 0.001.
 #' @param fix_theta_sd Logical; If TRUE, the standard deviation of the theta parameter is fixed. Default is FALSE.
 #' @param fix_alpha_1 Logical; If TRUE, the first element of the alpha parameter is fixed to 1. Default is TRUE.
-#' @param \dots Additional arguments for the for various settings. Refer to the functions in the Details.
+#' @param adapt List; optional adaptive MCMC control. If not \code{NULL}, proposal standard deviations are adapted during the burn-in period to reach a target acceptance rate and are held fixed during the main MCMC sampling.
+#'   When adaptation is enabled, the reported acceptance ratios in the output (\code{accept_beta}, \code{accept_theta}, \code{accept_alpha}, etc.) are computed only from iterations after burn-in, reflecting the performance of the adapted proposal distributions.
+#'   Elements of the list can include:
+#'   \itemize{
+#'     \item \code{use_adapt}: Logical; if \code{TRUE}, adaptive MCMC is used. Default is \code{FALSE}.
+#'     \item \code{adapt_interval}: Integer; the number of iterations between each update of the proposal SDs. Default is \code{100}.
+#'     \item \code{adapt_rate}: Numeric; Robbins-Monro scaling constant (c) in step size formula: adapt_rate / iteration^decay_rate. Default is \code{1.0}. Valid range: any positive value. Recommended: 0.5-2.0.
+#'     \item \code{decay_rate}: Numeric; Robbins-Monro decay exponent (alpha) in step size formula. Default is \code{0.5}. Valid range: (0.5, 1]. Recommended: 0.5-0.8.
+#'     \item \code{target_accept}: Numeric; target acceptance rate for scalar parameters (beta, theta, gamma, alpha). Default is \code{0.44}.
+#'     \item \code{target_accept_zw}: Numeric; target acceptance rate for the multi-dimensional latent positions z and w. Default is \code{0.234} (optimal for high dimensions; Roberts, Gelman & Gilks, 1997).
+#'     \item \code{target_accept_beta/theta/alpha/gamma}: Numeric; (optional) parameter-specific target acceptance rates to override \code{target_accept}.
+#'   }
+#' @param \dots Additional arguments passed to the underlying model-fitting functions.
 #'
 #' @return \code{lsirm2pl} returns an object of list.
 #' The basic return list containing the following components:
@@ -1562,12 +1610,15 @@ lsirm1pl = function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data 
 #'# The code following can achieve the same result.
 #' lsirm_result <- lsirm(data~lsirm2pl())
 #'
+#' # Fit with adaptive MCMC
+#' lsirm_result <- lsirm2pl(data, adapt = list(use_adapt = TRUE))
+#'
 #' }
 #' @export
 lsirm2pl = function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data = NA, chains = 1, multicore = 1, seed = NA,
-                    ndim = 2, niter = 15000, nburn = 2500, nthin = 5, nprint = 500, jump_beta = 0.4, jump_theta = 1, jump_alpha = 1, jump_gamma = 0.025, jump_z = 0.5, jump_w = 0.5,
+                    ndim = 2, niter = 15000, nburn = 2500, nthin = 5, nprint = 500, jump_beta = 0.4, jump_theta = 1, jump_alpha = 1, jump_gamma = 0.2, jump_z = 0.5, jump_w = 0.5,
                     pr_mean_beta = 0, pr_sd_beta = 1, pr_mean_theta = 0, pr_sd_theta = 1, pr_mean_gamma = 0.5, pr_sd_gamma = 1, pr_a_theta = 0.001, pr_b_theta = 0.001,
-                    pr_mean_alpha = 0.5, pr_sd_alpha = 1, fix_theta_sd = FALSE, fix_alpha_1 = TRUE, ...) {
+                    pr_mean_alpha = 0.5, pr_sd_alpha = 1, fix_theta_sd = FALSE, fix_alpha_1 = TRUE, adapt = NULL, ...) {
   if(!is.na(seed)){
     set.seed(seed)
   }

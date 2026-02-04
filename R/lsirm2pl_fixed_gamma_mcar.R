@@ -6,6 +6,8 @@
 #' @inheritParams lsirm2pl
 #' @param missing.val Numeric; A number to replace missing values. Default is 99.
 #' @param verbose Logical; If TRUE, MCMC samples are printed for each \code{nprint}. Default is FALSE.
+#' @param adapt List; optional adaptive MCMC control. If not \code{NULL}, proposal SDs are adapted during burn-in
+#' only and held fixed afterward.
 #'
 #' @return \code{lsirm2pl_fixed_gamma_mar} returns an object of  list containing the following components:
 #'  \item{data}{Data frame or matrix containing the variables in the model.}
@@ -55,10 +57,11 @@
 #' }
 #' @export
 lsirm2pl_fixed_gamma_mcar = function(data, ndim = 2, niter = 15000, nburn = 2500, nthin = 5, nprint = 500,
-                                     jump_beta = 0.4, jump_theta = 1, jump_alpha = 1.0, jump_z = 0.5, jump_w = 0.5,
+                                     jump_beta = 0.4, jump_theta = 1, jump_alpha = 1, jump_z = 0.5, jump_w = 0.5,
                                      pr_mean_beta = 0, pr_sd_beta = 1, pr_mean_theta = 0, pr_sd_theta = 1,
                                      pr_mean_alpha = 0.5, pr_sd_alpha = 1, pr_a_theta = 0.001, pr_b_theta = 0.001,
-                                     missing.val = 99, verbose=FALSE, fix_theta_sd=FALSE, fix_alpha_1=TRUE){
+                                     missing.val = 99, verbose=FALSE, fix_theta_sd=FALSE, fix_alpha_1=TRUE,
+                                     adapt = NULL){
   if(niter < nburn){
     stop("niter must be greater than burn-in process.")
   }
@@ -67,6 +70,9 @@ lsirm2pl_fixed_gamma_mcar = function(data, ndim = 2, niter = 15000, nburn = 2500
   }else{
     cname = paste("item", 1:ncol(data), sep=" ")
   }
+  
+  # Convert NA to missing.val
+  data[is.na(data)] <- missing.val
 
   # cat("\n\nFitting with MCMC algorithm\n")
 
@@ -75,7 +81,8 @@ lsirm2pl_fixed_gamma_mcar = function(data, ndim = 2, niter = 15000, nburn = 2500
                                           jump_beta=jump_beta, jump_theta=jump_theta, jump_alpha=jump_alpha, jump_z=jump_z, jump_w=jump_w,
                                           pr_mean_beta=pr_mean_beta, pr_sd_beta=pr_sd_beta, pr_mean_theta=pr_mean_theta, pr_sd_theta=pr_sd_theta,
                                           pr_mean_alpha=pr_mean_alpha, pr_sd_alpha=pr_sd_alpha, pr_a_theta=pr_a_theta, pr_b_theta=pr_b_theta,
-                                          missing=missing.val, verbose=verbose, fix_theta_sd=fix_theta_sd, fix_alpha_1=fix_alpha_1)
+                                          missing=missing.val, verbose=verbose, fix_theta_sd=fix_theta_sd, fix_alpha_1=fix_alpha_1,
+                                          adapt=adapt)
   mcmc.inf = list(nburn=nburn, niter=niter, nthin=nthin)
   nsample <- nrow(data)
   nitem <- ncol(data)
@@ -132,6 +139,7 @@ cat("\n")
               bic = bic,
                  mcmc_inf = mcmc.inf,
                  map_inf = map.inf,
+                 tuning = output$tuning,
                  beta_estimate  = beta.estimate,
                  beta_summary = beta.summary,
                  theta_estimate = theta.estimate,

@@ -81,17 +81,92 @@ diagnostic.lsirm <- function(object,
   if(is.null(draw.item$zw.dist)&("zw.dist" %in% which.draw)) draw.item$zw.dist = matrix(c(1, 1), ncol = 2)
   chain_list_all <- vector("list", length = object$chains)
 
+  .gelman_plot_safe <- function(mcmclist, param){
+    mcmclist_param <- coda::as.mcmc.list(lapply(mcmclist, function(ch){
+      mat <- as.matrix(ch)
+      coda::mcmc(mat[, param, drop = FALSE], thin = 1)
+    }))
+
+    # Open a null device to capture plot output without displaying
+    current_dev <- grDevices::dev.cur()
+    grDevices::pdf(file = NULL)
+    
+    # Try to get gelman.plot data
+    out <- tryCatch({
+      coda::gelman.plot(mcmclist_param, auto.layout = FALSE)
+    }, error = function(e){
+      grDevices::dev.off()
+      if(current_dev > 1) grDevices::dev.set(current_dev)
+      message("Skipping Gelman-Rubin plot: ", conditionMessage(e))
+      array_stub <- array(
+        NA_real_,
+        dim = c(1, 1, 2),
+        dimnames = list(NULL, NULL, c("median", "97.5%"))
+      )
+      return(list(shrink = array_stub, last.iter = NA_integer_))
+    })
+    
+    # Close the null device and restore previous device
+    grDevices::dev.off()
+    if(current_dev > 1) grDevices::dev.set(current_dev)
+
+    out
+  }
+
+  readline <- function(prompt = ""){
+    if(interactive()) base::readline(prompt = prompt) else ""
+  }
+
   #### Beta  ------------
   if("beta" %in% which.draw){
 
     if(multi_chain){
-      if(is.null(colnames(object[[1]]$data))){
+      is_grm <- !is.null(object[[1]]$method) && object[[1]]$method == "lsirmgrm"
+      
+      # Handle GRM beta as list structure for each chain
+      for(i in 1:object$chains){
+        if(is_grm && is.list(object[[i]]$beta) && !is.matrix(object[[i]]$beta)){
+          # Beta is stored as list with threshold components (th1, th2, etc.)
+          beta_list <- object[[i]]$beta
+          nitem <- ncol(object[[i]]$data)
+          nthreshold <- length(beta_list)
+          item_names <- if(!is.null(colnames(object[[i]]$data))) colnames(object[[i]]$data) else paste0("i", 1:nitem)
+          
+          # Combine all thresholds by column
+          beta_matrix <- do.call(cbind, beta_list)
+          
+          # Create column names: item:threshold format
+          threshold_names <- names(beta_list)
+          colnames_beta <- character(nitem * nthreshold)
+          for(item in 1:nitem){
+            for(th in 1:nthreshold){
+              colnames_beta[(item-1)*nthreshold + th] <- paste0(item_names[item], ":", threshold_names[th])
+            }
+          }
+          colnames(beta_matrix) <- colnames_beta
+          object[[i]]$beta <- beta_matrix
+        }
+      }
+      
+      if(is.null(colnames(object[[1]]$beta))){
         colnames(object[[1]]$beta) = 1:ncol(object[[1]]$beta)
-      }else{colnames(object[[1]]$beta) <- colnames(object[[1]]$data)}
+      }else{
+        if(!is_grm && !is.null(colnames(object[[1]]$data))){
+          colnames(object[[1]]$beta) <- colnames(object[[1]]$data)
+        }
+      }
 
 
 
-      if((length(draw.item$beta) == 1) & (draw.item$beta[1] == "first")){
+      if(is_grm && is.matrix(draw.item$beta) && ncol(draw.item$beta) == 2){
+        Kminus1 <- object[[1]]$ncat - 1
+        item_idx <- draw.item$beta[,1]
+        th_idx <- draw.item$beta[,2]
+        if(any(item_idx < 1 | item_idx > ncol(object[[1]]$data))) stop("Invalid item index in draw.item$beta")
+        if(any(th_idx < 1 | th_idx > Kminus1)) stop("Invalid threshold index in draw.item$beta")
+        draw.item.num <- (item_idx - 1) * Kminus1 + th_idx
+        draw.item.temp <- colnames(object[[1]]$beta)[draw.item.num]
+      }else if((length(draw.item$beta) == 1) & (draw.item$beta[1] == "first")){
         draw.item.temp = colnames(object[[1]]$beta)[1]
         draw.item.num <- 1
       }else if(is.numeric(draw.item$beta)){
@@ -117,13 +192,52 @@ diagnostic.lsirm <- function(object,
         }
       }
     }else{
-      if(is.null(colnames(object$data))){
+      is_grm <- !is.null(object$method) && object$method == "lsirmgrm"
+      
+      # Handle GRM beta as list structure
+      if(is_grm && is.list(object$beta) && !is.matrix(object$beta)){
+        # Beta is stored as list with threshold components (th1, th2, etc.)
+        # Each component is a matrix: (n_samples x n_items)
+        # Convert to single matrix: (n_samples x (n_items * n_thresholds))
+        beta_list <- object$beta
+        nitem <- ncol(object$data)
+        nthreshold <- length(beta_list)
+        item_names <- if(!is.null(colnames(object$data))) colnames(object$data) else paste0("i", 1:nitem)
+        
+        # Combine all thresholds by column
+        beta_matrix <- do.call(cbind, beta_list)
+        
+        # Create column names: item:threshold format
+        threshold_names <- names(beta_list)
+        colnames_beta <- character(nitem * nthreshold)
+        for(i in 1:nitem){
+          for(j in 1:nthreshold){
+            colnames_beta[(i-1)*nthreshold + j] <- paste0(item_names[i], ":", threshold_names[j])
+          }
+        }
+        colnames(beta_matrix) <- colnames_beta
+        object$beta <- beta_matrix
+      }
+      
+      if(is.null(colnames(object$beta))){
         colnames(object$beta) = 1:ncol(object$beta)
-      }else{colnames(object$beta) <- colnames(object$data)}
+      }else{
+        if(!is_grm && !is.null(colnames(object$data))){
+          colnames(object$beta) <- colnames(object$data)
+        }
+      }
 
 
 
-      if((length(draw.item$beta) == 1) & (draw.item$beta[1] == "first")){
+      if(is_grm && is.matrix(draw.item$beta) && ncol(draw.item$beta) == 2){
+        Kminus1 <- object$ncat - 1
+        item_idx <- draw.item$beta[,1]
+        th_idx <- draw.item$beta[,2]
+        if(any(item_idx < 1 | item_idx > ncol(object$data))) stop("Invalid item index in draw.item$beta")
+        if(any(th_idx < 1 | th_idx > Kminus1)) stop("Invalid threshold index in draw.item$beta")
+        draw.item.num <- (item_idx - 1) * Kminus1 + th_idx
+        draw.item.temp <- colnames(object$beta)[draw.item.num]
+      }else if((length(draw.item$beta) == 1) & (draw.item$beta[1] == "first")){
         draw.item.temp = colnames(object$beta)[1]
         draw.item.num <- 1
       }else if(is.numeric(draw.item$beta)){
@@ -158,8 +272,10 @@ diagnostic.lsirm <- function(object,
 
       # Create data frame
       combined_data <- do.call(rbind, lapply(seq_along(chain_data), function(j) {
-        data.frame(iteration = seq_along(chain_data[[j]]), value = chain_data[[j]], Chain = j)
+        y <- as.numeric(chain_data[[j]])
+        data.frame(iteration = seq_along(y), value = y, Chain = j)
       }))
+      combined_data$var1 <- combined_data$value
 
 
       if(multi_chain){
@@ -180,7 +296,7 @@ diagnostic.lsirm <- function(object,
         # Autocorrelation Plot
         autocorrelation_plots <- lapply(seq_along(chain_data), function(j) {
           acf_data <- acf(chain_data[[j]], plot = FALSE, lag.max = 60)
-          data.frame(Lag = acf_data$lag, ACF = acf_data$acf, Chain = j)
+          data.frame(Lag = as.numeric(acf_data$lag), ACF = as.numeric(acf_data$acf), Chain = j)
         })
 
         # Merge autocorrelation data and plot
@@ -192,40 +308,38 @@ diagnostic.lsirm <- function(object,
           ylab("Autocorrelation") +
           theme(legend.position = "none")
 
-        pdf(file = NULL)
-        # Call gelman.plot
-        gelman_plot <- gelman.plot(chain_data)
-        # Close the null device
-        dev.off()
+        if(gelman.diag){
+          gelman_plot <- .gelman_plot_safe(mcmclist, param)
 
-        median_values <- gelman_plot$shrink[,, "median"]
-        upper_values <- gelman_plot$shrink[,, "97.5%"]
-        iterations <- gelman_plot$last.iter
+          median_values <- gelman_plot$shrink[,, "median"]
+          upper_values <- gelman_plot$shrink[,, "97.5%"]
+          iterations <- gelman_plot$last.iter
 
-        # Create a data frame
-        psrf_data <- data.frame(
-          Iteration = iterations,
-          MedianPSRF = as.vector(median_values),
-          UpperPSRF = as.vector(upper_values)
-        )
-
-        # Reshape for plotting
-        psrf_long <- pivot_longer(psrf_data, cols = c("MedianPSRF", "UpperPSRF"), names_to = "Type", values_to = "PSRF") %>%
-          mutate(Type = recode(Type, "UpperPSRF" = "97.5%", "MedianPSRF" = "Median"))
-        # Check the data
-
-        psrf_plot <- ggplot(psrf_long, aes(x = Iteration, y = PSRF, group = Type)) +
-          geom_line(aes(linetype = Type, color = Type)) +  # Specify line type and color in aes to merge legends
-          # geom_hline(yintercept = 1.1, linetype = "dashed", color = "black", size = 1) +
-          scale_linetype_manual(values = c("97.5%" = "dashed", "Median" = "solid")) +
-          scale_color_manual(values = c("97.5%" = "#377EB8", "Median" = "#E41A1C")) +
-          labs(title = "", x = "Last Iteration in chain", y = "Shrink Factor") +
-          theme_minimal() +
-          theme(legend.title = element_blank(),
-                legend.position.inside = c(1, 1),  # Place legend inside the plot at top-right
-                legend.justification = c("right", "top")  # Anchor the legend at its top-right corner
-
+          # Create a data frame
+          psrf_data <- data.frame(
+            Iteration = iterations,
+            MedianPSRF = as.vector(median_values),
+            UpperPSRF = as.vector(upper_values)
           )
+
+          # Reshape for plotting
+          psrf_long <- pivot_longer(psrf_data, cols = c("MedianPSRF", "UpperPSRF"), names_to = "Type", values_to = "PSRF") %>%
+            mutate(Type = recode(Type, "UpperPSRF" = "97.5%", "MedianPSRF" = "Median"))
+
+          psrf_plot <- ggplot(psrf_long, aes(x = Iteration, y = PSRF, group = Type)) +
+            geom_line(aes(linetype = Type, color = Type)) +
+            scale_linetype_manual(values = c("97.5%" = "dashed", "Median" = "solid")) +
+            scale_color_manual(values = c("97.5%" = "#377EB8", "Median" = "#E41A1C")) +
+            labs(title = "", x = "Last Iteration in chain", y = "Shrink Factor") +
+            theme_minimal() +
+            theme(legend.title = element_blank(),
+                  legend.position.inside = c(1, 1),
+                  legend.justification = c("right", "top")
+
+            )
+        }else{
+          psrf_plot <- grid::nullGrob()
+        }
 
 
         # Combine plots using grid.arrange
@@ -238,10 +352,10 @@ diagnostic.lsirm <- function(object,
 
         if(porder[porder$param == "beta",]$idx == max(porder$idx)){
           if(((length(draw.item.num) > 1)&(i < length(draw.item.num))) ){
-            readline(prompt = "Hit <Return> to see next plot")
+            if(interactive()) readline(prompt = "Hit <Return> to see next plot")
           }
         }else{
-          readline(prompt = "Hit <Return> to see next plot")
+          if(interactive()) readline(prompt = "Hit <Return> to see next plot")
         }
       }else{
 
@@ -377,8 +491,10 @@ diagnostic.lsirm <- function(object,
 
       # Create data frame
       combined_data <- do.call(rbind, lapply(seq_along(chain_data), function(j) {
-        data.frame(iteration = seq_along(chain_data[[j]]), value = chain_data[[j]], Chain = j)
+        y <- as.numeric(chain_data[[j]])
+        data.frame(iteration = seq_along(y), value = y, Chain = j)
       }))
+      combined_data$var1 <- combined_data$value
 
 
       if(multi_chain){
@@ -419,11 +535,7 @@ diagnostic.lsirm <- function(object,
         #   ylab("Autocorrelation") +
         #   theme(legend.position = "none")
 
-        pdf(file = NULL)
-        # Call gelman.plot
-        gelman_plot <- gelman.plot(chain_data)
-        # Close the null device
-        dev.off()
+        gelman_plot <- .gelman_plot_safe(mcmclist, param)
 
 
 
@@ -576,8 +688,10 @@ diagnostic.lsirm <- function(object,
 
       # Create data frame
       combined_data <- do.call(rbind, lapply(seq_along(chain_data), function(j) {
-        data.frame(iteration = seq_along(chain_data[[j]]), value = chain_data[[j]], Chain = j)
+        y <- as.numeric(chain_data[[j]])
+        data.frame(iteration = seq_along(y), value = y, Chain = j)
       }))
+      combined_data$var1 <- combined_data$value
 
 
       if(multi_chain){
@@ -598,7 +712,7 @@ diagnostic.lsirm <- function(object,
         # Autocorrelation Plot
         autocorrelation_plots <- lapply(seq_along(chain_data), function(j) {
           acf_data <- acf(chain_data[[j]], plot = FALSE, lag.max = 60)
-          data.frame(Lag = acf_data$lag, ACF = acf_data$acf, Chain = j)
+          data.frame(Lag = as.numeric(acf_data$lag), ACF = as.numeric(acf_data$acf), Chain = j)
         })
 
         # Merge autocorrelation data and plot
@@ -610,42 +724,37 @@ diagnostic.lsirm <- function(object,
           ylab("Autocorrelation") +
           theme(legend.position = "none")
 
-        pdf(file = NULL)
-        # Call gelman.plot
-        gelman_plot <- gelman.plot(chain_data)
-        # Close the null device
-        dev.off()
+        if(gelman.diag){
+          gelman_plot <- .gelman_plot_safe(mcmclist, param)
 
+          median_values <- gelman_plot$shrink[,, "median"]
+          upper_values <- gelman_plot$shrink[,, "97.5%"]
+          iterations <- gelman_plot$last.iter
 
-
-        median_values <- gelman_plot$shrink[,, "median"]
-        upper_values <- gelman_plot$shrink[,, "97.5%"]
-        iterations <- gelman_plot$last.iter
-
-        # Create a data frame
-        psrf_data <- data.frame(
-          Iteration = iterations,
-          MedianPSRF = as.vector(median_values),
-          UpperPSRF = as.vector(upper_values)
-        )
-
-        # Reshape for plotting
-        psrf_long <- pivot_longer(psrf_data, cols = c("MedianPSRF", "UpperPSRF"), names_to = "Type", values_to = "PSRF") %>%
-          mutate(Type = recode(Type, "UpperPSRF" = "97.5%", "MedianPSRF" = "Median"))
-        # Check the data
-
-        psrf_plot <- ggplot(psrf_long, aes(x = Iteration, y = PSRF, group = Type)) +
-          geom_line(aes(linetype = Type, color = Type)) +  # Specify line type and color in aes to merge legends
-          # geom_hline(yintercept = 1.1, linetype = "dashed", color = "black", size = 1) +
-          scale_linetype_manual(values = c("97.5%" = "dashed", "Median" = "solid")) +
-          scale_color_manual(values = c("97.5%" = "#377EB8", "Median" = "#E41A1C")) +
-          labs(title = "", x = "Last Iteration in chain", y = "Shrink Factor") +
-          theme_minimal() +
-          theme(legend.title = element_blank(),
-                legend.position.inside = c(1, 1),  # Place legend inside the plot at top-right
-                legend.justification = c("right", "top")  # Anchor the legend at its top-right corner
-
+          # Create a data frame
+          psrf_data <- data.frame(
+            Iteration = iterations,
+            MedianPSRF = as.vector(median_values),
+            UpperPSRF = as.vector(upper_values)
           )
+
+          # Reshape for plotting
+          psrf_long <- pivot_longer(psrf_data, cols = c("MedianPSRF", "UpperPSRF"), names_to = "Type", values_to = "PSRF") %>%
+            mutate(Type = recode(Type, "UpperPSRF" = "97.5%", "MedianPSRF" = "Median"))
+
+          psrf_plot <- ggplot(psrf_long, aes(x = Iteration, y = PSRF, group = Type)) +
+            geom_line(aes(linetype = Type, color = Type)) +
+            scale_linetype_manual(values = c("97.5%" = "dashed", "Median" = "solid")) +
+            scale_color_manual(values = c("97.5%" = "#377EB8", "Median" = "#E41A1C")) +
+            labs(title = "", x = "Last Iteration in chain", y = "Shrink Factor") +
+            theme_minimal() +
+            theme(legend.title = element_blank(),
+                  legend.position.inside = c(1, 1),
+                  legend.justification = c("right", "top")
+            )
+        }else{
+          psrf_plot <- grid::nullGrob()
+        }
 
 
         # Combine plots using grid.arrange
@@ -785,8 +894,11 @@ diagnostic.lsirm <- function(object,
 
       # Create data frame
       combined_data <- do.call(rbind, lapply(seq_along(chain_data), function(j) {
-        data.frame(iteration = seq_along(chain_data[[j]]), value = chain_data[[j]], Chain = j)
+        y <- as.numeric(chain_data[[j]])
+        data.frame(iteration = seq_along(y), value = y, Chain = j)
       }))
+      combined_data$var1 <- combined_data$value
+      combined_data$var1 <- combined_data$value
 
 
       if(multi_chain){
@@ -807,7 +919,7 @@ diagnostic.lsirm <- function(object,
         # Autocorrelation Plot
         autocorrelation_plots <- lapply(seq_along(chain_data), function(j) {
           acf_data <- acf(chain_data[[j]], plot = FALSE, lag.max = 60)
-          data.frame(Lag = acf_data$lag, ACF = acf_data$acf, Chain = j)
+          data.frame(Lag = as.numeric(acf_data$lag), ACF = as.numeric(acf_data$acf), Chain = j)
         })
 
         # Merge autocorrelation data and plot
@@ -820,42 +932,38 @@ diagnostic.lsirm <- function(object,
           ylab("Autocorrelation") +
           theme(legend.position = "none")
 
-        pdf(file = NULL)
-        # Call gelman.plot
-        gelman_plot <- gelman.plot(chain_data)
-        # Close the null device
-        dev.off()
+        if(gelman.diag){
+          gelman_plot <- .gelman_plot_safe(mcmclist, param)
 
+          median_values <- gelman_plot$shrink[,, "median"]
+          upper_values <- gelman_plot$shrink[,, "97.5%"]
+          iterations <- gelman_plot$last.iter
 
-
-        median_values <- gelman_plot$shrink[,, "median"]
-        upper_values <- gelman_plot$shrink[,, "97.5%"]
-        iterations <- gelman_plot$last.iter
-
-        # Create a data frame
-        psrf_data <- data.frame(
-          Iteration = iterations,
-          MedianPSRF = as.vector(median_values),
-          UpperPSRF = as.vector(upper_values)
-        )
-
-        # Reshape for plotting
-        psrf_long <- pivot_longer(psrf_data, cols = c("MedianPSRF", "UpperPSRF"), names_to = "Type", values_to = "PSRF") %>%
-          mutate(Type = recode(Type, "UpperPSRF" = "97.5%", "MedianPSRF" = "Median"))
-        # Check the data
-
-        psrf_plot <- ggplot(psrf_long, aes(x = Iteration, y = PSRF, group = Type)) +
-          geom_line(aes(linetype = Type, color = Type)) +  # Specify line type and color in aes to merge legends
-          # geom_hline(yintercept = 1.1, linetype = "dashed", color = "black", size = 1) +
-          scale_linetype_manual(values = c("97.5%" = "dashed", "Median" = "solid")) +
-          scale_color_manual(values = c("97.5%" = "#377EB8", "Median" = "#E41A1C")) +
-          labs(title = "", x = "Last Iteration in chain", y = "Shrink Factor") +
-          theme_minimal() +
-          theme(legend.title = element_blank(),
-                legend.position.inside = c(1, 1),  # Place legend inside the plot at top-right
-                legend.justification = c("right", "top")  # Anchor the legend at its top-right corner
-
+          # Create a data frame
+          psrf_data <- data.frame(
+            Iteration = iterations,
+            MedianPSRF = as.vector(median_values),
+            UpperPSRF = as.vector(upper_values)
           )
+
+          # Reshape for plotting
+          psrf_long <- pivot_longer(psrf_data, cols = c("MedianPSRF", "UpperPSRF"), names_to = "Type", values_to = "PSRF") %>%
+            mutate(Type = recode(Type, "UpperPSRF" = "97.5%", "MedianPSRF" = "Median"))
+
+          psrf_plot <- ggplot(psrf_long, aes(x = Iteration, y = PSRF, group = Type)) +
+            geom_line(aes(linetype = Type, color = Type)) +
+            scale_linetype_manual(values = c("97.5%" = "dashed", "Median" = "solid")) +
+            scale_color_manual(values = c("97.5%" = "#377EB8", "Median" = "#E41A1C")) +
+            labs(title = "", x = "Last Iteration in chain", y = "Shrink Factor") +
+            theme_minimal() +
+            theme(legend.title = element_blank(),
+                  legend.position.inside = c(1, 1),
+                  legend.justification = c("right", "top")
+
+            )
+        }else{
+          psrf_plot <- grid::nullGrob()
+        }
 
 
         # Combine plots using grid.arrange
@@ -918,7 +1026,7 @@ diagnostic.lsirm <- function(object,
             readline(prompt = "Hit <Return> to see next plot")
           }
         }else{
-          readline(prompt = "Hit <Return> to see next plot")
+          if(interactive()) readline(prompt = "Hit <Return> to see next plot")
         }
       }
     }
@@ -937,7 +1045,9 @@ diagnostic.lsirm <- function(object,
 
       chain_list <- list()
       for(i in 1:chains){
-        chain_list[[i]] <- matrix(c(object[[i]]$sigma[,draw.item.num]), ncol = length(pnames),
+        sigma_draw <- object[[i]]$sigma
+        sigma_vec <- if(is.null(dim(sigma_draw))) as.numeric(sigma_draw) else as.numeric(sigma_draw[, draw.item.num])
+        chain_list[[i]] <- matrix(sigma_vec, ncol = length(pnames),
                                   dimnames= list(NULL,pnames))
         if(length(chain_list_all[[i]]) == 0){
           chain_list_all[[i]] <- chain_list[[i]]
@@ -953,8 +1063,10 @@ diagnostic.lsirm <- function(object,
       chains <- 1
 
       chain_list <- list()
-      chain_list[[1]] <- matrix(c(object$sigma[,draw.item.num]), ncol = length(pnames),
-                                dimnames= list(NULL,pnames))
+      sigma_draw <- object$sigma
+      sigma_vec <- if(is.null(dim(sigma_draw))) as.numeric(sigma_draw) else as.numeric(sigma_draw[, draw.item.num])
+      chain_list[[1]] <- matrix(sigma_vec, ncol = length(pnames),
+                dimnames= list(NULL,pnames))
     }
 
     # mcmc_chains <- lapply(chain_list, coda::mcmc, thin = 1)
@@ -972,8 +1084,10 @@ diagnostic.lsirm <- function(object,
 
       # Create data frame
       combined_data <- do.call(rbind, lapply(seq_along(chain_data), function(j) {
-        data.frame(iteration = seq_along(chain_data[[j]]), value = chain_data[[j]], Chain = j)
+        y <- as.numeric(chain_data[[j]])
+        data.frame(iteration = seq_along(y), value = y, Chain = j)
       }))
+      combined_data$var1 <- combined_data$value
 
 
       if(multi_chain){
@@ -994,7 +1108,7 @@ diagnostic.lsirm <- function(object,
         # Autocorrelation Plot
         autocorrelation_plots <- lapply(seq_along(chain_data), function(j) {
           acf_data <- acf(chain_data[[j]], plot = FALSE, lag.max = 60)
-          data.frame(Lag = acf_data$lag, ACF = acf_data$acf, Chain = j)
+          data.frame(Lag = as.numeric(acf_data$lag), ACF = as.numeric(acf_data$acf), Chain = j)
         })
 
         # Merge autocorrelation data and plot
@@ -1007,40 +1121,38 @@ diagnostic.lsirm <- function(object,
           ylab("Autocorrelation") +
           theme(legend.position = "none")
 
-        pdf(file = NULL)
-        # Call gelman.plot
-        gelman_plot <- gelman.plot(chain_data)
-        # Close the null device
-        dev.off()
+        if(gelman.diag){
+          gelman_plot <- .gelman_plot_safe(mcmclist, param)
 
-        median_values <- gelman_plot$shrink[,, "median"]
-        upper_values <- gelman_plot$shrink[,, "97.5%"]
-        iterations <- gelman_plot$last.iter
+          median_values <- gelman_plot$shrink[,, "median"]
+          upper_values <- gelman_plot$shrink[,, "97.5%"]
+          iterations <- gelman_plot$last.iter
 
-        # Create a data frame
-        psrf_data <- data.frame(
-          Iteration = iterations,
-          MedianPSRF = as.vector(median_values),
-          UpperPSRF = as.vector(upper_values)
-        )
-
-        # Reshape for plotting
-        psrf_long <- pivot_longer(psrf_data, cols = c("MedianPSRF", "UpperPSRF"), names_to = "Type", values_to = "PSRF") %>%
-          mutate(Type = recode(Type, "UpperPSRF" = "97.5%", "MedianPSRF" = "Median"))
-        # Check the data
-
-        psrf_plot <- ggplot(psrf_long, aes(x = Iteration, y = PSRF, group = Type)) +
-          geom_line(aes(linetype = Type, color = Type)) +  # Specify line type and color in aes to merge legends
-          # geom_hline(yintercept = 1.1, linetype = "dashed", color = "black", size = 1) +
-          scale_linetype_manual(values = c("97.5%" = "dashed", "Median" = "solid")) +
-          scale_color_manual(values = c("97.5%" = "#377EB8", "Median" = "#E41A1C")) +
-          labs(title = "", x = "Last Iteration in chain", y = "Shrink Factor") +
-          theme_minimal() +
-          theme(legend.title = element_blank(),
-                legend.position.inside = c(1, 1),  # Place legend inside the plot at top-right
-                legend.justification = c("right", "top")  # Anchor the legend at its top-right corner
-
+          # Create a data frame
+          psrf_data <- data.frame(
+            Iteration = iterations,
+            MedianPSRF = as.vector(median_values),
+            UpperPSRF = as.vector(upper_values)
           )
+
+          # Reshape for plotting
+          psrf_long <- pivot_longer(psrf_data, cols = c("MedianPSRF", "UpperPSRF"), names_to = "Type", values_to = "PSRF") %>%
+            mutate(Type = recode(Type, "UpperPSRF" = "97.5%", "MedianPSRF" = "Median"))
+
+          psrf_plot <- ggplot(psrf_long, aes(x = Iteration, y = PSRF, group = Type)) +
+            geom_line(aes(linetype = Type, color = Type)) +
+            scale_linetype_manual(values = c("97.5%" = "dashed", "Median" = "solid")) +
+            scale_color_manual(values = c("97.5%" = "#377EB8", "Median" = "#E41A1C")) +
+            labs(title = "", x = "Last Iteration in chain", y = "Shrink Factor") +
+            theme_minimal() +
+            theme(legend.title = element_blank(),
+                  legend.position.inside = c(1, 1),
+                  legend.justification = c("right", "top")
+
+            )
+        }else{
+          psrf_plot <- grid::nullGrob()
+        }
 
 
         # Combine plots using grid.arrange
@@ -1072,7 +1184,7 @@ diagnostic.lsirm <- function(object,
         # Autocorrelation Plot
         autocorrelation_plots <- lapply(seq_along(chain_data), function(j) {
           acf_data <- acf(chain_data[[j]], plot = FALSE, lag.max = 60)
-          data.frame(Lag = acf_data$lag, ACF = acf_data$acf, Chain = j)
+          data.frame(Lag = as.numeric(acf_data$lag), ACF = as.numeric(acf_data$acf), Chain = j)
         })
 
         # Merge autocorrelation data and plot
@@ -1149,8 +1261,11 @@ diagnostic.lsirm <- function(object,
 
       # Create data frame
       combined_data <- do.call(rbind, lapply(seq_along(chain_data), function(j) {
-        data.frame(iteration = seq_along(chain_data[[j]]), value = chain_data[[j]], Chain = j)
+        y <- as.numeric(chain_data[[j]])
+        data.frame(iteration = seq_along(y), value = y, Chain = j)
       }))
+
+      combined_data$var1 <- combined_data$value
 
 
       if(multi_chain){
@@ -1171,7 +1286,7 @@ diagnostic.lsirm <- function(object,
         # Autocorrelation Plot
         autocorrelation_plots <- lapply(seq_along(chain_data), function(j) {
           acf_data <- acf(chain_data[[j]], plot = FALSE, lag.max = 60)
-          data.frame(Lag = acf_data$lag, ACF = acf_data$acf, Chain = j)
+          data.frame(Lag = as.numeric(acf_data$lag), ACF = as.numeric(acf_data$acf), Chain = j)
         })
 
         # Merge autocorrelation data and plot
@@ -1183,42 +1298,38 @@ diagnostic.lsirm <- function(object,
           ylab("Autocorrelation") +
           theme(legend.position = "none")
 
-        pdf(file = NULL)
-        # Call gelman.plot
-        gelman_plot <- gelman.plot(chain_data)
-        # Close the null device
-        dev.off()
+        if(gelman.diag){
+          gelman_plot <- .gelman_plot_safe(mcmclist, param)
 
+          median_values <- gelman_plot$shrink[,, "median"]
+          upper_values <- gelman_plot$shrink[,, "97.5%"]
+          iterations <- gelman_plot$last.iter
 
-
-        median_values <- gelman_plot$shrink[,, "median"]
-        upper_values <- gelman_plot$shrink[,, "97.5%"]
-        iterations <- gelman_plot$last.iter
-
-        # Create a data frame
-        psrf_data <- data.frame(
-          Iteration = iterations,
-          MedianPSRF = as.vector(median_values),
-          UpperPSRF = as.vector(upper_values)
-        )
-
-        # Reshape for plotting
-        psrf_long <- pivot_longer(psrf_data, cols = c("MedianPSRF", "UpperPSRF"), names_to = "Type", values_to = "PSRF") %>%
-          mutate(Type = recode(Type, "UpperPSRF" = "97.5%", "MedianPSRF" = "Median"))
-        # Check the data
-
-        psrf_plot <- ggplot(psrf_long, aes(x = Iteration, y = PSRF, group = Type)) +
-          geom_line(aes(linetype = Type, color = Type)) +  # Specify line type and color in aes to merge legends
-          # geom_hline(yintercept = 1.1, linetype = "dashed", color = "black", size = 1) +
-          scale_linetype_manual(values = c("97.5%" = "dashed", "Median" = "solid")) +
-          scale_color_manual(values = c("97.5%" = "#377EB8", "Median" = "#E41A1C")) +
-          labs(title = "", x = "Last Iteration in chain", y = "Shrink Factor") +
-          theme_minimal() +
-          theme(legend.title = element_blank(),
-                legend.position.inside = c(1, 1),  # Place legend inside the plot at top-right
-                legend.justification = c("right", "top")  # Anchor the legend at its top-right corner
-
+          # Create a data frame
+          psrf_data <- data.frame(
+            Iteration = iterations,
+            MedianPSRF = as.vector(median_values),
+            UpperPSRF = as.vector(upper_values)
           )
+
+          # Reshape for plotting
+          psrf_long <- pivot_longer(psrf_data, cols = c("MedianPSRF", "UpperPSRF"), names_to = "Type", values_to = "PSRF") %>%
+            mutate(Type = recode(Type, "UpperPSRF" = "97.5%", "MedianPSRF" = "Median"))
+
+          psrf_plot <- ggplot(psrf_long, aes(x = Iteration, y = PSRF, group = Type)) +
+            geom_line(aes(linetype = Type, color = Type)) +
+            scale_linetype_manual(values = c("97.5%" = "dashed", "Median" = "solid")) +
+            scale_color_manual(values = c("97.5%" = "#377EB8", "Median" = "#E41A1C")) +
+            labs(title = "", x = "Last Iteration in chain", y = "Shrink Factor") +
+            theme_minimal() +
+            theme(legend.title = element_blank(),
+                  legend.position.inside = c(1, 1),
+                  legend.justification = c("right", "top")
+
+            )
+        }else{
+          psrf_plot <- grid::nullGrob()
+        }
 
 
         # Combine plots using grid.arrange
@@ -1250,7 +1361,7 @@ diagnostic.lsirm <- function(object,
         # Autocorrelation Plot
         autocorrelation_plots <- lapply(seq_along(chain_data), function(j) {
           acf_data <- acf(chain_data[[j]], plot = FALSE, lag.max = 60)
-          data.frame(Lag = acf_data$lag, ACF = acf_data$acf, Chain = j)
+          data.frame(Lag = as.numeric(acf_data$lag), ACF = as.numeric(acf_data$acf), Chain = j)
         })
 
         # Merge autocorrelation data and plot
@@ -1349,8 +1460,11 @@ diagnostic.lsirm <- function(object,
       chain_data <- lapply(mcmclist, function(chain) chain[, param])
 
       combined_data <- do.call(rbind, lapply(seq_along(chain_data), function(j) {
-        data.frame(iteration = seq_along(chain_data[[j]]), value = chain_data[[j]], Chain = j)
+        y <- as.numeric(chain_data[[j]])
+        data.frame(iteration = seq_along(y), value = y, Chain = j)
       }))
+
+      combined_data$var1 <- combined_data$value
 
       if(multi_chain){
 
@@ -1367,7 +1481,7 @@ diagnostic.lsirm <- function(object,
 
         autocorrelation_plots <- lapply(seq_along(chain_data), function(j) {
           acf_data <- acf(chain_data[[j]], plot = FALSE, lag.max = 60)
-          data.frame(Lag = acf_data$lag, ACF = acf_data$acf, Chain = j)
+          data.frame(Lag = as.numeric(acf_data$lag), ACF = as.numeric(acf_data$acf), Chain = j)
         })
 
         acf_combined <- do.call(rbind, autocorrelation_plots)
@@ -1378,9 +1492,8 @@ diagnostic.lsirm <- function(object,
           ylab("Autocorrelation") +
           theme(legend.position = "none")
 
-        pdf(file = NULL)
-        gelman_plot <- gelman.plot(chain_data)
-        dev.off()
+        if(gelman.diag){
+          gelman_plot <- .gelman_plot_safe(mcmclist, param)
 
         median_values <- gelman_plot$shrink[,, "median"]
         upper_values <- gelman_plot$shrink[,, "97.5%"]
@@ -1406,6 +1519,10 @@ diagnostic.lsirm <- function(object,
                 legend.justification = c("right", "top")
           )
 
+        }else{
+          psrf_plot <- grid::nullGrob()
+        }
+
         combined_plot <- grid.arrange(arrangeGrob(trace_plot,
                                                   density_plot,
                                                   autocorrelation_plot,
@@ -1414,10 +1531,10 @@ diagnostic.lsirm <- function(object,
                                                   ncol = 2))
         if(porder[porder$param == "z",]$idx == max(porder$idx)){
           if(((draw.item.num) > 1)&(i < (draw.item.num))){
-            readline(prompt = "Hit <Return> to see next plot")
+            if(interactive()) readline(prompt = "Hit <Return> to see next plot")
           }
         }else{
-          readline(prompt = "Hit <Return> to see next plot")
+          if(interactive()) readline(prompt = "Hit <Return> to see next plot")
         }
         
       }else{
@@ -1435,7 +1552,7 @@ diagnostic.lsirm <- function(object,
 
         autocorrelation_plots <- lapply(seq_along(chain_data), function(j) {
           acf_data <- acf(chain_data[[j]], plot = FALSE, lag.max = 60)
-          data.frame(Lag = acf_data$lag, ACF = acf_data$acf, Chain = j)
+          data.frame(Lag = as.numeric(acf_data$lag), ACF = as.numeric(acf_data$acf), Chain = j)
         })
 
         acf_combined <- do.call(rbind, autocorrelation_plots)
@@ -1460,7 +1577,7 @@ diagnostic.lsirm <- function(object,
             readline(prompt = "Hit <Return> to see next plot")
           }
         }else{
-          readline(prompt = "Hit <Return> to see next plot")
+          if(interactive()) readline(prompt = "Hit <Return> to see next plot")
         }
       }
     }
@@ -1536,8 +1653,11 @@ diagnostic.lsirm <- function(object,
       chain_data <- lapply(mcmclist, function(chain) chain[, param])
 
       combined_data <- do.call(rbind, lapply(seq_along(chain_data), function(j) {
-        data.frame(iteration = seq_along(chain_data[[j]]), value = chain_data[[j]], Chain = j)
+        y <- as.numeric(chain_data[[j]])
+        data.frame(iteration = seq_along(y), value = y, Chain = j)
       }))
+
+      combined_data$var1 <- combined_data$value
 
       if(multi_chain){
 
@@ -1554,7 +1674,7 @@ diagnostic.lsirm <- function(object,
 
         autocorrelation_plots <- lapply(seq_along(chain_data), function(j) {
           acf_data <- acf(chain_data[[j]], plot = FALSE, lag.max = 60)
-          data.frame(Lag = acf_data$lag, ACF = acf_data$acf, Chain = j)
+          data.frame(Lag = as.numeric(acf_data$lag), ACF = as.numeric(acf_data$acf), Chain = j)
         })
 
         acf_combined <- do.call(rbind, autocorrelation_plots)
@@ -1565,9 +1685,8 @@ diagnostic.lsirm <- function(object,
           ylab("Autocorrelation") +
           theme(legend.position = "none")
 
-        pdf(file = NULL)
-        gelman_plot <- gelman.plot(chain_data)
-        dev.off()
+        if(gelman.diag){
+          gelman_plot <- .gelman_plot_safe(mcmclist, param)
 
         median_values <- gelman_plot$shrink[,, "median"]
         upper_values <- gelman_plot$shrink[,, "97.5%"]
@@ -1593,6 +1712,10 @@ diagnostic.lsirm <- function(object,
                 legend.justification = c("right", "top")
           )
 
+        }else{
+          psrf_plot <- grid::nullGrob()
+        }
+
         combined_plot <- grid.arrange(arrangeGrob(trace_plot,
                                                   density_plot,
                                                   autocorrelation_plot,
@@ -1602,10 +1725,10 @@ diagnostic.lsirm <- function(object,
 
         if(porder[porder$param == "w",]$idx == max(porder$idx)){
           if(((draw.item.num) > 1)&(i < (draw.item.num))){
-            readline(prompt = "Hit <Return> to see next plot")
+            if(interactive()) readline(prompt = "Hit <Return> to see next plot")
           }
         }else{
-          readline(prompt = "Hit <Return> to see next plot")
+          if(interactive()) readline(prompt = "Hit <Return> to see next plot")
         }
       }else{
 
@@ -1622,7 +1745,7 @@ diagnostic.lsirm <- function(object,
 
         autocorrelation_plots <- lapply(seq_along(chain_data), function(j) {
           acf_data <- acf(chain_data[[j]], plot = FALSE, lag.max = 60)
-          data.frame(Lag = acf_data$lag, ACF = acf_data$acf, Chain = j)
+          data.frame(Lag = as.numeric(acf_data$lag), ACF = as.numeric(acf_data$acf), Chain = j)
         })
 
         acf_combined <- do.call(rbind, autocorrelation_plots)
@@ -1647,7 +1770,7 @@ diagnostic.lsirm <- function(object,
             readline(prompt = "Hit <Return> to see next plot")
           }
         }else{
-          readline(prompt = "Hit <Return> to see next plot")
+          if(interactive()) readline(prompt = "Hit <Return> to see next plot")
         }
       }
     }
@@ -1676,11 +1799,12 @@ diagnostic.lsirm <- function(object,
           
           iz = draw.item$zw.dist[j,1]
           iw = draw.item$zw.dist[j,2]
-          
-          if(is.vector(object[[i]]$z[,j,])){
-            dist_temp[,j] <- sum((object[[i]]$z[,iz,] - object[[i]]$w[,iw,])^2)
+
+          if(dim(object[[i]]$z)[3] == 1){
+            dist_temp[,j] <- (object[[i]]$z[,iz,1] - object[[i]]$w[,iw,1])^2
           }else{
-            dist_temp[,j] <- apply(apply(object[[i]]$z[,iz,] - object[[i]]$w[,iw,], 1, function(x) x^2), 2, sum)
+            delta <- object[[i]]$z[,iz,] - object[[i]]$w[,iw,]
+            dist_temp[,j] <- rowSums(delta^2)
           }
         }
         chain_list[[i]] <- matrix(dist_temp, ncol = length(pnames),
@@ -1707,11 +1831,12 @@ diagnostic.lsirm <- function(object,
         
         iz = draw.item$zw.dist[j,1]
         iw = draw.item$zw.dist[j,2]
-        
-        if(is.vector(object$z[,j,])){
-          dist_temp[,j] <- sum((object$z[,iz,] - object$w[,iw,])^2)
+
+        if(dim(object$z)[3] == 1){
+          dist_temp[,j] <- (object$z[,iz,1] - object$w[,iw,1])^2
         }else{
-          dist_temp[,j] <- apply(apply(object$z[,iz,] - object$w[,iw,], 1, function(x) x^2), 2, sum)
+          delta <- object$z[,iz,] - object$w[,iw,]
+          dist_temp[,j] <- rowSums(delta^2)
         }
         
       }
@@ -1734,8 +1859,11 @@ diagnostic.lsirm <- function(object,
       
       # Create data frame
       combined_data <- do.call(rbind, lapply(seq_along(chain_data), function(j) {
-        data.frame(iteration = seq_along(chain_data[[j]]), value = chain_data[[j]], Chain = j)
+        y <- as.numeric(chain_data[[j]])
+        data.frame(iteration = seq_along(y), value = y, Chain = j)
       }))
+
+      combined_data$var1 <- combined_data$value
       
       
       if(multi_chain){
@@ -1756,7 +1884,7 @@ diagnostic.lsirm <- function(object,
         # Autocorrelation Plot
         autocorrelation_plots <- lapply(seq_along(chain_data), function(j) {
           acf_data <- acf(chain_data[[j]], plot = FALSE, lag.max = 60)
-          data.frame(Lag = acf_data$lag, ACF = acf_data$acf, Chain = j)
+          data.frame(Lag = as.numeric(acf_data$lag), ACF = as.numeric(acf_data$acf), Chain = j)
         })
         
         # Merge autocorrelation data and plot
@@ -1768,9 +1896,8 @@ diagnostic.lsirm <- function(object,
           ylab("Autocorrelation") +
           theme(legend.position = "none")
         
-        pdf(file = NULL)
-        gelman_plot <- gelman.plot(chain_data)
-        dev.off()
+        if(gelman.diag){
+          gelman_plot <- .gelman_plot_safe(mcmclist, param)
         
         median_values <- gelman_plot$shrink[,, "median"]
         upper_values <- gelman_plot$shrink[,, "97.5%"]
@@ -1800,6 +1927,10 @@ diagnostic.lsirm <- function(object,
           )
         
         
+        }else{
+          psrf_plot <- grid::nullGrob()
+        }
+
         # Combine plots using grid.arrange
         combined_plot <- grid.arrange(arrangeGrob(trace_plot,
                                                   density_plot,
@@ -1810,10 +1941,10 @@ diagnostic.lsirm <- function(object,
         
         if(porder[porder$param == "zw.dist",]$idx == max(porder$idx)){
           if(((draw.item.num) > 1)&(i < (draw.item.num))){
-            readline(prompt = "Hit <Return> to see next plot")
+            if(interactive()) readline(prompt = "Hit <Return> to see next plot")
           }
         }else{
-          readline(prompt = "Hit <Return> to see next plot")
+          if(interactive()) readline(prompt = "Hit <Return> to see next plot")
         }
         
       }else{
@@ -1834,7 +1965,7 @@ diagnostic.lsirm <- function(object,
         # Autocorrelation Plot
         autocorrelation_plots <- lapply(seq_along(chain_data), function(j) {
           acf_data <- acf(chain_data[[j]], plot = FALSE, lag.max = 60)
-          data.frame(Lag = acf_data$lag, ACF = acf_data$acf, Chain = j)
+          data.frame(Lag = as.numeric(acf_data$lag), ACF = as.numeric(acf_data$acf), Chain = j)
         })
         
         # Merge autocorrelation data and plot
@@ -1863,7 +1994,7 @@ diagnostic.lsirm <- function(object,
             readline(prompt = "Hit <Return> to see next plot")
           }
         }else{
-          readline(prompt = "Hit <Return> to see next plot")
+          if(interactive()) readline(prompt = "Hit <Return> to see next plot")
         }
         
       }
@@ -1875,9 +2006,19 @@ diagnostic.lsirm <- function(object,
 
   if(gelman.diag == TRUE){
     if(object$chains > 1){
-      mcmc_chains <- lapply(chain_list_all, function(x) coda::mcmc(x, thin = 1))
-      mcmclist <- coda::as.mcmc.list(mcmc_chains)
-      print(coda::gelman.diag(mcmclist))
+      if(length(chain_list_all) == 0 || any(sapply(chain_list_all, is.null)) || any(sapply(chain_list_all, function(x) length(x) == 0))){
+        message("\nWarning: No MCMC samples collected for Gelman-Rubin diagnostic.")
+        message("This may occur if no parameters were selected in draw.item.")
+      }else{
+        cat("\n")
+        cat("==================================================\n")
+        cat("Gelman and Rubin's convergence diagnostic\n")
+        cat("==================================================\n\n")
+        mcmc_chains <- lapply(chain_list_all, function(x) coda::mcmc(x, thin = 1))
+        mcmclist <- coda::as.mcmc.list(mcmc_chains)
+        print(coda::gelman.diag(mcmclist))
+        cat("\n")
+      }
     }else{
       stop("Gelman and Rubin's convergence diagnostic requires at least two chains for computation.")
     }

@@ -5,7 +5,7 @@
 #' \link{lsirm2pl_mar_ss} factorizes item response matrix into column-wise item effect, row-wise respondent effect in a latent space, while ignoring the missing element under the assumption of missing completely at random. Unlike 1PL model, 2PL model assumes the item effect can vary according to respondent, allowing additional parameter multiplied with respondent effect.  The resulting latent space provides an interaction map that represents interactions between respondents and items.
 #'
 #' @inheritParams lsirm2pl
-#' @param jump_gamma Numeric; the jumping rule for the theta proposal density. Default is 1.0.
+#' @param jump_gamma Numeric; the jumping rule for the theta proposal density. Default is 1.
 #' @param pr_spike_mean Numeric; the mean of spike prior for log gamma. Default is -3.
 #' @param pr_spike_sd Numeric; the standard deviation of spike prior for log gamma. Default is 1.
 #' @param pr_slab_mean Numeric; the mean of spike prior for log gamma. Default is 0.5.
@@ -69,7 +69,7 @@
 #' }
 #' @export
 lsirm2pl_mcar_ss = function(data, ndim = 2, niter = 15000, nburn = 2500, nthin = 5, nprint = 500,
-                            jump_beta = 0.4, jump_theta = 1.0, jump_alpha = 1.0, jump_gamma = 1.0, jump_z = 0.5, jump_w = 0.5,
+                            jump_beta = 0.4, jump_theta = 1.0, jump_alpha = 1, jump_gamma = 1.0, jump_z = 0.5, jump_w = 0.5,
                             pr_mean_beta = 0, pr_sd_beta = 1.0, pr_mean_theta = 0, pr_sd_theta = 1.0,
                             pr_spike_mean = -3, pr_spike_sd = 1.0, pr_slab_mean = 0.5, pr_slab_sd = 1.0 ,
                             pr_mean_alpha = 0.5, pr_sd_alpha = 1.0,
@@ -83,6 +83,9 @@ lsirm2pl_mcar_ss = function(data, ndim = 2, niter = 15000, nburn = 2500, nthin =
   }else{
     cname = paste("item", 1:ncol(data), sep=" ")
   }
+  
+  # Convert NA to missing.val
+  data[is.na(data)] <- missing.val
 
   # cat("\n\nFitting with MCMC algorithm\n")
 
@@ -167,7 +170,7 @@ cat("\n")
                  z_estimate     = z.est,
                  w_estimate     = w.est,
                  pi_estimate    = pi.estimate,
-                 beta           = output$beta,
+                 xi_estimate    = xi.estimate,                 beta           = output$beta,
                  theta          = output$theta,
                  theta_sd       = output$sigma_theta,
                  gamma          = output$gamma,
@@ -175,7 +178,7 @@ cat("\n")
                  z              = z.proc,
                  w              = w.proc,
                  pi             = output$pi,
-                 z_raw          = output$z,
+                 xi             = output$xi,                 z_raw          = output$z,
                  w_raw          = output$w,
                  accept_beta    = output$accept_beta,
                  accept_theta   = output$accept_theta,

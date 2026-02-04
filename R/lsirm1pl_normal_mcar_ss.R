@@ -4,7 +4,7 @@
 #' \link{lsirm1pl_normal_mcar_ss} factorizes continuous item response matrix into column-wise item effect, row-wise respondent effect and further embeds interaction effect in a latent space, while ignoring the missing element under the assumption of missing completely at random. The resulting latent space provides an interaction map that represents interactions between respondents and items.
 #'
 #' @inheritParams lsirm1pl
-#' @param jump_gamma Numeric; the jumping rule for the theta proposal density. Default is 1.0.
+#' @param jump_gamma Numeric; the jumping rule for the theta proposal density. Default is 1.
 #' @param pr_spike_mean Numeric; the mean of spike prior for log gamma. Default is -3.
 #' @param pr_spike_sd Numeric; the standard deviation of spike prior for log gamma. Default is 1.
 #' @param pr_slab_mean Numeric; the mean of spike prior for log gamma. Default is 0.5.
@@ -81,6 +81,9 @@ lsirm1pl_normal_mcar_ss = function(data, ndim = 2, niter = 15000, nburn = 2500, 
   }else{
     cname = paste("item", 1:ncol(data), sep=" ")
   }
+  
+  # Convert NA to missing.val
+  data[is.na(data)] <- missing.val
 
   # cat("\n\nFitting with MCMC algorithm\n")
 
@@ -148,7 +151,7 @@ cat("\n")
   }else{
     log_like = log_likelihood_normal_cpp(as.matrix(data), ndim, as.matrix(beta.estimate), as.matrix(theta.estimate), 0, z.est, w.est, sigma.estimate, missing.val)
   }
-  p = nitem + nsample + 1 + 1 + ndim * nitem + ndim * nsample + 2 + 1
+  p = nitem + nsample + 1 + 1 + ndim * nitem + ndim * nsample + 2 + 1 + 1 # added sigma
   bic = -2 * log_like[[1]] + p * log(nitem * nsample)
 
   result <- list(data = data,
@@ -165,6 +168,7 @@ cat("\n")
                  z_estimate     = z.est,
                  w_estimate     = w.est,
                  pi_estimate    = pi.estimate,
+                 xi_estimate    = xi.estimate,
                  beta           = output$beta,
                  theta          = output$theta,
                  theta_sd       = output$sigma_theta,
@@ -175,11 +179,21 @@ cat("\n")
                  z_raw          = output$z,
                  w_raw          = output$w,
                  pi             = output$pi,
+                 xi             = output$xi,
                  accept_beta    = output$accept_beta,
                  accept_theta   = output$accept_theta,
                  accept_w       = output$accept_w,
                  accept_z       = output$accept_z,
                  accept_gamma   = output$accept_gamma)
+
+  result$call <- match.call()
+  result$method <- "lsirm1pl"
+  result$missing <- "mcar"
+  result$varselect <- TRUE
+  result$dtype <- "continuous"
+  result$chains <- 1
+  result$fixed_gamma <- FALSE
+
   class(result) = "lsirm"
 
   return(result)

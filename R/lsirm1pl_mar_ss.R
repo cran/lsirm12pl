@@ -4,7 +4,7 @@
 #'
 #'
 #' @inheritParams lsirm1pl
-#' @param jump_gamma Numeric; the jumping rule for the theta proposal density. Default is 1.0.
+#' @param jump_gamma Numeric; the jumping rule for the theta proposal density. Default is 1.
 #' @param pr_spike_mean Numeric; the mean of spike prior for log gamma. Default is -3.
 #' @param pr_spike_sd Numeric; the standard deviation of spike prior for log gamma. Default is 1.
 #' @param pr_slab_mean Numeric; the mean of spike prior for log gamma. Default is 0.5.
@@ -80,6 +80,10 @@ lsirm1pl_mar_ss = function(data, ndim = 2, niter = 15000, nburn = 2500, nthin = 
   }else{
     cname = paste("item", 1:ncol(data), sep=" ")
   }
+  
+  # Convert NA to missing.val
+  data[is.na(data)] <- missing.val
+  
   # cat("\n\nFitting with MCMC algorithm\n")
 
   output <- lsirm1pl_mar_ss_cpp(data=as.matrix(data), ndim=ndim, niter=niter, nburn=nburn, nthin=nthin, nprint=nprint,
@@ -147,8 +151,8 @@ cat("\n")
   bic = -2 * log_like[[1]] + p * log(nitem * nsample)
 
   result <- list(data = data,
-              missing.val = missing.val,
-              bic = bic,
+                 missing.val = missing.val,
+                 bic = bic,
                  mcmc_inf = mcmc.inf,
                  map_inf = map.inf,
                  beta_estimate  = beta.estimate,
@@ -160,6 +164,7 @@ cat("\n")
                  w_estimate     = w.est,
                  imp_estimate   = imp.estimate,
                  pi_estimate    = pi.estimate,
+                 xi_estimate    = xi.estimate,
                  beta           = output$beta,
                  theta          = output$theta,
                  theta_sd       = output$sigma_theta,
@@ -170,11 +175,21 @@ cat("\n")
                  w_raw          = output$w,
                  imp            = output$impute,
                  pi             = output$pi,
+                 xi             = output$xi,
                  accept_beta    = output$accept_beta,
                  accept_theta   = output$accept_theta,
                  accept_w       = output$accept_w,
                  accept_z       = output$accept_z,
                  accept_gamma   = output$accept_gamma)
+
+  result$call <- match.call()
+  result$method <- "lsirm1pl"
+  result$missing <- "mar"
+  result$varselect <- TRUE
+  result$dtype <- "binary"
+  result$chains <- 1
+  result$fixed_gamma <- FALSE
+
   class(result) = "lsirm"
 
   return(result)

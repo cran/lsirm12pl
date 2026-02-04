@@ -4,7 +4,7 @@
 #' \link{lsirm1pl_normal_mar_ss} factorizes continuous item response matrix into column-wise item effect, row-wise respondent effect and further embeds interaction effect in a latent space, while considering the missing element under the assumption of missing at random. The resulting latent space provides an interaction map that represents interactions between respondents and items.
 #'
 #' @inheritParams lsirm1pl
-#' @param jump_gamma Numeric; the jumping rule for the theta proposal density. Default is 1.0.
+#' @param jump_gamma Numeric; the jumping rule for the theta proposal density. Default is 1.
 #' @param pr_spike_mean Numeric; the mean of spike prior for log gamma. Default is -3.
 #' @param pr_spike_sd Numeric; the standard deviation of spike prior for log gamma. Default is 1.
 #' @param pr_slab_mean Numeric; the mean of spike prior for log gamma. Default is 0.5.
@@ -82,6 +82,10 @@ lsirm1pl_normal_mar_ss = function(data, ndim = 2, niter = 15000, nburn = 2500, n
   }else{
     cname = paste("item", 1:ncol(data), sep=" ")
   }
+  
+  # Convert NA to missing.val
+  data[is.na(data)] <- missing.val
+  
   # cat("\n\nFitting with MCMC algorithm\n")
 
   output <- lsirm1pl_normal_mar_ss_cpp(data=as.matrix(data), ndim=ndim, niter=niter, nburn=nburn, nthin=nthin, nprint=nprint,
@@ -98,7 +102,7 @@ lsirm1pl_normal_mar_ss = function(data, ndim = 2, niter = 15000, nburn = 2500, n
 
   nmcmc = as.integer((niter - nburn) / nthin)
   max.address = min(which.max(output$map))
-  map.inf = data.frame(value = output$map[which.max(output$map)], iter = which.max(output$map))
+  map.inf = data.frame(value = output$map[max.address], iter = max.address)
   w.star = output$w[max.address,,]
   z.star = output$z[max.address,,]
   w.proc = array(0,dim=c(nmcmc,nitem,ndim))
@@ -143,15 +147,17 @@ cat("\n")
   rownames(beta.summary) <- cname
 
   # Calculate BIC
-   # cat("\n\nCalculate BIC\n")
-  missing_est = ifelse(imp.estimate > 0.5, 1, 0)
-  data[data == missing.val] = missing_est
+  # cat("\n\nCalculate BIC\n")
+  if (length(imp.estimate) > 0) {
+    data[data == missing.val] = imp.estimate
+  }
+
   if(pi.estimate > 0.5){
     log_like = log_likelihood_normal_cpp(as.matrix(data), ndim, as.matrix(beta.estimate), as.matrix(theta.estimate), gamma.estimate, z.est, w.est, sigma.estimate, missing.val)
   }else{
     log_like = log_likelihood_normal_cpp(as.matrix(data), ndim, as.matrix(beta.estimate), as.matrix(theta.estimate), 0, z.est, w.est, sigma.estimate, missing.val)
   }
-  p = nitem + nsample + 1 + 1 + ndim * nitem + ndim * nsample + 2 + 1
+  p = nitem + nsample + 1 + 1 + ndim * nitem + ndim * nsample + 2 + 1 + 1 # added sigma
   bic = -2 * log_like[[1]] + p * log(nitem * nsample)
 
   result <- list(data = data,
@@ -163,28 +169,39 @@ cat("\n")
                  beta_summary = beta.summary,
                  theta_estimate = theta.estimate,
                  sigma_theta_estimate    = sigma_theta.estimate,
-                 sigma_estimate    = sigma.estimate,
+                 sigma_estimate = sigma.estimate,
                  gamma_estimate = gamma.estimate,
                  z_estimate     = z.est,
                  w_estimate     = w.est,
                  imp_estimate   = imp.estimate,
                  pi_estimate    = pi.estimate,
+                 xi_estimate    = xi.estimate,
                  beta           = output$beta,
                  theta          = output$theta,
                  theta_sd       = output$sigma_theta,
-                 sigma       = output$sigma,
+                 sigma          = output$sigma,
                  gamma          = output$gamma,
                  z              = z.proc,
                  w              = w.proc,
                  z_raw          = output$z,
                  w_raw          = output$w,
-                 imp            = output$impute,
                  pi             = output$pi,
+                 xi             = output$xi,
+                 imp            = output$impute,
                  accept_beta    = output$accept_beta,
                  accept_theta   = output$accept_theta,
                  accept_w       = output$accept_w,
                  accept_z       = output$accept_z,
                  accept_gamma   = output$accept_gamma)
+
+  result$call <- match.call()
+  result$method <- "lsirm1pl"
+  result$missing <- "mar"
+  result$varselect <- TRUE
+  result$dtype <- "continuous"
+  result$chains <- 1
+  result$fixed_gamma <- FALSE
+
   class(result) = "lsirm"
 
   return(result)

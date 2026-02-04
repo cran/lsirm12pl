@@ -5,9 +5,9 @@
 #' \link{lsirm1pl_normal_mcar} factorizes continuous item response matrix into column-wise item effect, row-wise respondent effect and further embeds interaction effect in a latent space, while ignoring the missing element under the assumption of missing completely at random. The resulting latent space provides an interaction map that represents interactions between respondents and items.
 #'
 #' @inheritParams lsirm1pl
-#' @param jump_gamma Numeric; the jumping rule for the gamma proposal density. Default is 0.025
+#' @param jump_gamma Numeric; the jumping rule for the gamma proposal density. Default is 0.2
 #' @param pr_mean_gamma Numeric; mean of log normal prior for gamma. Default is 0.5.
-#' @param pr_sd_gamma Numeric; standard deviation of log normal prior for gamma. Default is 1.0.
+#' @param pr_sd_gamma Numeric; standard deviation of log normal prior for gamma. Default is 1.
 #' @param pr_a_eps Numeric; the shape parameter of inverse gamma prior for variance of data likelihood. Default is 0.001.
 #' @param pr_b_eps Numeric; the scale parameter of inverse gamma prior for variance of data likelihood. Default is 0.001.
 #' @param verbose Logical; If TRUE, MCMC samples are printed for each \code{nprint}. Default is FALSE.
@@ -72,8 +72,9 @@ lsirm1pl_normal_mcar = function(data, ndim = 2, niter = 15000, nburn = 2500, nth
     cname = colnames(data)
   }else{
     cname = paste("item", 1:ncol(data), sep=" ")
-  }
-
+  }  
+  # Convert NA to missing.val
+  data[is.na(data)] <- missing.val
   # cat("\n\nFitting with MCMC algorithm\n")
 
 
@@ -133,7 +134,7 @@ cat("\n")
   # Calculate BIC
   # cat("\n\nCalculate BIC\n")
   log_like = log_likelihood_normal_cpp(as.matrix(data), ndim, as.matrix(beta.estimate), as.matrix(theta.estimate), gamma.estimate, z.est, w.est, sigma.estimate, missing.val)
-  p = nitem + nsample + 1 + 1 + ndim * nitem + ndim * nsample + 1
+  p = nitem + nsample + 1 + 1 + ndim * nitem + ndim * nsample + 1 + 1 # added sigma
   bic = -2 * log_like[[1]] + p * log(nitem * nsample)
 
   result <- list(data = data,
@@ -163,6 +164,15 @@ cat("\n")
                  accept_w       = output$accept_w,
                  accept_z       = output$accept_z,
                  accept_gamma   = output$accept_gamma)
+
+  result$call <- match.call()
+  result$method <- "lsirm1pl"
+  result$missing <- "mcar"
+  result$varselect <- FALSE
+  result$dtype <- "continuous"
+  result$chains <- 1
+  result$fixed_gamma <- FALSE
+
   class(result) = "lsirm"
 
   return(result)

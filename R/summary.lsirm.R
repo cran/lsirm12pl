@@ -34,42 +34,59 @@ summary.lsirm <- function(object, chain.idx = 1, estimate = 'mean', CI = 0.95, .
 {
   if(object$method == "lsirm1pl") method = "lpl LSIRM"
   if(object$method == "lsirm2pl") method = "2pl LSIRM"
+  if(object$method == "lsirmgrm") method = "ordinal GRM LSIRM"
+  if(object$method == "lsirmgrm2pl") method = "ordinal GRM 2PL LSIRM"
 
   if(object$chains == 1){
 
-    if(is.data.frame(object$data)){
-      cname = colnames(object$data)
+    if(object$method %in% c("lsirmgrm", "lsirmgrm2pl")){
+      # For GRM modles, we use the flattened beta_matrix for summaries
+      beta_samples <- if(!is.null(object$beta_matrix)) object$beta_matrix else object$beta
+      cname <- colnames(beta_samples)
+      if(is.null(cname)) cname <- paste0("beta", 1:ncol(beta_samples))
     }else{
-      cname = paste("item", 1:ncol(object$data), sep=" ")
+      beta_samples <- object$beta
+      if(is.data.frame(object$data)){
+        cname = colnames(object$data)
+      }else{
+        cname = paste("item", 1:ncol(object$data), sep=" ")
+      }
     }
 
     if(estimate %in% c('mean', 'median', 'mode')){
       if(estimate == 'mean'){
-        est = apply(object$beta, 2, mean)
+        est = apply(beta_samples, 2, mean)
       }else if(estimate == 'median'){
-        est = apply(object$beta, 2, median)
-      }else{
-        st = apply(object$beta, 2, mode)
+        est = apply(beta_samples, 2, median)
+      }else if(estimate == 'mode'){
+        # Basic mode calculation: most frequent value (might not be ideal for continuous)
+        # For now, let's use mean as a fallback or if we want true mode we'd need a density approach
+        # Given this is MCMC, mean or median are usually preferred.
+        # But if the user asked for mode, we should try to provide it or warn.
+        est = apply(beta_samples, 2, function(x) {
+          d <- density(x)
+          d$x[which.max(d$y)]
+        })
       }
     }else{
       warning("Estimate type is not 'mean', 'median', or 'mode'. Therefore, calculating mean estimate.")
       estimate <- 'mean'
-      est = apply(object$beta, 2, mean)
+      est = apply(beta_samples, 2, mean)
     }
 
     if(length(CI) == 1){
       if (CI < 0.5) {
         warning("CI should be greater than 0.5; defaulting to 0.95.")
         CI <- 0.95  # 기본값으로 재설정
-        quant <- t(apply(object$beta, 2, function(x) quantile(x, probs = c(0.025, 0.975))))
+        quant <- t(apply(beta_samples, 2, function(x) quantile(x, probs = c(0.025, 0.975))))
         ci.temp = c(0.025, 0.975)
       }else{
-        quant <- t(apply(object$beta, 2, function(x) quantile(x, probs = c((1 - CI)/2, 1-(1 - CI)/2))))
+        quant <- t(apply(beta_samples, 2, function(x) quantile(x, probs = c((1 - CI)/2, 1-(1 - CI)/2))))
         ci.temp = c((1-CI)/2, (1+CI)/2)
       }
     }else if(length(CI) == 2){
       if(CI[1]<CI[2]){
-        quant <- t(apply(object$beta, 2, function(x) quantile(x, probs = c(CI[1],CI[2]))))
+        quant <- t(apply(beta_samples, 2, function(x) quantile(x, probs = c(CI[1],CI[2]))))
         ci.temp = CI
       }else{
         stop("The lower CI bound must be less than the upper CI bound.")
@@ -92,43 +109,54 @@ summary.lsirm <- function(object, chain.idx = 1, estimate = 'mean', CI = 0.95, .
                 missing = object$missing,
                 dtype = object$dtype,
                 ss = object$varselect,
+                tuning = object$tuning,
                 n.chains = 1)
   }else{
 
     object.chain = object[[chain.idx]]
-    if(is.data.frame(object.chain$data)){
-      cname = colnames(object.chain$data)
+    if(object.chain$method %in% c("lsirmgrm", "lsirmgrm2pl")){
+      beta_samples <- if(!is.null(object.chain$beta_matrix)) object.chain$beta_matrix else object.chain$beta
+      cname <- colnames(beta_samples)
+      if(is.null(cname)) cname <- paste0("beta", 1:ncol(beta_samples))
     }else{
-      cname = paste("item", 1:ncol(object.chain$data), sep=" ")
+      beta_samples <- object.chain$beta
+      if(is.data.frame(object.chain$data)){
+        cname = colnames(object.chain$data)
+      }else{
+        cname = paste("item", 1:ncol(object.chain$data), sep=" ")
+      }
     }
 
     if(estimate %in% c('mean', 'median', 'mode')){
       if(estimate == 'mean'){
-        est = apply(object.chain$beta, 2, mean)
+        est = apply(beta_samples, 2, mean)
       }else if(estimate == 'median'){
-        est = apply(object.chain$beta, 2, median)
-      }else{
-        st = apply(object.chain$beta, 2, mode)
+        est = apply(beta_samples, 2, median)
+      }else if(estimate == 'mode'){
+        est = apply(beta_samples, 2, function(x) {
+          d <- density(x)
+          d$x[which.max(d$y)]
+        })
       }
     }else{
       warning("Estimate type is not 'mean', 'median', or 'mode'. Therefore, calculating mean estimate.")
       estimate <- 'mean'
-      est = apply(object.chain$beta, 2, mean)
+      est = apply(beta_samples, 2, mean)
     }
 
     if(length(CI) == 1){
       if (CI < 0.5) {
         warning("CI should be greater than 0.5; defaulting to 0.95.")
         CI <- 0.95  # 기본값으로 재설정
-        quant <- t(apply(object.chain$beta, 2, function(x) quantile(x, probs = c(0.025, 0.975))))
+        quant <- t(apply(beta_samples, 2, function(x) quantile(x, probs = c(0.025, 0.975))))
         ci.temp = c(0.025, 0.975)
       }else{
-        quant <- t(apply(object.chain$beta, 2, function(x) quantile(x, probs = c((1 - CI)/2, 1-(1 - CI)/2))))
+        quant <- t(apply(beta_samples, 2, function(x) quantile(x, probs = c((1 - CI)/2, 1-(1 - CI)/2))))
         ci.temp = c((1-CI)/2, (1+CI)/2)
       }
     }else if(length(CI) == 2){
       if(CI[1]<CI[2]){
-        quant <- t(apply(object.chain$beta, 2, function(x) quantile(x, probs = c(CI[1],CI[2]))))
+        quant <- t(apply(beta_samples, 2, function(x) quantile(x, probs = c(CI[1],CI[2]))))
         ci.temp = CI
       }else{
         stop("The lower CI bound must be less than the upper CI bound.")
@@ -150,6 +178,7 @@ summary.lsirm <- function(object, chain.idx = 1, estimate = 'mean', CI = 0.95, .
                 missing = object.chain$missing,
                 dtype = object.chain$dtype,
                 ss = object.chain$varselect,
+                tuning = object.chain$tuning,
                 n.chains = object$chains,
                 chain = chain.idx)
   }

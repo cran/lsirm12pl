@@ -47,7 +47,7 @@
 #'
 #' @export
 lsirm2pl_normal_fixed_gamma = function(data, ndim = 2, niter = 15000, nburn = 2500, nthin = 5, nprint = 500,
-                                       jump_beta = 0.4, jump_theta = 1.0, jump_alpha = 1.0, jump_z = 0.5, jump_w = 0.5,
+                                       jump_beta = 0.4, jump_theta = 1.0, jump_alpha = 1, jump_z = 0.5, jump_w = 0.5,
                                        pr_mean_beta = 0, pr_sd_beta = 1.0, pr_mean_theta = 0, pr_sd_theta = 1.0,
                                        pr_mean_alpha = 0.5, pr_sd_alpha = 1,
                                        pr_a_theta = 0.001, pr_b_theta = 0.001,pr_a_eps = 0.001, pr_b_eps = 0.001, verbose=FALSE, fix_theta_sd=FALSE, fix_alpha_1=TRUE){

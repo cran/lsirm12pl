@@ -4,7 +4,7 @@
 #' LSIRM factorizes continuous item response matrix into column-wise item effect, row-wise respondent effect and further embeds interaction effect in a latent space. The resulting latent space provides an interaction map that represents interactions between respondents and items.
 #'
 #' @inheritParams lsirm1pl
-#' @param jump_gamma Numeric; the jumping rule for the theta proposal density. Default is 1.0.
+#' @param jump_gamma Numeric; the jumping rule for the theta proposal density. Default is 1.
 #' @param pr_spike_mean Numeric; mean of spike prior for log gamma default value is -3.
 #' @param pr_spike_sd Numeric; standard deviation of spike prior for log gamma default value is 1.
 #' @param pr_slab_mean Numeric; mean of spike prior for log gamma default value is 0.5.
@@ -156,7 +156,7 @@ cat("\n")
                  z_estimate     = z.est,
                  w_estimate     = w.est,
                  pi_estimate    = pi.estimate,
-                 beta           = output$beta,
+                 xi_estimate    = xi.estimate,                 beta           = output$beta,
                  theta          = output$theta,
                  theta_sd       = output$sigma_theta,
                  sigma       = output$sigma,
@@ -166,7 +166,7 @@ cat("\n")
                  z_raw          = output$z,
                  w_raw          = output$w,
                  pi             = output$pi,
-                 accept_beta    = output$accept_beta,
+                 xi             = output$xi,                 accept_beta    = output$accept_beta,
                  accept_theta   = output$accept_theta,
                  accept_w       = output$accept_w,
                  accept_z       = output$accept_z,

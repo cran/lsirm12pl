@@ -20,6 +20,7 @@ double Kumulavsech(arma::mat CC, double omega, arma::vec xlim, arma::vec ylim){
   return(S);
 }
 
+
 // [[Rcpp::export]]
 double logpXCbeta(arma::mat X, arma::mat CC, double alpha, double omega, double AreaW, double integral){
   int nXrows = X.n_rows;
@@ -89,6 +90,145 @@ Rcpp::List log_likelihood_cpp(arma::mat data, const int ndim, arma::mat beta_est
   return(output);
 
 } // function end
+
+static inline double inv_logit_stable_grm_ll(const double x){
+  if(x >= 0.0){
+    return 1.0 / (1.0 + std::exp(-x));
+  }
+  const double ex = std::exp(x);
+  return ex / (1.0 + ex);
+}
+
+static inline double log_grm_prob_y0based_ll(const int y, const arma::rowvec& beta_i, const double eta){
+  const int Kminus1 = (int)beta_i.n_elem;
+  const int K = Kminus1 + 1;
+  const double eps = 1e-16;
+
+  auto p_ge = [&](const int k)->double{
+    return inv_logit_stable_grm_ll(eta + beta_i((unsigned)(k-1)));
+  };
+
+  double p = 0.0;
+  if(y <= 0){
+    p = 1.0 - p_ge(1);
+  }else if(y >= (K-1)){
+    p = p_ge(K-1);
+  }else{
+    p = p_ge(y) - p_ge(y+1);
+  }
+
+  if(!std::isfinite(p) || p <= eps) p = eps;
+  if(p >= 1.0 - eps) p = 1.0 - eps;
+  return std::log(p);
+}
+
+// [[Rcpp::export]]
+Rcpp::List log_likelihood_grm_cpp(arma::mat data, const int ndim, const int ncat,
+                                  arma::mat beta_est, arma::mat theta_est,
+                                  const double gamma_est, arma::mat z_est, arma::mat w_est,
+                                  const double missing){
+  if(ncat < 2){
+    Rcpp::stop("ncat must be >= 2.");
+  }
+
+  const int nsample = data.n_rows;
+  const int nitem = data.n_cols;
+  const int K = ncat;
+  const int Kminus1 = K - 1;
+  double log_likelihood = 0.0, dist_temp = 0.0;
+  int i, j, k;
+
+  // detect if data is 1-based (Likert 1..K) or 0-based (0..K-1)
+  const double data_min = data.min();
+  const int data_is_one_based = (data_min >= 1.0);
+
+  if(beta_est.n_rows != nitem || beta_est.n_cols != Kminus1){
+    Rcpp::stop("beta_est must be nitem x (ncat-1).");
+  }
+
+  arma::dmat dist(nsample, nitem, fill::zeros);
+  dist.fill(0.0);
+  for(i = 0; i < nitem; i++){
+    for(k = 0; k < nsample; k++){
+      dist_temp = 0.0;
+      for(j = 0; j < ndim; j++) dist_temp += std::pow((z_est(k,j) - w_est(i,j)), 2.0);
+      dist(k,i) = std::sqrt(dist_temp);
+    }
+  }
+
+  for(i = 0; i < nitem; i++){
+    arma::rowvec beta_i = beta_est.row(i);
+    for(k = 0; k < nsample; k++){
+      if(data(k,i) == missing) continue;
+      int y = (int)(data(k,i));
+      if(data_is_one_based) y -= 1;
+      if(y < 0) y = 0;
+      if(y > (K-1)) y = K-1;
+      const double eta = theta_est(k) - gamma_est * dist(k,i);
+      log_likelihood += log_grm_prob_y0based_ll(y, beta_i, eta);
+    }
+  }
+
+  Rcpp::List output;
+  output["log_likelihood"] = log_likelihood;
+  return output;
+}
+
+// [[Rcpp::export]]
+Rcpp::List log_likelihood_grm2pl_cpp(arma::mat data, const int ndim, const int ncat,
+                                     arma::mat beta_est, arma::mat alpha_est, arma::mat theta_est,
+                                     const double gamma_est, arma::mat z_est, arma::mat w_est,
+                                     const double missing){
+  if(ncat < 2){
+    Rcpp::stop("ncat must be >= 2.");
+  }
+
+  const int nsample = data.n_rows;
+  const int nitem = data.n_cols;
+  const int K = ncat;
+  const int Kminus1 = K - 1;
+  double log_likelihood = 0.0, dist_temp = 0.0;
+  int i, j, k;
+
+  // detect if data is 1-based (Likert 1..K) or 0-based (0..K-1)
+  const double data_min = data.min();
+  const int data_is_one_based = (data_min >= 1.0);
+
+  if(beta_est.n_rows != nitem || beta_est.n_cols != Kminus1){
+    Rcpp::stop("beta_est must be nitem x (ncat-1).");
+  }
+  if(alpha_est.n_rows != nitem){
+    Rcpp::stop("alpha_est must have length nitem.");
+  }
+
+  arma::dmat dist(nsample, nitem, fill::zeros);
+  dist.fill(0.0);
+  for(i = 0; i < nitem; i++){
+    for(k = 0; k < nsample; k++){
+      dist_temp = 0.0;
+      for(j = 0; j < ndim; j++) dist_temp += std::pow((z_est(k,j) - w_est(i,j)), 2.0);
+      dist(k,i) = std::sqrt(dist_temp);
+    }
+  }
+
+  for(i = 0; i < nitem; i++){
+    arma::rowvec beta_i = beta_est.row(i);
+    const double ai = alpha_est(i);
+    for(k = 0; k < nsample; k++){
+      if(data(k,i) == missing) continue;
+      int y = (int)(data(k,i));
+      if(data_is_one_based) y -= 1;
+      if(y < 0) y = 0;
+      if(y > (K-1)) y = K-1;
+      const double eta = ai * theta_est(k) - gamma_est * dist(k,i);
+      log_likelihood += log_grm_prob_y0based_ll(y, beta_i, eta);
+    }
+  }
+
+  Rcpp::List output;
+  output["log_likelihood"] = log_likelihood;
+  return output;
+}
 
 // [[Rcpp::export]]
 Rcpp::List log_likelihood_normal_cpp(arma::mat data, const int ndim, arma::mat beta_est, arma::mat theta_est, const double gamma_est, arma::mat z_est, arma::mat w_est, const double sigma_est,

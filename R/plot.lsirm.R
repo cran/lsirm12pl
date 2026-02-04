@@ -52,6 +52,13 @@ plot.lsirm <- function(object, ..., option = "interaction", rotation=FALSE, clus
     }
   }
 
+  data <- NULL
+  if(!is.null(x$data)){
+    data <- x$data
+  }else if(!is.null(object$data)){
+    data <- object$data
+  }
+
   if(option == "interaction"){
 
     item_position = x$w_estimate
@@ -530,18 +537,40 @@ plot.lsirm <- function(object, ..., option = "interaction", rotation=FALSE, clus
       stop('\"cluster\" option is implemented for interaction map.')
     }
 
+    if(!is.null(x$method) && x$method == "lsirmgrm" && !is.null(x$beta_array)){
+      beta_array <- x$beta_array
+      niter <- dim(beta_array)[1]
+      nitem <- dim(beta_array)[2]
+      Kminus1 <- dim(beta_array)[3]
+
+      beta_dataframe <- data.frame(
+        item = rep(1:nitem, each = niter * Kminus1),
+        threshold = rep(rep(1:Kminus1, each = niter), times = nitem),
+        value = as.vector(beta_array)
+      )
+
+      return(ggplot(beta_dataframe, aes(x = factor(threshold), y = value, group = threshold)) +
+        geom_boxplot(outlier.shape = NA) +
+        facet_wrap(~ item, ncol = 5) +
+        xlab("Threshold") +
+        ylab("Beta estimates") +
+        theme(axis.text.x = element_text(face = "bold", size = 10),
+              axis.text.y = element_text(face = "bold", size = 12),
+          axis.title = element_text(size = 13, face = 'bold')))
+    }
+
     beta_dataframe <- data.frame(x = rep(1:ncol(x$beta), each= nrow(x$beta)),
                                  value = as.vector(x$beta))
     #outlier
     lower <- min(data.frame(beta_dataframe %>% group_by(x) %>%
-                              reframe(stat = boxplot.stats(value)$stats, .groups = "drop"))[1:ncol(data)*5 - 4, 2])
+                              reframe(stat = boxplot.stats(value)$stats, .groups = "drop"))[1:ncol(x$beta)*5 - 4, 2])
     # summarise(stat = boxplot.stats(value)$stats, .groups = "drop"))[1:ncol(data)*5 - 4, 2])
     upper <- max(data.frame(beta_dataframe %>% group_by(x) %>%
-                              reframe(stat = boxplot.stats(value)$stats, .groups = "drop"))[1:ncol(data)*5, 2])
+                              reframe(stat = boxplot.stats(value)$stats, .groups = "drop"))[1:ncol(x$beta)*5, 2])
     # summarise(stat = boxplot.stats(value)$stats, .groups = "drop"))[1:ncol(data)*5, 2])
     ylim1 = c(lower, upper)
 
-    if(ncol(data) > 30){
+    if(!is.null(data) && ncol(data) > 30){
       ggplot(data=beta_dataframe, aes(x=x,y=value, group=x)) + geom_boxplot(outlier.shape = NA) +
         coord_cartesian(ylim = ylim1*1.05) +
         scale_x_continuous(breaks = round(seq(from = 0, to = ncol(x$beta), length.out = 10))) +
@@ -559,13 +588,14 @@ plot.lsirm <- function(object, ..., option = "interaction", rotation=FALSE, clus
               axis.title=element_text(size=15, face='bold'))
     }
   }else if(option == "theta"){
+  if(is.null(data)) stop("The original response data is not available in this object.")
 
     if(option == "theta" & !is.na(cluster)){
       stop('\"cluster\" option is implemented for interaction map.')
     }
 
 
-    if(is.null(x$missing.val) == TRUE){
+    if(!is.null(data) && !is.null(x$missing.val)){
       data[data==x$missing.val] = NA
     }
 
@@ -618,14 +648,14 @@ plot.lsirm <- function(object, ..., option = "interaction", rotation=FALSE, clus
 
       #outlier
       lower <- min(data.frame(alpha_dataframe %>% group_by(x) %>%
-                                reframe(stat = boxplot.stats(value)$stats, .groups = "drop"))[1:ncol(data)*5 - 4, 2])
+                                reframe(stat = boxplot.stats(value)$stats, .groups = "drop"))[1:ncol(x$alpha)*5 - 4, 2])
       # summarise(stat = boxplot.stats(value)$stats, .groups = "drop"))[1:ncol(data)*5 - 4, 2])
       upper <- max(data.frame(alpha_dataframe %>% group_by(x) %>%
-                                reframe(stat = boxplot.stats(value)$stats, .groups = 'drop'))[1:ncol(data)*5, 2])
+                                reframe(stat = boxplot.stats(value)$stats, .groups = 'drop'))[1:ncol(x$alpha)*5, 2])
       # summarise(stat = boxplot.stats(value)$stats, .groups = 'drop'))[1:ncol(data)*5, 2])
       ylim1 = c(lower, upper)
 
-      if(ncol(data) > 30){
+      if(!is.null(data) && ncol(data) > 30){
         ggplot(data=alpha_dataframe, aes(x=x,y=value, group=x)) + geom_boxplot(outlier.shape = NA) +
           coord_cartesian(ylim = ylim1*1.05) +
           scale_x_continuous(breaks = round(seq(from = 0, to = ncol(x$alpha), length.out = 10))) +

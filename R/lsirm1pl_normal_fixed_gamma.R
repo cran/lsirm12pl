@@ -141,6 +141,13 @@ cat("\n")
                  accept_theta   = output$accept_theta,
                  accept_w       = output$accept_w,
                  accept_z       = output$accept_z)
+
+  result$call <- match.call()
+  result$method <- "lsirm1pl"
+  result$dtype <- "continuous"
+  result$chains <- 1
+  result$varselect <- FALSE
+  result$fixed_gamma <- TRUE
   class(result) = "lsirm"
 
   return(result)

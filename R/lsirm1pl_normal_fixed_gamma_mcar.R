@@ -68,6 +68,10 @@ lsirm1pl_normal_fixed_gamma_mcar = function(data, ndim = 2, niter = 15000, nburn
   }else{
     cname = paste("item", 1:ncol(data), sep=" ")
   }
+  
+  # Convert NA to missing.val
+  data[is.na(data)] <- missing.val
+  
   # cat("\n\nFitting with MCMC algorithm\n")
 
   output <- lsirm1pl_normal_fixed_gamma_mcar_cpp(data=as.matrix(data),  ndim=ndim,  niter=niter,  nburn=nburn,  nthin=nthin,  nprint=nprint,

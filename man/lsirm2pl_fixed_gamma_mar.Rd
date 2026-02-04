@@ -27,7 +27,8 @@ lsirm2pl_fixed_gamma_mar(
   missing.val = 99,
   verbose = FALSE,
   fix_theta_sd = FALSE,
-  fix_alpha_1 = TRUE
+  fix_alpha_1 = TRUE,
+  adapt = NULL
 )
 }
 \arguments{
@@ -45,9 +46,9 @@ lsirm2pl_fixed_gamma_mar(
 
 \item{jump_beta}{Numeric; the jumping rule for the beta proposal density. Default is 0.4.}
 
-\item{jump_theta}{Numeric; the jumping rule for the theta proposal density. Default is 1.0.}
+\item{jump_theta}{Numeric; the jumping rule for the theta proposal density. Default is 1.}
 
-\item{jump_alpha}{Numeric; the jumping rule for the alpha proposal density. Default is 1.0.}
+\item{jump_alpha}{Numeric; the jumping rule for the alpha proposal density. Default is 1.}
 
 \item{jump_z}{Numeric; the jumping rule for the z proposal density. Default is 0.5.}
 
@@ -55,15 +56,15 @@ lsirm2pl_fixed_gamma_mar(
 
 \item{pr_mean_beta}{Numeric; the mean of the normal prior for beta. Default is 0.}
 
-\item{pr_sd_beta}{Numeric; the standard deviation of the normal prior for beta. Default is 1.0.}
+\item{pr_sd_beta}{Numeric; the standard deviation of the normal prior for beta. Default is 1.}
 
 \item{pr_mean_theta}{Numeric; the mean of the normal prior for theta. Default is 0.}
 
-\item{pr_sd_theta}{Numeric; the standard deviation of the normal prior for theta. Default is 1.0.}
+\item{pr_sd_theta}{Numeric; the standard deviation of the normal prior for theta. Default is 1.}
 
 \item{pr_mean_alpha}{Numeric; the mean of the log normal prior for alpha. Default is 0.5.}
 
-\item{pr_sd_alpha}{Numeric; the standard deviation of the log normal prior for alpha. Default is 1.0.}
+\item{pr_sd_alpha}{Numeric; the standard deviation of the log normal prior for alpha. Default is 1.}
 
 \item{pr_a_theta}{Numeric; the shape parameter of the inverse gamma prior for the variance of theta. Default is 0.001.}
 
@@ -76,6 +77,9 @@ lsirm2pl_fixed_gamma_mar(
 \item{fix_theta_sd}{Logical; If TRUE, the standard deviation of the theta parameter is fixed. Default is FALSE.}
 
 \item{fix_alpha_1}{Logical; If TRUE, the first element of the alpha parameter is fixed to 1. Default is TRUE.}
+
+\item{adapt}{List; optional adaptive MCMC control. If not \code{NULL}, proposal SDs are adapted during burn-in
+only and held fixed afterward.}
 }
 \value{
 \code{lsirm2pl_fixed_gamma_mar} returns an object of  list containing the following components:

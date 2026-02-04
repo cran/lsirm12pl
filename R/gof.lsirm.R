@@ -25,47 +25,88 @@ gof.lsirm = function(object, chain.idx=1){
   values <- NULL
   x <- NULL
   y <- NULL
-  if(object$chains == 1){
+
+  chains <- if(!is.null(object$chains)) object$chains else 1
+  if(!is.numeric(chain.idx) || length(chain.idx) != 1 || is.na(chain.idx)){
+    stop("chain.idx must be a single numeric value.")
+  }
+  chain.idx <- as.integer(chain.idx)
+  if(chains < 1){
+    stop("Invalid object$chains: must be >= 1.")
+  }
+  if(chain.idx < 1 || chain.idx > chains){
+    stop(sprintf("chain.idx must be between 1 and %d.", chains))
+  }
+
+  if(chains == 1){
     data = object$data
     dtype = object$dtype
     method = object$method
-    niter = nrow(object$beta)
-    if(object$dtype=="continuous"){
-      e.sigma = object$sigma
+    if(object$dtype == "ordinal" || object$method == "lsirmgrm"){
+      niter = dim(object$beta_array)[1]
+      gamma = if(!is.null(object$gamma)) object$gamma else rep(1, niter)
+      P = make_prob_ordinal(niter = niter,
+                            beta_array = object$beta_array,
+                            theta = object$theta,
+                            gamma = gamma,
+                            alpha = if(!is.null(object$alpha)) object$alpha else NULL,
+                            item = object$w,
+                            res = object$z,
+                            ncat = object$ncat,
+                            y_base = if(!is.null(object$y_base)) object$y_base else 0)
     }else{
-      e.sigma = rep(niter, 1)
+      niter = nrow(object$beta)
+      if(object$dtype=="continuous"){
+        e.sigma = object$sigma
+      }else{
+        e.sigma = rep(1, niter)
+      }
+      if(!is.null(object$gamma)){
+        gamma = object$gamma
+      }else{
+        gamma = rep(1, niter)
+      }
+      P = make_prob(niter, beta=object$beta,theta=object$theta,
+                    gamma=gamma, sigma=e.sigma,
+                    item = object$w,
+                    res = object$z,
+                    type = object$dtype)
     }
-    if(!is.null(object$gamma)){
-      gamma = object$gamma
-    }else{
-      gamma = rep(niter, 1)
-    }
-    P = make_prob(niter, beta=object$beta,theta=object$theta,
-                  gamma=gamma, sigma=e.sigma,
-                  item = object$w,
-                  res = object$z,
-                  type = object$dtype)
   }else{
     object = object[[chain.idx]]
     data = object$data
     dtype = object$dtype
     method = object$method
-    niter = nrow(object$beta)
-    if(object$dtype=="continuous"){
-      e.sigma = object$sigma
+    if(object$dtype == "ordinal" || object$method == "lsirmgrm"){
+      niter = dim(object$beta_array)[1]
+      gamma = if(!is.null(object$gamma)) object$gamma else rep(1, niter)
+      P = make_prob_ordinal(niter = niter,
+                            beta_array = object$beta_array,
+                            theta = object$theta,
+                            gamma = gamma,
+                            alpha = if(!is.null(object$alpha)) object$alpha else NULL,
+                            item = object$w,
+                            res = object$z,
+                            ncat = object$ncat,
+                            y_base = if(!is.null(object$y_base)) object$y_base else 0)
     }else{
-      e.sigma = rep(niter, 1)
+      niter = nrow(object$beta)
+      if(object$dtype=="continuous"){
+        e.sigma = object$sigma
+      }else{
+        e.sigma = rep(1, niter)
+      }
+      if(!is.null(object$gamma)){
+        gamma = object$gamma
+      }else{
+        gamma = rep(1, niter)
+      }
+      P = make_prob(niter, beta=object$beta,theta=object$theta,
+                    gamma=gamma, sigma=e.sigma,
+                    item = object$w,
+                    res = object$z,
+                    type = object$dtype)
     }
-    if(!is.null(object$gamma)){
-      gamma = object$gamma
-    }else{
-      gamma = rep(niter, 1)
-    }
-    P = make_prob(niter, beta=object$beta,theta=object$theta,
-                  gamma=gamma, sigma=e.sigma,
-                  item = object$w,
-                  res = object$z,
-                  type = object$dtype)
   }
 
 
@@ -109,6 +150,12 @@ gof.lsirm = function(object, chain.idx=1){
       theme(title = element_text(size=25,face="bold",hjust=0.5),
             plot.title = element_text(hjust = 0.5))
     return(gofp)
+  }else if(dtype == "ordinal"){
+    gofp = gofp+
+      labs(title="Goodness of fit")+
+      theme(title = element_text(size=25,face="bold",hjust=0.5),
+            plot.title = element_text(hjust = 0.5))
+    return(gofp)
   }else{
     if(method == "lsirm1pl"){
       aucp = roc_1pl(object)
@@ -136,6 +183,47 @@ gof.lsirm = function(object, chain.idx=1){
                               top=title)
     }
   }
+}
+
+make_prob_ordinal = function(niter, beta_array, theta, gamma, alpha = NULL, item, res, ncat, y_base = 0){
+  cat("\nSimulation Start\n\n")
+  pb <- txtProgressBar(title = "progress bar", min = 0, max = niter,
+                       style = 3, width = 50)
+
+  n.i = dim(item)[2]
+  n.r = dim(res)[2]
+  Kminus1 <- ncat - 1
+
+  S = matrix(nrow=niter, ncol=n.i)
+
+  for(k in 1:niter){
+    res_k <- res[k,,]
+    if(is.null(dim(res_k))) res_k <- matrix(res_k, ncol = dim(res)[3])
+    theta_k <- theta[k,]
+    gamma_k <- gamma[k]
+    if(!is.null(alpha)) alpha_k <- alpha[k,]
+
+    for(i in 1:n.i){
+      item_i <- item[k, i, ]
+      d <- sqrt(rowSums((res_k - matrix(item_i, nrow = n.r, ncol = length(item_i), byrow = TRUE))^2))
+      if(is.null(alpha)){
+        eta <- theta_k - gamma_k * d
+      }else{
+        eta <- theta_k * alpha_k[i] - gamma_k * d
+      }
+
+      # E[Y0] = sum_{m=1}^{K-1} P(Y >= m)
+      cum_sum <- rep(0, n.r)
+      for(m in 1:Kminus1){
+        cum_sum <- cum_sum + stats::plogis(eta + beta_array[k, i, m])
+      }
+
+      S[k, i] <- mean(y_base + cum_sum)
+    }
+    setTxtProgressBar(pb, k, label = paste( round(k/niter * 100, 0), "% done"))
+  }
+
+  return(S)
 }
 
 make_prob = function(niter,beta,theta,gamma,sigma,item,res,type="continuous"){

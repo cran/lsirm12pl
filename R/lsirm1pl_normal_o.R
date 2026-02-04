@@ -4,9 +4,9 @@
 #' \link{lsirm1pl_normal_o} factorizes continuous item response matrix into column-wise item effect, row-wise respondent effect and further embeds interaction effect in a latent space. The resulting latent space provides an interaction map that represents interactions between respondents and items.
 #'
 #' @inheritParams lsirm1pl
-#' @param jump_gamma Numeric; the jumping rule for the gamma proposal density. Default is 0.025
+#' @param jump_gamma Numeric; the jumping rule for the gamma proposal density. Default is 0.2
 #' @param pr_mean_gamma Numeric; mean of log normal prior for gamma. Default is 0.5.
-#' @param pr_sd_gamma Numeric; standard deviation of log normal prior for gamma. Default is 1.0.
+#' @param pr_sd_gamma Numeric; standard deviation of log normal prior for gamma. Default is 1.
 #' @param pr_a_eps Numeric; the shape parameter of inverse gamma prior for variance of data likelihood. Default is 0.001.
 #' @param pr_b_eps Numeric; the scale parameter of inverse gamma prior for variance of data likelihood. Default is 0.001.
 #' @param verbose Logical; If TRUE, MCMC samples are printed for each \code{nprint}. Default is FALSE.
@@ -120,7 +120,7 @@ cat("\n")
   # Calculate BIC
   # cat("\n\nCalculate BIC\n")
   log_like = log_likelihood_normal_cpp(as.matrix(data), ndim, as.matrix(beta.estimate), as.matrix(theta.estimate), gamma.estimate, z.est, w.est, sigma.estimate, 99)
-  p = nitem + nsample + 1 + 1 + ndim * nitem + ndim * nsample + 1
+  p = nitem + nsample + 1 + 1 + ndim * nitem + ndim * nsample + 1 + 1 # added sigma
   bic = -2 * log_like[[1]] + p * log(nsample * nitem)
 
   result <- list(data = data,
@@ -150,6 +150,14 @@ cat("\n")
                  accept_z       = output$accept_z,
                  accept_gamma   = output$accept_gamma)
   class(result) = "lsirm"
+
+  result$call <- match.call()
+  result$method <- "lsirm1pl"
+  result$missing <- NA
+  result$dtype <- "continuous"
+  result$chains <- 1
+  result$varselect <- FALSE
+  result$fixed_gamma <- FALSE
 
   return(result)
 }

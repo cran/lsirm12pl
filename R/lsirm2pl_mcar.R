@@ -4,9 +4,9 @@
 #' \link{lsirm2pl_mcar} factorizes item response matrix into column-wise item effect, row-wise respondent effect in a latent space, while ignoring the missing element under the assumption of missing completely at random. Unlike 1PL model, 2PL model assumes the item effect can vary according to respondent, allowing additional parameter multiplied with respondent effect.  The resulting latent space provides an interaction map that represents interactions between respondents and items.
 #'
 #' @inheritParams lsirm2pl
-#' @param jump_gamma Numeric; the jumping rule for the gamma proposal density. Default is 0.025
+#' @param jump_gamma Numeric; the jumping rule for the gamma proposal density. Default is 0.2
 #' @param pr_mean_gamma Numeric; mean of log normal prior for gamma. Default is 0.5.
-#' @param pr_sd_gamma Numeric; standard deviation of log normal prior for gamma. Default is 1.0.
+#' @param pr_sd_gamma Numeric; standard deviation of log normal prior for gamma. Default is 1.
 #' @param missing.val Numeric; A number to replace missing values. Default is 99.
 #' @param verbose Logical; If TRUE, MCMC samples are printed for each \code{nprint}. Default is FALSE.
 #'
@@ -61,7 +61,7 @@
 #' }
 #' @export
 lsirm2pl_mcar = function(data, ndim = 2, niter = 15000, nburn = 2500, nthin = 5, nprint = 500,
-                         jump_beta = 0.4, jump_theta = 1, jump_alpha = 1.0, jump_gamma = 0.025, jump_z = 0.5, jump_w = 0.5,
+                         jump_beta = 0.4, jump_theta = 1, jump_alpha = 1, jump_gamma = 0.2, jump_z = 0.5, jump_w = 0.5,
                          pr_mean_beta = 0, pr_sd_beta = 1, pr_mean_theta = 0, pr_sd_theta = 1, pr_mean_gamma = 0.5, pr_sd_gamma = 1,
                          pr_mean_alpha = 0.5, pr_sd_alpha = 1, pr_a_theta = 0.001, pr_b_theta = 0.001,
                          missing.val = 99, verbose=FALSE, fix_theta_sd=FALSE, fix_alpha_1=TRUE){
@@ -73,6 +73,9 @@ lsirm2pl_mcar = function(data, ndim = 2, niter = 15000, nburn = 2500, nthin = 5,
   }else{
     cname = paste("item", 1:ncol(data), sep=" ")
   }
+  
+  # Convert NA to missing.val
+  data[is.na(data)] <- missing.val
 
   # cat("\n\nFitting with MCMC algorithm\n")
 
@@ -163,6 +166,14 @@ cat("\n")
                  accept_z       = output$accept_z,
                  accept_gamma   = output$accept_gamma,
                  accept_alpha   = output$accept_alpha)
+  result$call <- match.call()
+  result$method <- "lsirm2pl"
+  result$missing <- "mcar"
+  result$varselect <- FALSE
+  result$dtype <- "binary"
+  result$chains <- 1
+  result$fixed_gamma <- FALSE
+
   class(result) = "lsirm"
 
   return(result)

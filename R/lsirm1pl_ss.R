@@ -2,7 +2,7 @@
 #' @description \link{lsirm1pl_ss} is used to fit 1PL LSIRM with model selection approach based on spike-and-slab priors. LSIRM factorizes item response matrix into column-wise item effect, row-wise respondent effect and further embeds interaction effect in a latent space. The resulting latent space provides an interaction map that represents interactions between respondents and items.
 #'
 #' @inheritParams lsirm1pl
-#' @param jump_gamma Numeric; the jumping rule for the theta proposal density. Default is 1.0.
+#' @param jump_gamma Numeric; the jumping rule for the theta proposal density. Default is 1.
 #' @param pr_spike_mean Numeric; the mean of spike prior for log gamma. Default is -3.
 #' @param pr_spike_sd Numeric; the standard deviation of spike prior for log gamma. Default is 1.
 #' @param pr_slab_mean Numeric; the mean of spike prior for log gamma. Default is 0.5.
@@ -144,6 +144,7 @@ cat("\n")
                  z_estimate     = z.est,
                  w_estimate     = w.est,
                  pi_estimate    = pi.estimate,
+                 xi_estimate    = xi.estimate,
                  beta           = output$beta,
                  theta          = output$theta,
                  theta_sd       = output$sigma_theta,
@@ -153,11 +154,19 @@ cat("\n")
                  z_raw          = output$z,
                  w_raw          = output$w,
                  pi             = output$pi,
+                 xi             = output$xi,
                  accept_beta    = output$accept_beta,
                  accept_theta   = output$accept_theta,
                  accept_w       = output$accept_w,
                  accept_z       = output$accept_z,
                  accept_gamma   = output$accept_gamma)
+
+  result$call <- match.call()
+  result$method <- "lsirm1pl"
+  result$dtype <- "binary"
+  result$chains <- 1
+  result$varselect <- TRUE
+  result$fixed_gamma <- FALSE
   class(result) = "lsirm"
 
   return(result)

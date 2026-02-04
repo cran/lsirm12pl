@@ -4,10 +4,22 @@
 #' \link{lsirm2pl_o} factorizes item response matrix into column-wise item effect, row-wise respondent effect and further embeds interaction effect in a latent space. Unlike 1PL model, 2PL model assumes the item effect can vary according to respondent, allowing additional parameter multiplied with respondent effect. The resulting latent space provides an interaction map that represents interactions between respondents and items.
 #'
 #' @inheritParams lsirm2pl
-#' @param jump_gamma Numeric; the jumping rule for the gamma proposal density. Default is 0.025.
+#' @param jump_gamma Numeric; the jumping rule for the gamma proposal density. Default is 0.2.
 #' @param pr_mean_gamma Numeric; mean of log normal prior for gamma. Default is 0.5.
-#' @param pr_sd_gamma Numeric; standard deviation of log normal prior for gamma. Default is 1.0.
+#' @param pr_sd_gamma Numeric; standard deviation of log normal prior for gamma. Default is 1.
 #' @param verbose Logical; If TRUE, MCMC samples are printed for each \code{nprint}. Default is FALSE.
+#' @param adapt List; optional adaptive MCMC control. If not \code{NULL}, proposal standard deviations are adapted during the burn-in period to reach a target acceptance rate and are held fixed during the main MCMC sampling.
+#'   When adaptation is enabled, the reported acceptance ratios in the output (\code{accept_beta}, \code{accept_theta}, \code{accept_alpha}, etc.) are computed only from iterations after burn-in, reflecting the performance of the adapted proposal distributions.
+#'   Elements of the list can include:
+#'   \itemize{
+#'     \item \code{use_adapt}: Logical; if \code{TRUE}, adaptive MCMC is used. Default is \code{FALSE}.
+#'     \item \code{adapt_interval}: Integer; the number of iterations between each update of the proposal SDs. Default is \code{100}.
+#'     \item \code{adapt_rate}: Numeric; Robbins-Monro scaling constant (c) in step size formula: adapt_rate / iteration^decay_rate. Default is \code{1.0}. Valid range: any positive value. Recommended: 0.5-2.0.
+#'     \item \code{decay_rate}: Numeric; Robbins-Monro decay exponent (alpha) in step size formula. Default is \code{0.5}. Valid range: (0.5, 1]. Recommended: 0.5-0.8.
+#'     \item \code{target_accept}: Numeric; target acceptance rate for scalar parameters (beta, theta, gamma, alpha). Default is \code{0.44}.
+#'     \item \code{target_accept_zw}: Numeric; target acceptance rate for multi-dimensional latent positions z and w. Default is \code{0.234}.
+#'     \item \code{target_accept_beta/theta/alpha/gamma}: Numeric; (optional) parameter-specific target acceptance rates to override \code{target_accept}.
+#'   }
 #'
 #' @return \code{lsirm2pl_o} returns an object of  list containing the following components:
 #'  \item{data}{Data frame or matrix containing the variables used in the model.}
@@ -51,9 +63,10 @@
 #' }
 #' @export
 lsirm2pl_o = function(data, ndim = 2, niter = 15000, nburn = 2500, nthin = 5, nprint = 500,
-                      jump_beta = 0.4, jump_theta = 1, jump_alpha = 1.0, jump_gamma = 0.025, jump_z = 0.5, jump_w = 0.5,
+                      jump_beta = 0.4, jump_theta = 1, jump_alpha = 1, jump_gamma = 0.2, jump_z = 0.5, jump_w = 0.5,
                       pr_mean_beta = 0, pr_sd_beta = 1, pr_mean_theta = 0, pr_sd_theta = 1, pr_mean_gamma = 0.5, pr_sd_gamma = 1,
-                      pr_mean_alpha = 0.5, pr_sd_alpha = 1, pr_a_theta = 0.001, pr_b_theta = 0.001, verbose=FALSE, fix_theta_sd=FALSE, fix_alpha_1=TRUE){
+                      pr_mean_alpha = 0.5, pr_sd_alpha = 1, pr_a_theta = 0.001, pr_b_theta = 0.001, verbose=FALSE, fix_theta_sd=FALSE, fix_alpha_1=TRUE,
+                      adapt = NULL){
   if(niter < nburn){
     stop("niter must be greater than burn-in process.")
   }
@@ -70,7 +83,8 @@ lsirm2pl_o = function(data, ndim = 2, niter = 15000, nburn = 2500, nthin = 5, np
                          jump_beta=jump_beta, jump_theta=jump_theta, jump_alpha=jump_alpha, jump_gamma=jump_gamma, jump_z=jump_z, jump_w=jump_w,
                          pr_mean_beta=pr_mean_beta, pr_sd_beta=pr_sd_beta, pr_mean_theta=pr_mean_theta, pr_sd_theta=pr_sd_theta,
                          pr_mean_gamma=pr_mean_gamma, pr_sd_gamma=pr_sd_gamma,
-                         pr_mean_alpha=pr_mean_alpha, pr_sd_alpha=pr_sd_alpha, pr_a_theta=pr_a_theta, pr_b_theta=pr_b_theta, verbose=verbose, fix_theta_sd=fix_theta_sd, fix_alpha_1=fix_alpha_1)
+                         pr_mean_alpha=pr_mean_alpha, pr_sd_alpha=pr_sd_alpha, pr_a_theta=pr_a_theta, pr_b_theta=pr_b_theta, verbose=verbose, fix_theta_sd=fix_theta_sd, fix_alpha_1=fix_alpha_1,
+                         adapt=adapt)
 
   mcmc.inf = list(nburn=nburn, niter=niter, nthin=nthin)
   nsample <- nrow(data)
@@ -145,12 +159,20 @@ cat("\n")
                  w              = w.proc,
                  z_raw          = output$z,
                  w_raw          = output$w,
+                 tuning         = output$tuning,
                  accept_beta    = output$accept_beta,
                  accept_theta   = output$accept_theta,
                  accept_w       = output$accept_w,
                  accept_z       = output$accept_z,
                  accept_gamma   = output$accept_gamma,
                  accept_alpha   = output$accept_alpha)
+
+  result$call <- match.call()
+  result$method <- "lsirm2pl"
+  result$dtype <- "binary"
+  result$chains <- 1
+  result$varselect <- FALSE
+  result$fixed_gamma <- FALSE
   class(result) = "lsirm"
 
   return(result)

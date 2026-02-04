@@ -126,7 +126,6 @@ cat("\n")
   # Calculate BIC
   # cat("\n\nCalculate BIC\n")
   missing_est = ifelse(imp.estimate > 0.5, 1, 0)
-  data[data == missing.val] = missing_est
   log_like = log_likelihood_normal_cpp(as.matrix(data), ndim, as.matrix(beta.estimate), as.matrix(theta.estimate), 1, z.est, w.est, sigma.estimate, missing.val)
   p = nitem + nsample + 1 + ndim * nitem + ndim * nsample + 1
   bic = -2 * log_like[[1]] + p * log(nitem * nsample)
