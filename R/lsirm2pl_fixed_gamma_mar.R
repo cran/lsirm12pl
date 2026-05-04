@@ -6,8 +6,7 @@
 #' @inheritParams lsirm2pl
 #' @param missing.val Numeric; A number to replace missing values. Default is 99.
 #' @param verbose Logical; If TRUE, MCMC samples are printed for each \code{nprint}. Default is FALSE.
-#' @param adapt List; optional adaptive MCMC control. If not \code{NULL}, proposal SDs are adapted during burn-in
-#' only and held fixed afterward.
+#' @param adapt List; optional adaptive MCMC control. If not \code{NULL}, proposal SDs are adapted during burn-in using a Robbins-Monro update on the log proposal SD and held fixed afterward. See \code{\link{lsirm2pl}} for the full list of adaptive tuning settings and their default targets.
 #'
 #' @return \code{lsirm2pl_fixed_gamma_mar} returns an object of  list containing the following components:
 #'  \item{data}{Data frame or matrix containing the variables in the model.}
@@ -20,7 +19,7 @@
 #' \item{sigma_theta_estimate}{Posterior estimates of the standard deviation of theta.}
 #' \item{z_estimate}{Posterior estimates of the z parameter.}
 #' \item{w_estimate}{Posterior estimates of the w parameter.}
-#'  \item{imp_estimate}{Probability of imputating a missing value with 1.}
+#'  \item{imp_estimate}{Probability of imputing a missing value with 1.}
 #' \item{beta}{Posterior samples of the beta parameter.}
 #' \item{theta}{Posterior samples of the theta parameter.}
 #' \item{theta_sd}{Posterior samples of the standard deviation of theta.}
@@ -64,10 +63,11 @@ lsirm2pl_fixed_gamma_mar = function(data, ndim = 2, niter = 15000, nburn = 2500,
                                     pr_mean_beta = 0, pr_sd_beta = 1, pr_mean_theta = 0, pr_sd_theta = 1,
                                     pr_mean_alpha = 0.5, pr_sd_alpha = 1, pr_a_theta = 0.001, pr_b_theta = 0.001,
                                     missing.val = 99, verbose=FALSE, fix_theta_sd=FALSE, fix_alpha_1=TRUE,
-                                    adapt = NULL){
-  if(niter < nburn){
+                                    adapt = NULL) {
+  if(niter <= nburn){
     stop("niter must be greater than burn-in process.")
   }
+  adapt <- normalize_adapt(adapt)
   if(is.data.frame(data)){
     cname = colnames(data)
   }else{
@@ -76,6 +76,7 @@ lsirm2pl_fixed_gamma_mar = function(data, ndim = 2, niter = 15000, nburn = 2500,
 
   # cat("\n\nFitting with MCMC algorithm\n")
 
+  data <- replace_na_with_missing(data, missing.val)
 
   output <- lsirm2pl_fixed_gamma_mar_cpp(data=as.matrix(data), ndim=ndim, niter=niter, nburn=nburn, nthin=nthin, nprint=nprint,
                                          jump_beta=jump_beta, jump_theta=jump_theta, jump_alpha=jump_alpha, jump_z=jump_z, jump_w=jump_w,
@@ -88,8 +89,9 @@ lsirm2pl_fixed_gamma_mar = function(data, ndim = 2, niter = 15000, nburn = 2500,
   nitem <- ncol(data)
 
   nmcmc = as.integer((niter - nburn) / nthin)
-  max.address = min(which.max(output$map))
-  map.inf = data.frame(value = output$map[which.max(output$map)], iter = which.max(output$map))
+  map.info <- get_map_info(output$map)
+  max.address <- map.info$address
+  map.inf <- map.info$info
   w.star = output$w[max.address,,]
   z.star = output$z[max.address,,]
   w.proc = array(0,dim=c(nmcmc,nitem,ndim))
@@ -147,7 +149,7 @@ cat("\n")
                  beta_summary = beta.summary,
                  theta_estimate = theta.estimate,
                  sigma_theta_estimate    = sigma_theta.estimate,
-                 alhpa_estimate = alpha.estimate,
+                 alpha_estimate = alpha.estimate,
                  z_estimate     = z.est,
                  w_estimate     = w.est,
                  imp_estimate   = imp.estimate,
@@ -159,6 +161,7 @@ cat("\n")
                  w              = w.proc,
                  z_raw          = output$z,
                  w_raw          = output$w,
+                 tuning         = output$tuning,
                  imp            = output$impute,
                  accept_beta    = output$accept_beta,
                  accept_theta   = output$accept_theta,

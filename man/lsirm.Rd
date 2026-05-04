@@ -25,10 +25,10 @@ The descriptions of options for each model, such as \code{<term 2>} and \code{<t
 \examples{
 \donttest{
 # generate example item response matrix
-data     <- matrix(rbinom(500, size = 1, prob = 0.5),ncol=10,nrow=50)
+data <- matrix(rbinom(500, size = 1, prob = 0.5), ncol = 10, nrow = 50)
 
-lsirm_result <- lsirm(data~lsirm1pl())
-lsirm_result <- lsirm(data~lsirm2pl())
+lsirm_result <- lsirm(data ~ lsirm1pl())
+lsirm_result <- lsirm(data ~ lsirm2pl())
 
 # Realistic example with BFPT data
 data(BFPT)
@@ -42,8 +42,7 @@ fit_bfpt <- lsirm(dat[1:50, 1:10] ~ lsirmgrm(niter = 1000, nburn = 500))
 summary(fit_bfpt)
 
 # Fit with adaptive MCMC
-lsirm_result <- lsirm(data~lsirm1pl(adapt = list(use_adapt = TRUE)))
-
+lsirm_result <- lsirm(data ~ lsirm1pl(adapt = list(use_adapt = TRUE)))
 }
 }
 \seealso{

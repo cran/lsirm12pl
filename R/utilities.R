@@ -4,8 +4,10 @@ check.datatype <- function(data, missing.val = 99, ...){
     missing.temp = missing.val
   }else{missing.temp = 99}
 
+  values <- unique(c(data.matrix(data)))
+  values <- values[!is.na(values)]
   check.v <- c(0, 1, missing.temp)
-  check.r <- length(setdiff(unique(c(data.matrix(data))), check.v)) == 0 # If the unique values are exist except check.v
+  check.r <- length(setdiff(values, check.v)) == 0 # If the unique values are exist except check.v
   return(check.r) # TRUE: Binary, FALSE: Continuous
 
   # if(!exists('missing_data')){
@@ -16,6 +18,44 @@ check.datatype <- function(data, missing.val = 99, ...){
   # check.v <- c(0,1,missing.temp)
   # check.r <- sum(check.v %in% unique(c(data.matrix(data)))) == length(check.v)  # If data have (0,1,90), cannot catch continuous
   # return(check.r)
+}
+
+replace_na_with_missing <- function(data, missing.val = 99) {
+  n_missing <- sum(is.na(data))
+  if (n_missing > 0) {
+    warning(sprintf(
+      "%d NA value%s detected and treated as missing.val (%s).",
+      n_missing,
+      ifelse(n_missing == 1, "", "s"),
+      missing.val
+    ), call. = FALSE)
+    data[is.na(data)] <- missing.val
+  }
+  data
+}
+
+normalize_adapt <- function(adapt) {
+  if (isTRUE(adapt)) {
+    return(list(use_adapt = TRUE))
+  }
+  if (identical(adapt, FALSE)) {
+    return(NULL)
+  }
+  adapt
+}
+
+get_map_info <- function(map) {
+  finite_map <- is.finite(map)
+  if (!any(finite_map)) {
+    stop("All MAP values are non-finite. Check data coding, missing-data settings, and sampler tuning.", call. = FALSE)
+  }
+  map_work <- map
+  map_work[!finite_map] <- -Inf
+  max.address <- min(which.max(map_work))
+  list(
+    address = max.address,
+    info = data.frame(value = map[max.address], iter = max.address)
+  )
 }
 
 # Distance
@@ -303,4 +343,3 @@ MCMCestThomas <- function(X, xlim, ylim, NStep = 10000, DiscardStep = 1000, Jump
 
   res
 }
-

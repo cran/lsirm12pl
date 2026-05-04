@@ -22,7 +22,7 @@
 #' \item{gamma_estimate}{posterior estimates of gamma parameter.}
 #' \item{z_estimate}{Posterior estimates of the z parameter.}
 #' \item{w_estimate}{Posterior estimates of the w parameter.}
-#'  \item{imp_estimate}{Probability of imputating a missing value with 1.}
+#'  \item{imp_estimate}{Probability of imputing a missing value with 1.}
 #' \item{beta}{Posterior samples of the beta parameter.}
 #' \item{theta}{Posterior samples of the theta parameter.}
 #' \item{gamma}{Posterior samples of the gamma parameter.}
@@ -62,10 +62,11 @@
 lsirm1pl_mar = function(data, ndim = 2, niter = 15000, nburn = 2500, nthin = 5, nprint = 500,
                         jump_beta = 0.4, jump_theta = 1, jump_gamma = 0.2, jump_z = 0.5, jump_w = 0.5,
                         pr_mean_beta = 0, pr_sd_beta = 1, pr_mean_theta = 0, pr_sd_theta = 1,
-                        pr_mean_gamma = 0.5, pr_sd_gamma = 1, pr_a_theta = 0.001, pr_b_theta = 0.001, missing.val = 99, verbose=FALSE, fix_theta_sd=FALSE){
-  if(niter < nburn){
+                        pr_mean_gamma = 0.5, pr_sd_gamma = 1, pr_a_theta = 0.001, pr_b_theta = 0.001, missing.val = 99, verbose=FALSE, fix_theta_sd=FALSE, adapt = NULL) {
+  if(niter <= nburn){
     stop("niter must be greater than burn-in process.")
   }
+  adapt <- normalize_adapt(adapt)
   if(is.data.frame(data)){
     cname = colnames(data)
   }else{
@@ -73,7 +74,7 @@ lsirm1pl_mar = function(data, ndim = 2, niter = 15000, nburn = 2500, nthin = 5, 
   }
   
   # Convert NA to missing.val
-  data[is.na(data)] <- missing.val
+  data <- replace_na_with_missing(data, missing.val)
   
   # cat("\n\nFitting with MCMC algorithm\n")
 
@@ -82,15 +83,16 @@ lsirm1pl_mar = function(data, ndim = 2, niter = 15000, nburn = 2500, nthin = 5, 
                              pr_mean_beta=pr_mean_beta, pr_sd_beta=pr_sd_beta, pr_mean_theta=pr_mean_theta, pr_sd_theta=pr_sd_theta,
                              pr_mean_gamma = pr_mean_gamma, pr_sd_gamma = pr_sd_gamma,
                              pr_a_theta=pr_a_theta, pr_b_theta=pr_b_theta, missing = missing.val, verbose=verbose, fix_theta_sd=fix_theta_sd,
-                             fixed_gamma = FALSE, adapt = NULL)
+                             fixed_gamma = FALSE, adapt = adapt)
 
   mcmc.inf = list(nburn=nburn, niter=niter, nthin=nthin)
   nsample <- nrow(data)
   nitem <- ncol(data)
 
   nmcmc = as.integer((niter - nburn) / nthin)
-  max.address = min(which.max(output$map))
-  map.inf = data.frame(value = output$map[which.max(output$map)], iter = which.max(output$map))
+  map.info <- get_map_info(output$map)
+  max.address <- map.info$address
+  map.inf <- map.info$info
   w.star = output$w[max.address,,]
   z.star = output$z[max.address,,]
   w.proc = array(0,dim=c(nmcmc,nitem,ndim))
@@ -163,6 +165,7 @@ cat("\n")
                  w              = w.proc,
                  z_raw          = output$z,
                  w_raw          = output$w,
+                 tuning         = output$tuning,
                  imp            = output$impute,
                  accept_beta    = output$accept_beta,
                  accept_theta   = output$accept_theta,

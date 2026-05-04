@@ -91,16 +91,18 @@ lsirm1pl(
 
 \item{fix_theta_sd}{Logical; If TRUE, the standard deviation of the theta parameter is fixed. Default is FALSE.}
 
-\item{adapt}{List; optional adaptive MCMC control. If not \code{NULL}, proposal standard deviations are adapted during the burn-in period to reach a target acceptance rate and are held fixed during the main MCMC sampling.
+\item{adapt}{List; optional adaptive MCMC control. If not \code{NULL}, proposal standard deviations are adapted during burn-in using a Robbins-Monro update on the log proposal SD and are held fixed during the main MCMC sampling.
 When adaptation is enabled, the reported acceptance ratios in the output (\code{accept_beta}, \code{accept_theta}, etc.) are computed only from iterations after burn-in, reflecting the performance of the adapted proposal distributions.
+The defaults are tuning heuristics for random-walk Metropolis proposals: scalar parameters use a target acceptance rate of \code{0.44}, while latent position block proposals use \code{0.234}. The \code{0.44} target is commonly used for one-dimensional random-walk proposals, and \code{0.234} is the high-dimensional optimal-scaling benchmark discussed by Roberts, Gelman and Gilks (1997) and Roberts and Rosenthal (2001). These values are proposal-tuning targets, not convergence diagnostics.
 Elements of the list can include:
 \itemize{
   \item \code{use_adapt}: Logical; if \code{TRUE}, adaptive MCMC is used. Default is \code{FALSE}.
-  \item \code{adapt_interval}: Integer; the number of iterations between each update of the proposal SDs. Default is \code{100}.
-  \item \code{adapt_rate}: Numeric; Robbins-Monro scaling constant (c) in step size formula: adapt_rate / iteration^decay_rate. Default is \code{1.0}. Valid range: any positive value. Recommended: 0.5-2.0.
-  \item \code{decay_rate}: Numeric; Robbins-Monro decay exponent (alpha) in step size formula. Default is \code{0.5}. Valid range: (0.5, 1]. Recommended: 0.5-0.8.
-  \item \code{target_accept}: Numeric; target acceptance rate for scalar parameters (beta, theta, gamma, alpha). Default is \code{0.44}.
-  \item \code{target_accept_zw}: Numeric; target acceptance rate for multi-dimensional latent positions z and w. Default is \code{0.234}.
+  \item \code{adapt_interval}: Integer; the number of iterations between proposal SD updates. Smaller values react more quickly but can be noisy; larger values are smoother but adapt more slowly. Default is \code{100}.
+  \item \code{adapt_rate}: Numeric; Robbins-Monro scaling constant \eqn{c} in the step-size formula \eqn{c / t^\alpha}. Larger values adapt faster but can oscillate; smaller values are more conservative. Default is \code{1.0}. Recommended starting range is \code{0.5}--\code{2.0}.
+  \item \code{decay_rate}: Numeric; Robbins-Monro decay exponent \eqn{\alpha} in \eqn{c / t^\alpha}. Values above \code{0.5} give diminishing adaptation consistent with the usual stochastic-approximation square-summability condition. Default is \code{0.6}; recommended range is \code{0.6}--\code{0.8}.
+  \item \code{jump_min}, \code{jump_max}: Numeric; advanced lower and upper bounds for adapted proposal SDs, used to prevent proposal scales from collapsing to zero or becoming excessively large. These are normally left unchanged.
+  \item \code{target_accept}: Numeric; default target acceptance rate for scalar random-walk updates (beta, theta, gamma). Default is \code{0.44}.
+  \item \code{target_accept_zw}: Numeric; target acceptance rate for latent position block updates z and w. Default is \code{0.234}.
   \item \code{target_accept_beta/theta/gamma}: Numeric; (optional) parameter-specific target acceptance rates to override \code{target_accept}.
 }}
 
@@ -123,6 +125,8 @@ The basic return list containing the following components:
 \item{theta_sd}{Posterior samples of the standard deviation of theta.}
 \item{z}{Posterior samples of the z parameter, represented as a 3-dimensional matrix where the last axis denotes the dimension of the latent space.}
 \item{w}{Posterior samples of the w parameter, represented as a 3-dimensional matrix where the last axis denotes the dimension of the latent space.}
+\item{z_raw}{Posterior samples of the z parameter before Procrustes matching.}
+\item{w_raw}{Posterior samples of the w parameter before Procrustes matching.}
 \item{accept_beta}{Acceptance ratio for the beta parameter.}
 \item{accept_theta}{Acceptance ratio for the theta parameter.}
 \item{accept_z}{Acceptance ratio for the z parameter.}
@@ -153,16 +157,24 @@ If both \code{spikenslab} and \code{fixed_gamma} are set \code{TRUE}, it returns
 \examples{
 \donttest{
 # generate example item response matrix
-data     <- matrix(rbinom(500, size = 1, prob = 0.5),ncol=10,nrow=50)
+data <- matrix(rbinom(500, size = 1, prob = 0.5), ncol = 10, nrow = 50)
 lsirm_result <- lsirm1pl(data)
 
 # The code following can achieve the same result.
-lsirm_result <- lsirm(data~lsirm1pl())
+lsirm_result <- lsirm(data ~ lsirm1pl())
 
 # Fit with adaptive MCMC
 lsirm_result <- lsirm1pl(data, adapt = list(use_adapt = TRUE))
-
 }
+}
+\references{
+Jeon, M., Jin, I. H., Schweinberger, M., & Baugh, S. (2021). Mapping unobserved item-respondent interactions: A latent space item response model with interaction map. \emph{Psychometrika}, 86(2), 378--403. \url{https://link.springer.com/article/10.1007/s11336-021-09762-5}
+
+Roberts, G. O., Gelman, A., & Gilks, W. R. (1997). Weak convergence and optimal scaling of random walk Metropolis algorithms. \emph{The Annals of Applied Probability}, 7(1), 110--120. \doi{10.1214/aoap/1034625254}
+
+Roberts, G. O., & Rosenthal, J. S. (2001). Optimal scaling for various Metropolis-Hastings algorithms. \emph{Statistical Science}, 16(4), 351--367. \doi{10.1214/ss/1015346320}
+
+Andrieu, C., & Thoms, J. (2008). A tutorial on adaptive MCMC. \emph{Statistics and Computing}, 18(4), 343--373. \doi{10.1007/s11222-008-9110-y}
 }
 \seealso{
 The LSIRM for 1PL LSIRM for binary item response data as following:

@@ -28,7 +28,8 @@ lsirm2pl_normal_fixed_gamma(
   pr_b_eps = 0.001,
   verbose = FALSE,
   fix_theta_sd = FALSE,
-  fix_alpha_1 = TRUE
+  fix_alpha_1 = TRUE,
+  adapt = NULL
 )
 }
 \arguments{
@@ -79,6 +80,21 @@ lsirm2pl_normal_fixed_gamma(
 \item{fix_theta_sd}{Logical; If TRUE, the standard deviation of the theta parameter is fixed. Default is FALSE.}
 
 \item{fix_alpha_1}{Logical; If TRUE, the first element of the alpha parameter is fixed to 1. Default is TRUE.}
+
+\item{adapt}{List; optional adaptive MCMC control. If not \code{NULL}, proposal standard deviations are adapted during burn-in using a Robbins-Monro update on the log proposal SD and are held fixed during the main MCMC sampling.
+When adaptation is enabled, the reported acceptance ratios in the output (\code{accept_beta}, \code{accept_theta}, \code{accept_alpha}, etc.) are computed only from iterations after burn-in, reflecting the performance of the adapted proposal distributions.
+The defaults are tuning heuristics for random-walk Metropolis proposals: scalar parameters use a target acceptance rate of \code{0.44}, while latent position block proposals use \code{0.234}. The \code{0.44} target is commonly used for one-dimensional random-walk proposals, and \code{0.234} is the high-dimensional optimal-scaling benchmark discussed by Roberts, Gelman and Gilks (1997) and Roberts and Rosenthal (2001). These values are proposal-tuning targets, not convergence diagnostics.
+Elements of the list can include:
+\itemize{
+  \item \code{use_adapt}: Logical; if \code{TRUE}, adaptive MCMC is used. Default is \code{FALSE}.
+  \item \code{adapt_interval}: Integer; the number of iterations between proposal SD updates. Smaller values react more quickly but can be noisy; larger values are smoother but adapt more slowly. Default is \code{100}.
+  \item \code{adapt_rate}: Numeric; Robbins-Monro scaling constant \eqn{c} in the step-size formula \eqn{c / t^\alpha}. Larger values adapt faster but can oscillate; smaller values are more conservative. Default is \code{1.0}. Recommended starting range is \code{0.5}--\code{2.0}.
+  \item \code{decay_rate}: Numeric; Robbins-Monro decay exponent \eqn{\alpha} in \eqn{c / t^\alpha}. Values above \code{0.5} give diminishing adaptation consistent with the usual stochastic-approximation square-summability condition. Default is \code{0.6}; recommended range is \code{0.6}--\code{0.8}.
+  \item \code{jump_min}, \code{jump_max}: Numeric; advanced lower and upper bounds for adapted proposal SDs, used to prevent proposal scales from collapsing to zero or becoming excessively large. These are normally left unchanged.
+  \item \code{target_accept}: Numeric; default target acceptance rate for scalar random-walk updates (beta, theta, gamma, alpha). Default is \code{0.44}.
+  \item \code{target_accept_zw}: Numeric; target acceptance rate for latent position block updates z and w. Default is \code{0.234}.
+  \item \code{target_accept_beta/theta/alpha/gamma}: Numeric; (optional) parameter-specific target acceptance rates to override \code{target_accept}.
+}}
 }
 \value{
 \code{lsirm2pl_normal_fixed_gamma} returns an object of  list containing the following components:
@@ -113,7 +129,7 @@ lsirm2pl_normal_fixed_gamma(
 \link{lsirm2pl_normal_fixed_gamma} factorizes item response matrix into column-wise item effect, row-wise respondent effect and further embeds interaction effect in a latent space. Unlike 1PL model, 2PL model assumes the item effect can vary according to respondent, allowing additional parameter multiplied with respondent effect. The resulting latent space provides an interaction map that represents interactions between respondents and items.
 }
 \details{
-\code{lsirm2pl_normal_fixed_gamma} models the continuous value of response by respondent \eqn{j} to item \eqn{i} with item effect \eqn{\beta_i}, respondent effect \eqn{\theta_j} and the distance between latent position \eqn{w_i} of item \eqn{i} and latent position \eqn{z_j} of respondent \eqn{j} in the shared metric space. For 2pl model, the the item effect is assumed to have additional discrimination parameter \eqn{\alpha_i} multiplied by \eqn{\theta_j}: \deqn{Y_{j,i} = \theta_j+\beta_i-\gamma||z_j-w_i|| + e_{j,i}} where the error \eqn{e_{j,i} \sim N(0,\sigma^2)}
+\code{lsirm2pl_normal_fixed_gamma} models the continuous value of response by respondent \eqn{j} to item \eqn{i} with item effect \eqn{\beta_i}, respondent effect \eqn{\theta_j} and the distance between latent position \eqn{w_i} of item \eqn{i} and latent position \eqn{z_j} of respondent \eqn{j} in the shared metric space. For 2pl model, the the item effect is assumed to have additional discrimination parameter \eqn{\alpha_i} multiplied by \eqn{\theta_j}: \deqn{Y_{j,i} = \alpha_i\theta_j+\beta_i-\gamma||z_j-w_i|| + e_{j,i}} where the error \eqn{e_{j,i} \sim N(0,\sigma^2)}
 }
 \examples{
 # generate example (continuous) item response matrix

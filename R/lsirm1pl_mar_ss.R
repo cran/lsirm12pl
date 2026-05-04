@@ -42,7 +42,7 @@
 #' \item{accept_w}{Acceptance ratio for the w parameter.}
 #' \item{accept_gamma}{Acceptance ratio for the gamma parameter.}
 #'  \item{pi_estimate}{Posterior estimation of phi. inclusion probability of gamma. if estimation of phi is less than 0.5, choose Rasch model with gamma = 0, otherwise latent space model with gamma > 0. }
-#'  \item{imp_estimate}{Probability of imputating a missing value with 1.}
+#'  \item{imp_estimate}{Probability of imputing a missing value with 1.}
 #'
 #' @details \code{lsirm1pl_mar_ss} models the probability of correct response by respondent \eqn{j} to item \eqn{i} with item effect \eqn{\beta_i}, respondent effect \eqn{\theta_j} and the distance between latent position \eqn{w_i} of item \eqn{i} and latent position \eqn{z_j} of respondent \eqn{j} in the shared metric space, with \eqn{\gamma} represents the weight of the distance term: \deqn{logit(P(Y_{j,i} = 1 |\theta_j,\beta_i,\gamma,z_j,w_i))=\theta_j+\beta_i-\gamma||z_j-w_i||} Under the assumption of missing at random, the model takes the missing element into consideration in the sampling procedure. For the details of missing at random assumption and data augmentation, see References. \code{lsirm1pl_mar_ss} model include model selection approach based on spike-and-slab priors for log gamma. For detail of spike-and-slab priors, see References.
 #'
@@ -71,10 +71,11 @@ lsirm1pl_mar_ss = function(data, ndim = 2, niter = 15000, nburn = 2500, nthin = 
                            jump_beta = 0.4, jump_theta = 1.0, jump_gamma = 1, jump_z = 0.5, jump_w = 0.5,
                            pr_mean_beta = 0, pr_sd_beta = 1.0, pr_mean_theta = 0, pr_sd_theta = 1.0,
                            pr_spike_mean = -3, pr_spike_sd = 1.0, pr_slab_mean = 0.5, pr_slab_sd = 1.0,
-                           pr_a_theta = 0.001, pr_b_theta = 0.001, pr_xi_a  = 1, pr_xi_b = 1,  missing.val = 99, verbose=FALSE, fix_theta_sd=FALSE){
-  if(niter < nburn){
+                           pr_a_theta = 0.001, pr_b_theta = 0.001, pr_xi_a  = 1, pr_xi_b = 1,  missing.val = 99, verbose=FALSE, fix_theta_sd=FALSE, adapt = NULL) {
+  if(niter <= nburn){
     stop("niter must be greater than burn-in process.")
   }
+  adapt <- normalize_adapt(adapt)
   if(is.data.frame(data)){
     cname = colnames(data)
   }else{
@@ -82,7 +83,7 @@ lsirm1pl_mar_ss = function(data, ndim = 2, niter = 15000, nburn = 2500, nthin = 
   }
   
   # Convert NA to missing.val
-  data[is.na(data)] <- missing.val
+  data <- replace_na_with_missing(data, missing.val)
   
   # cat("\n\nFitting with MCMC algorithm\n")
 
@@ -90,15 +91,16 @@ lsirm1pl_mar_ss = function(data, ndim = 2, niter = 15000, nburn = 2500, nthin = 
                                 jump_beta=jump_beta, jump_theta=jump_theta, jump_gamma=jump_gamma, jump_z=jump_z, jump_w=jump_w,
                                 pr_mean_beta=pr_mean_beta, pr_sd_beta=pr_sd_beta, pr_mean_theta=pr_mean_theta, pr_sd_theta=pr_sd_theta,
                                 pr_spike_mean=pr_spike_mean, pr_spike_sd=pr_spike_sd, pr_slab_mean=pr_slab_mean, pr_slab_sd=pr_slab_sd,
-                                pr_a_theta=pr_a_theta, pr_b_theta=pr_b_theta, pr_beta_a = pr_xi_a, pr_beta_b = pr_xi_b, missing=missing.val, verbose=verbose, fix_theta_sd=fix_theta_sd)
+                                pr_a_theta=pr_a_theta, pr_b_theta=pr_b_theta, pr_beta_a = pr_xi_a, pr_beta_b = pr_xi_b, missing=missing.val, verbose=verbose, fix_theta_sd=fix_theta_sd, adapt=adapt)
 
   mcmc.inf = list(nburn=nburn, niter=niter, nthin=nthin)
   nsample <- nrow(data)
   nitem <- ncol(data)
 
   nmcmc = as.integer((niter - nburn) / nthin)
-  max.address = min(which.max(output$map))
-  map.inf = data.frame(value = output$map[which.max(output$map)], iter = which.max(output$map))
+  map.info <- get_map_info(output$map)
+  max.address <- map.info$address
+  map.inf <- map.info$info
   w.star = output$w[max.address,,]
   z.star = output$z[max.address,,]
   w.proc = array(0,dim=c(nmcmc,nitem,ndim))
@@ -173,6 +175,7 @@ cat("\n")
                  w              = w.proc,
                  z_raw          = output$z,
                  w_raw          = output$w,
+                 tuning         = output$tuning,
                  imp            = output$impute,
                  pi             = output$pi,
                  xi             = output$xi,

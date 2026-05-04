@@ -78,8 +78,7 @@ lsirm2pl_fixed_gamma_mar(
 
 \item{fix_alpha_1}{Logical; If TRUE, the first element of the alpha parameter is fixed to 1. Default is TRUE.}
 
-\item{adapt}{List; optional adaptive MCMC control. If not \code{NULL}, proposal SDs are adapted during burn-in
-only and held fixed afterward.}
+\item{adapt}{List; optional adaptive MCMC control. If not \code{NULL}, proposal SDs are adapted during burn-in using a Robbins-Monro update on the log proposal SD and held fixed afterward. See \code{\link{lsirm2pl}} for the full list of adaptive tuning settings and their default targets.}
 }
 \value{
 \code{lsirm2pl_fixed_gamma_mar} returns an object of  list containing the following components:
@@ -93,7 +92,7 @@ only and held fixed afterward.}
 \item{sigma_theta_estimate}{Posterior estimates of the standard deviation of theta.}
 \item{z_estimate}{Posterior estimates of the z parameter.}
 \item{w_estimate}{Posterior estimates of the w parameter.}
- \item{imp_estimate}{Probability of imputating a missing value with 1.}
+ \item{imp_estimate}{Probability of imputing a missing value with 1.}
 \item{beta}{Posterior samples of the beta parameter.}
 \item{theta}{Posterior samples of the theta parameter.}
 \item{theta_sd}{Posterior samples of the standard deviation of theta.}

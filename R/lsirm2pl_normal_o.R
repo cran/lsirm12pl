@@ -41,7 +41,7 @@
 #'  \item{alpha}{Posterior estimates of the alpha parameter.}
 #'  \item{accept_alpha}{Acceptance ratio for the alpha parameter.}
 #'
-#' @details \code{lsirm2pl_normal_o} models the continuous value of response by respondent \eqn{j} to item \eqn{i} with item effect \eqn{\beta_i}, respondent effect \eqn{\theta_j} and the distance between latent position \eqn{w_i} of item \eqn{i} and latent position \eqn{z_j} of respondent \eqn{j} in the shared metric space, with \eqn{\gamma} represents the weight of the distance term. For 2pl model, the the item effect is assumed to have additional discrimination parameter \eqn{\alpha_i} multiplied by \eqn{\theta_j}: \deqn{Y_{j,i} = \theta_j+\beta_i-\gamma||z_j-w_i|| + e_{j,i}} where the error \eqn{e_{j,i} \sim N(0,\sigma^2)}
+#' @details \code{lsirm2pl_normal_o} models the continuous value of response by respondent \eqn{j} to item \eqn{i} with item effect \eqn{\beta_i}, respondent effect \eqn{\theta_j} and the distance between latent position \eqn{w_i} of item \eqn{i} and latent position \eqn{z_j} of respondent \eqn{j} in the shared metric space, with \eqn{\gamma} represents the weight of the distance term. For 2pl model, the the item effect is assumed to have additional discrimination parameter \eqn{\alpha_i} multiplied by \eqn{\theta_j}: \deqn{Y_{j,i} = \alpha_i\theta_j+\beta_i-\gamma||z_j-w_i|| + e_{j,i}} where the error \eqn{e_{j,i} \sim N(0,\sigma^2)}
 #' @examples
 #' # generate example (continuous) item response matrix
 #' data <- matrix(rnorm(500, mean = 0, sd = 1),ncol=10,nrow=50)
@@ -56,10 +56,11 @@ lsirm2pl_normal_o = function(data, ndim = 2, niter = 15000, nburn = 2500, nthin 
                              pr_mean_beta = 0, pr_sd_beta = 1.0, pr_mean_theta = 0, pr_sd_theta = 1.0,
                              pr_mean_gamma = 0.5, pr_sd_gamma =1.0,
                              pr_mean_alpha = 0.5, pr_sd_alpha = 1,
-                             pr_a_theta = 0.001, pr_b_theta = 0.001,pr_a_eps = 0.001, pr_b_eps = 0.001, verbose=FALSE, fix_theta_sd=FALSE, fix_alpha_1=TRUE){
-  if(niter < nburn){
+                             pr_a_theta = 0.001, pr_b_theta = 0.001,pr_a_eps = 0.001, pr_b_eps = 0.001, verbose=FALSE, fix_theta_sd=FALSE, fix_alpha_1=TRUE, adapt = NULL) {
+  if(niter <= nburn){
     stop("niter must be greater than burn-in process.")
   }
+  adapt <- normalize_adapt(adapt)
   if(is.data.frame(data)){
     cname = colnames(data)
   }else{
@@ -72,15 +73,16 @@ lsirm2pl_normal_o = function(data, ndim = 2, niter = 15000, nburn = 2500, nthin 
   output <- lsirm2pl_normal_cpp(data=as.matrix(data), ndim=ndim, niter=niter, nburn=nburn, nthin=nthin, nprint=nprint,
                                 jump_beta=jump_beta, jump_theta=jump_theta, jump_alpha=jump_alpha, jump_gamma=jump_gamma, jump_z=jump_z, jump_w=jump_w,
                                 pr_mean_beta=pr_mean_beta, pr_sd_beta=pr_sd_beta, pr_a_theta=pr_a_theta, pr_b_theta=pr_b_theta, pr_mean_theta=pr_mean_theta, pr_sd_theta=pr_sd_theta,
-                                pr_a_eps=pr_a_eps,  pr_b_eps=pr_b_eps, pr_mean_gamma=pr_mean_gamma, pr_sd_gamma=pr_sd_gamma, pr_mean_alpha=pr_mean_alpha, pr_sd_alpha=pr_sd_alpha, verbose=verbose, fix_theta_sd=fix_theta_sd, fix_alpha_1=fix_alpha_1)
+                                pr_a_eps=pr_a_eps,  pr_b_eps=pr_b_eps, pr_mean_gamma=pr_mean_gamma, pr_sd_gamma=pr_sd_gamma, pr_mean_alpha=pr_mean_alpha, pr_sd_alpha=pr_sd_alpha, verbose=verbose, fix_theta_sd=fix_theta_sd, fix_alpha_1=fix_alpha_1, adapt=adapt)
 
   mcmc.inf = list(nburn=nburn, niter=niter, nthin=nthin)
   nsample <- nrow(data)
   nitem <- ncol(data)
 
   nmcmc = as.integer((niter - nburn) / nthin)
-  max.address = min(which.max(output$map))
-  map.inf = data.frame(value = output$map[which.max(output$map)], iter = which.max(output$map))
+  map.info <- get_map_info(output$map)
+  max.address <- map.info$address
+  map.inf <- map.info$info
   w.star = output$w[max.address,,]
   z.star = output$z[max.address,,]
   w.proc = array(0,dim=c(nmcmc,nitem,ndim))
@@ -150,6 +152,7 @@ cat("\n")
                  w              = w.proc,
                  z_raw          = output$z,
                  w_raw          = output$w,
+                 tuning         = output$tuning,
                  accept_beta    = output$accept_beta,
                  accept_theta   = output$accept_theta,
                  accept_w       = output$accept_w,

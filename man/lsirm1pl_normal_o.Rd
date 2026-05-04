@@ -27,7 +27,8 @@ lsirm1pl_normal_o(
   pr_a_eps = 0.001,
   pr_b_eps = 0.001,
   verbose = FALSE,
-  fix_theta_sd = FALSE
+  fix_theta_sd = FALSE,
+  adapt = NULL
 )
 }
 \arguments{
@@ -76,6 +77,21 @@ lsirm1pl_normal_o(
 \item{verbose}{Logical; If TRUE, MCMC samples are printed for each \code{nprint}. Default is FALSE.}
 
 \item{fix_theta_sd}{Logical; If TRUE, the standard deviation of the theta parameter is fixed. Default is FALSE.}
+
+\item{adapt}{List; optional adaptive MCMC control. If not \code{NULL}, proposal standard deviations are adapted during burn-in using a Robbins-Monro update on the log proposal SD and are held fixed during the main MCMC sampling.
+When adaptation is enabled, the reported acceptance ratios in the output (\code{accept_beta}, \code{accept_theta}, etc.) are computed only from iterations after burn-in, reflecting the performance of the adapted proposal distributions.
+The defaults are tuning heuristics for random-walk Metropolis proposals: scalar parameters use a target acceptance rate of \code{0.44}, while latent position block proposals use \code{0.234}. The \code{0.44} target is commonly used for one-dimensional random-walk proposals, and \code{0.234} is the high-dimensional optimal-scaling benchmark discussed by Roberts, Gelman and Gilks (1997) and Roberts and Rosenthal (2001). These values are proposal-tuning targets, not convergence diagnostics.
+Elements of the list can include:
+\itemize{
+  \item \code{use_adapt}: Logical; if \code{TRUE}, adaptive MCMC is used. Default is \code{FALSE}.
+  \item \code{adapt_interval}: Integer; the number of iterations between proposal SD updates. Smaller values react more quickly but can be noisy; larger values are smoother but adapt more slowly. Default is \code{100}.
+  \item \code{adapt_rate}: Numeric; Robbins-Monro scaling constant \eqn{c} in the step-size formula \eqn{c / t^\alpha}. Larger values adapt faster but can oscillate; smaller values are more conservative. Default is \code{1.0}. Recommended starting range is \code{0.5}--\code{2.0}.
+  \item \code{decay_rate}: Numeric; Robbins-Monro decay exponent \eqn{\alpha} in \eqn{c / t^\alpha}. Values above \code{0.5} give diminishing adaptation consistent with the usual stochastic-approximation square-summability condition. Default is \code{0.6}; recommended range is \code{0.6}--\code{0.8}.
+  \item \code{jump_min}, \code{jump_max}: Numeric; advanced lower and upper bounds for adapted proposal SDs, used to prevent proposal scales from collapsing to zero or becoming excessively large. These are normally left unchanged.
+  \item \code{target_accept}: Numeric; default target acceptance rate for scalar random-walk updates (beta, theta, gamma). Default is \code{0.44}.
+  \item \code{target_accept_zw}: Numeric; target acceptance rate for latent position block updates z and w. Default is \code{0.234}.
+  \item \code{target_accept_beta/theta/gamma}: Numeric; (optional) parameter-specific target acceptance rates to override \code{target_accept}.
+}}
 }
 \value{
 \code{lsirm1pl_normal_o} returns an object of  list containing the following components:

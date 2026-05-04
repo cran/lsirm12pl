@@ -49,129 +49,146 @@
 #' Ishwaran, H., & Rao, J. S. (2005). Spike and slab variable selection: Frequentist and Bayesian strategies (Vol. 33). The Annals of Statistics
 #'
 #' @examples
+#' \donttest{
 #' # generate example (continuous) item response matrix
-#' data     <- matrix(rnorm(500, mean = 0, sd = 1),ncol=10,nrow=50)
+#' data <- matrix(rnorm(500, mean = 0, sd = 1), ncol = 10, nrow = 50)
 #'
 #' lsirm_result <- lsirm1pl_normal_ss(data)
 #'
 #' # The code following can achieve the same result.
 #' lsirm_result <- lsirm(data ~ lsirm1pl(spikenslab = TRUE, fixed_gamma = FALSE))
+#' }
 #'
 #' @export
-lsirm1pl_normal_ss = function(data, ndim = 2, niter = 15000, nburn = 2500, nthin = 5, nprint = 500,
-                              jump_beta = 0.4, jump_theta = 1.0, jump_gamma = 1.0, jump_z = 0.5, jump_w = 0.5,
-                              pr_mean_beta = 0, pr_sd_beta = 1.0, pr_mean_theta = 0, pr_sd_theta = 1.0,
-                              pr_spike_mean = -3, pr_spike_sd = 1.0, pr_slab_mean = 0.5, pr_slab_sd = 1.0,
-                              pr_a_theta = 0.001, pr_b_theta = 0.001,
-                              pr_a_eps = 0.001, pr_b_eps = 0.001,
-                              pr_xi_a = 0.001, pr_xi_b = 0.001, verbose=FALSE, fix_theta_sd=FALSE){
-  if(niter < nburn){
+lsirm1pl_normal_ss <- function(data, ndim = 2, niter = 15000, nburn = 2500, nthin = 5, nprint = 500,
+                               jump_beta = 0.4, jump_theta = 1.0, jump_gamma = 1.0, jump_z = 0.5, jump_w = 0.5,
+                               pr_mean_beta = 0, pr_sd_beta = 1.0, pr_mean_theta = 0, pr_sd_theta = 1.0,
+                               pr_spike_mean = -3, pr_spike_sd = 1.0, pr_slab_mean = 0.5, pr_slab_sd = 1.0,
+                               pr_a_theta = 0.001, pr_b_theta = 0.001,
+                               pr_a_eps = 0.001, pr_b_eps = 0.001,
+                               pr_xi_a = 0.001, pr_xi_b = 0.001, verbose = FALSE, fix_theta_sd = FALSE,
+                               adapt = NULL) {
+  if (niter <= nburn) {
     stop("niter must be greater than burn-in process.")
   }
-  if(is.data.frame(data)){
-    cname = colnames(data)
-  }else{
-    cname = paste("item", 1:ncol(data), sep=" ")
+  adapt <- normalize_adapt(adapt)
+  if (is.data.frame(data)) {
+    cname <- colnames(data)
+  } else {
+    cname <- paste("item", 1:ncol(data), sep = " ")
   }
 
   # cat("\n\nFitting with MCMC algorithm\n")
 
 
-  output <- lsirm1pl_normal_ss_cpp(data=as.matrix(data), ndim=ndim, niter=niter, nburn=nburn, nthin=nthin, nprint=nprint,
-                                   jump_beta=jump_beta, jump_theta=jump_theta, jump_gamma=jump_gamma, jump_z=jump_z, jump_w=jump_w,
-                                   pr_mean_beta=pr_mean_beta, pr_sd_beta=pr_sd_beta, pr_mean_theta=pr_mean_theta, pr_sd_theta=pr_sd_theta,
-                                   pr_spike_mean=pr_spike_mean, pr_spike_sd=pr_spike_sd, pr_slab_mean=pr_slab_mean, pr_slab_sd=pr_slab_sd,
-                                   pr_a_theta=pr_a_theta, pr_b_theta=pr_b_theta,
-                                   pr_a_eps=pr_a_eps, pr_b_eps=pr_b_eps,
-                                   pr_beta_a=pr_xi_a, pr_beta_b=pr_xi_b, verbose=verbose, fix_theta_sd=fix_theta_sd)
+  output <- lsirm1pl_normal_ss_cpp(
+    data = as.matrix(data), ndim = ndim, niter = niter, nburn = nburn, nthin = nthin, nprint = nprint,
+    jump_beta = jump_beta, jump_theta = jump_theta, jump_gamma = jump_gamma, jump_z = jump_z, jump_w = jump_w,
+    pr_mean_beta = pr_mean_beta, pr_sd_beta = pr_sd_beta, pr_mean_theta = pr_mean_theta, pr_sd_theta = pr_sd_theta,
+    pr_spike_mean = pr_spike_mean, pr_spike_sd = pr_spike_sd, pr_slab_mean = pr_slab_mean, pr_slab_sd = pr_slab_sd,
+    pr_a_theta = pr_a_theta, pr_b_theta = pr_b_theta,
+    pr_a_eps = pr_a_eps, pr_b_eps = pr_b_eps,
+    pr_beta_a = pr_xi_a, pr_beta_b = pr_xi_b, verbose = verbose, fix_theta_sd = fix_theta_sd,
+    adapt = adapt
+  )
 
-  mcmc.inf = list(nburn=nburn, niter=niter, nthin=nthin)
+  mcmc.inf <- list(nburn = nburn, niter = niter, nthin = nthin)
   nsample <- nrow(data)
   nitem <- ncol(data)
 
-  nmcmc = as.integer((niter - nburn) / nthin)
-  max.address = min(which.max(output$map))
-  map.inf = data.frame(value = output$map[which.max(output$map)], iter = which.max(output$map))
-  w.star = output$w[max.address,,]
-  z.star = output$z[max.address,,]
-  w.proc = array(0,dim=c(nmcmc,nitem,ndim))
-  z.proc = array(0,dim=c(nmcmc,nsample,ndim))
+  nmcmc <- as.integer((niter - nburn) / nthin)
+  map.info <- get_map_info(output$map)
+  max.address <- map.info$address
+  map.inf <- map.info$info
+  w.star <- output$w[max.address, , ]
+  z.star <- output$z[max.address, , ]
+  w.proc <- array(0, dim = c(nmcmc, nitem, ndim))
+  z.proc <- array(0, dim = c(nmcmc, nsample, ndim))
 
   # cat("\n\nProcrustes Matching Analysis\n")
-cat("\n")
+  cat("\n")
 
-  for(iter in 1:nmcmc){
-    z.iter = output$z[iter,,]
-    w.iter = output$w[iter,,]
+  for (iter in 1:nmcmc) {
+    z.iter <- output$z[iter, , ]
+    w.iter <- output$w[iter, , ]
 
-    if(ndim == 1){
-      z.iter = as.matrix(z.iter)
-      w.iter = as.matrix(w.iter)
-      z.star = as.matrix(z.star)
-      w.star = as.matrix(w.star)
+    if (ndim == 1) {
+      z.iter <- as.matrix(z.iter)
+      w.iter <- as.matrix(w.iter)
+      z.star <- as.matrix(z.star)
+      w.star <- as.matrix(w.star)
     }
 
-    if(iter != max.address) z.proc[iter,,] = procrustes(z.iter,z.star)$X.new
-    else z.proc[iter,,] = z.iter
+    if (iter != max.address) {
+      z.proc[iter, , ] <- procrustes(z.iter, z.star)$X.new
+    } else {
+      z.proc[iter, , ] <- z.iter
+    }
 
-    if(iter != max.address) w.proc[iter,,] = procrustes(w.iter,w.star)$X.new
-    else w.proc[iter,,] = w.iter
+    if (iter != max.address) {
+      w.proc[iter, , ] <- procrustes(w.iter, w.star)$X.new
+    } else {
+      w.proc[iter, , ] <- w.iter
+    }
   }
 
-  w.est = colMeans(w.proc, dims = 1)
-  z.est = colMeans(z.proc, dims = 1)
+  w.est <- colMeans(w.proc, dims = 1)
+  z.est <- colMeans(z.proc, dims = 1)
 
-  beta.estimate = apply(output$beta, 2, mean)
-  theta.estimate = apply(output$theta, 2, mean)
-  sigma_theta.estimate = mean(output$sigma_theta)
-  sigma.estimate = mean(output$sigma)
-  gamma.estimate = mean(output$gamma)
-  pi.estimate = mean(output$pi)
-  xi.estimate = mean(output$xi)
+  beta.estimate <- apply(output$beta, 2, mean)
+  theta.estimate <- apply(output$theta, 2, mean)
+  sigma_theta.estimate <- mean(output$sigma_theta)
+  sigma.estimate <- mean(output$sigma)
+  gamma.estimate <- mean(output$gamma)
+  pi.estimate <- mean(output$pi)
+  xi.estimate <- mean(output$xi)
 
-  beta.summary = data.frame(cbind(apply(output$beta, 2, mean), t(apply(output$beta, 2, function(x) quantile(x, probs = c(0.025, 0.975))))))
+  beta.summary <- data.frame(cbind(apply(output$beta, 2, mean), t(apply(output$beta, 2, function(x) quantile(x, probs = c(0.025, 0.975))))))
   colnames(beta.summary) <- c("Estimate", "2.5%", "97.5%")
   rownames(beta.summary) <- cname
 
   # Calculate BIC
   # cat("\n\nCalculate BIC\n")
-  if(pi.estimate > 0.5){
-    log_like = log_likelihood_normal_cpp(as.matrix(data), ndim, as.matrix(beta.estimate), as.matrix(theta.estimate), gamma.estimate, z.est, w.est, sigma.estimate, 99)
-  }else{
-    log_like = log_likelihood_normal_cpp(as.matrix(data), ndim, as.matrix(beta.estimate), as.matrix(theta.estimate), 0, z.est, w.est, sigma.estimate, 99)
+  if (pi.estimate > 0.5) {
+    log_like <- log_likelihood_normal_cpp(as.matrix(data), ndim, as.matrix(beta.estimate), as.matrix(theta.estimate), gamma.estimate, z.est, w.est, sigma.estimate, 99)
+  } else {
+    log_like <- log_likelihood_normal_cpp(as.matrix(data), ndim, as.matrix(beta.estimate), as.matrix(theta.estimate), 0, z.est, w.est, sigma.estimate, 99)
   }
-  p = nitem + nsample + 1 + 1 + ndim * nitem + ndim * nsample + 2 + 1
-  bic = -2 * log_like[[1]] + p * log(nitem * nsample)
+  p <- nitem + nsample + 1 + 1 + ndim * nitem + ndim * nsample + 2 + 1
+  bic <- -2 * log_like[[1]] + p * log(nitem * nsample)
 
-  result <- list(data = data,
-              bic = bic,
-                 mcmc_inf = mcmc.inf,
-                 map_inf = map.inf,
-                 beta_estimate  = beta.estimate,
-                 beta_summary = beta.summary,
-                 theta_estimate = theta.estimate,
-                 sigma_theta_estimate    = sigma_theta.estimate,
-                 sigma_estimate    = sigma.estimate,
-                 gamma_estimate = gamma.estimate,
-                 z_estimate     = z.est,
-                 w_estimate     = w.est,
-                 pi_estimate    = pi.estimate,
-                 xi_estimate    = xi.estimate,                 beta           = output$beta,
-                 theta          = output$theta,
-                 theta_sd       = output$sigma_theta,
-                 sigma       = output$sigma,
-                 gamma          = output$gamma,
-                 z              = z.proc,
-                 w              = w.proc,
-                 z_raw          = output$z,
-                 w_raw          = output$w,
-                 pi             = output$pi,
-                 xi             = output$xi,                 accept_beta    = output$accept_beta,
-                 accept_theta   = output$accept_theta,
-                 accept_w       = output$accept_w,
-                 accept_z       = output$accept_z,
-                 accept_gamma   = output$accept_gamma)
-  class(result) = "lsirm"
+  result <- list(
+    data = data,
+    bic = bic,
+    mcmc_inf = mcmc.inf,
+    map_inf = map.inf,
+    beta_estimate = beta.estimate,
+    beta_summary = beta.summary,
+    theta_estimate = theta.estimate,
+    sigma_theta_estimate = sigma_theta.estimate,
+    sigma_estimate = sigma.estimate,
+    gamma_estimate = gamma.estimate,
+    z_estimate = z.est,
+    w_estimate = w.est,
+    pi_estimate = pi.estimate,
+    xi_estimate = xi.estimate, beta = output$beta,
+    theta = output$theta,
+    theta_sd = output$sigma_theta,
+    sigma = output$sigma,
+    gamma = output$gamma,
+    z = z.proc,
+    w = w.proc,
+    z_raw = output$z,
+    w_raw = output$w,
+                 tuning         = output$tuning,
+    pi = output$pi,
+    xi = output$xi, accept_beta = output$accept_beta,
+    accept_theta = output$accept_theta,
+    accept_w = output$accept_w,
+    accept_z = output$accept_z,
+    accept_gamma = output$accept_gamma
+  )
+  class(result) <- "lsirm"
 
   return(result)
 }

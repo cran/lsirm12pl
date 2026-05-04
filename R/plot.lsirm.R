@@ -5,8 +5,8 @@
 #' @param object Object of class \code{lsirm}.
 #' @param option Character; If value is "interaction", draw the interaction map that represents interactions between respondents and items. If value is "beta", draw the boxplot for the posterior samples of beta. If value is "theta", draw the distribution of the theta estimates per total test score for the \code{data}. If value is "alpha", draw the boxplot for the posterior samples of alpha. The "alpha" is only available for 2PL LSIRM.
 #' @param rotation Logical; If TRUE the latent positions are visualized after oblique (oblimin) rotation.
-#' @param cluster Character; If value is "neyman" the cluster result are visualized by Point Process Cluster Analysis. If value is "spectral", spectral clustering method applied. Default is NA.
-#' @param which.clust Character; Choose which values to clustering. "resp" is the option for respondent and "item" is the option for items. Default is "item".
+#' @param cluster Character; clustering method for the interaction map. Use \code{"neyman"} for Neyman-Scott/Thomas point-process clustering or \code{"spectral"} for spectral clustering. If \code{NA}, no clustering is applied. Default is \code{NA}.
+#' @param which.clust Character; latent positions to cluster when \code{cluster} is \code{"neyman"} or \code{"spectral"}. Use \code{"item"} to cluster item positions (\code{w_estimate}) or \code{"resp"} to cluster respondent positions (\code{z_estimate}). Default is \code{"item"}.
 #' @param interact Logical; If TRUE, draw the interaction map interactively.
 #' @param chain.idx Numeric; Index of MCMC chain. Default is 1.
 #' @param ... Additional arguments for the corresponding function.
@@ -27,7 +27,8 @@
 #' plot(lsirm_result, interact = TRUE)
 #'
 #' # clustering the respondents or items
-#' plot(lsirm_result, cluster = TRUE)
+#' plot(lsirm_result, cluster = "spectral", which.clust = "item")
+#' plot(lsirm_result, cluster = "spectral", which.clust = "resp")
 #' }
 #' @export
 plot <- function(object, ..., option = "interaction", rotation=FALSE, cluster=NA,

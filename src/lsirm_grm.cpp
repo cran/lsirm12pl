@@ -58,7 +58,7 @@ struct AdaptControlGrm {
   bool use_adapt = false;
   int adapt_interval = 100;
   double adapt_rate = 1.0;
-  double decay_rate = 0.5;
+  double decay_rate = 0.6;
   double jump_min = 1e-4;
   double jump_max = 10.0;
   double target_accept_beta = 0.44;
@@ -502,7 +502,7 @@ static Rcpp::List lsirmgrm_internal(
 
         if (accept == 1) {
           beta_old_i((uword)c) = beta_proposal;
-          if (!do_adapt || iter >= nburn) {
+          if (iter >= nburn) {
             accept_beta(i, c) += 1.0 / ((niter - nburn) * 1.0);
           }
           if (do_adapt && iter < nburn) {
@@ -555,7 +555,7 @@ static Rcpp::List lsirmgrm_internal(
 
       if (accept == 1) {
         oldtheta(k) = newtheta(k);
-        if (!do_adapt || iter >= nburn) {
+        if (iter >= nburn) {
           accept_theta(k) += 1.0 / ((niter - nburn) * 1.0);
         }
         if (do_adapt && iter < nburn) {
@@ -624,7 +624,7 @@ static Rcpp::List lsirmgrm_internal(
 
       if (accept == 1) {
         oldgamma = newgamma;
-        if (!do_adapt || iter >= nburn) {
+        if (iter >= nburn) {
           accept_gamma += 1.0 / ((niter - nburn) * 1.0);
         }
         if (do_adapt && iter < nburn) {
@@ -713,7 +713,7 @@ static Rcpp::List lsirmgrm_internal(
 
         if (accept == 1) {
           oldalpha(i) = newalpha(i);
-          if (!do_adapt || iter >= nburn) {
+          if (iter >= nburn) {
             accept_alpha(i) += 1.0 / ((niter - nburn) * 1.0);
           }
           if (do_adapt && iter < nburn) {
@@ -782,7 +782,7 @@ static Rcpp::List lsirmgrm_internal(
         for (j = 0; j < ndim; j++)
           oldz(k, j) = newz(k, j);
         dist.row(k) = new_dist_k.t();
-        if (!do_adapt || iter >= nburn) {
+        if (iter >= nburn) {
           accept_z(k) += 1.0 / ((niter - nburn) * 1.0);
         }
         if (do_adapt && iter < nburn) {
@@ -851,7 +851,7 @@ static Rcpp::List lsirmgrm_internal(
         for (j = 0; j < ndim; j++)
           oldw(i, j) = neww(i, j);
         dist.col(i) = new_dist_i;
-        if (!do_adapt || iter >= nburn) {
+        if (iter >= nburn) {
           accept_w(i) += 1.0 / ((niter - nburn) * 1.0);
         }
         if (do_adapt && iter < nburn) {
@@ -1049,6 +1049,7 @@ static Rcpp::List lsirmgrm_internal(
   tuning["use_adapt"] = do_adapt;
   tuning["adapt_interval"] = adapt_ctrl.adapt_interval;
   tuning["adapt_rate"] = adapt_ctrl.adapt_rate;
+  tuning["decay_rate"] = adapt_ctrl.decay_rate;
   tuning["jump_min"] = adapt_ctrl.jump_min;
   tuning["jump_max"] = adapt_ctrl.jump_max;
   tuning["target_accept_beta"] = adapt_ctrl.target_accept_beta;

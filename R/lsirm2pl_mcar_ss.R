@@ -74,10 +74,11 @@ lsirm2pl_mcar_ss = function(data, ndim = 2, niter = 15000, nburn = 2500, nthin =
                             pr_spike_mean = -3, pr_spike_sd = 1.0, pr_slab_mean = 0.5, pr_slab_sd = 1.0 ,
                             pr_mean_alpha = 0.5, pr_sd_alpha = 1.0,
                             pr_a_theta = 0.001, pr_b_theta = 0.001, pr_xi_a  = 1, pr_xi_b = 1,
-                            missing.val = 99, verbose=FALSE, fix_theta_sd=FALSE, fix_alpha_1=TRUE){
-  if(niter < nburn){
+                            missing.val = 99, verbose=FALSE, fix_theta_sd=FALSE, fix_alpha_1=TRUE, adapt = NULL) {
+  if(niter <= nburn){
     stop("niter must be greater than burn-in process.")
   }
+  adapt <- normalize_adapt(adapt)
   if(is.data.frame(data)){
     cname = colnames(data)
   }else{
@@ -85,7 +86,7 @@ lsirm2pl_mcar_ss = function(data, ndim = 2, niter = 15000, nburn = 2500, nthin =
   }
   
   # Convert NA to missing.val
-  data[is.na(data)] <- missing.val
+  data <- replace_na_with_missing(data, missing.val)
 
   # cat("\n\nFitting with MCMC algorithm\n")
 
@@ -96,15 +97,16 @@ lsirm2pl_mcar_ss = function(data, ndim = 2, niter = 15000, nburn = 2500, nthin =
                                  pr_spike_mean=pr_spike_mean, pr_spike_sd=pr_spike_sd, pr_slab_mean=pr_slab_mean, pr_slab_sd=pr_slab_sd,
                                  pr_mean_alpha=pr_mean_alpha, pr_sd_alpha=pr_sd_alpha,
                                  pr_a_theta=pr_a_theta, pr_b_theta=pr_b_theta, pr_beta_a=pr_xi_a, pr_beta_b=pr_xi_b,
-                                 missing=missing.val, verbose=verbose, fix_theta_sd=fix_theta_sd, fix_alpha_1=fix_alpha_1)
+                                 missing=missing.val, verbose=verbose, fix_theta_sd=fix_theta_sd, fix_alpha_1=fix_alpha_1, adapt=adapt)
 
   mcmc.inf = list(nburn=nburn, niter=niter, nthin=nthin)
   nsample <- nrow(data)
   nitem <- ncol(data)
 
   nmcmc = as.integer((niter - nburn) / nthin)
-  max.address = min(which.max(output$map))
-  map.inf = data.frame(value = output$map[which.max(output$map)], iter = which.max(output$map))
+  map.info <- get_map_info(output$map)
+  max.address <- map.info$address
+  map.inf <- map.info$info
   w.star = output$w[max.address,,]
   z.star = output$z[max.address,,]
   w.proc = array(0,dim=c(nmcmc,nitem,ndim))
@@ -180,6 +182,7 @@ cat("\n")
                  pi             = output$pi,
                  xi             = output$xi,                 z_raw          = output$z,
                  w_raw          = output$w,
+                 tuning         = output$tuning,
                  accept_beta    = output$accept_beta,
                  accept_theta   = output$accept_theta,
                  accept_w       = output$accept_w,

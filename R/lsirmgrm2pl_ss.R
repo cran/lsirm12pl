@@ -4,7 +4,6 @@
 #'
 #' @inheritParams lsirmgrm2pl
 #' @param verbose Logical; If TRUE, MCMC samples are printed for each \code{nprint}. Default is FALSE.
-#' @param verbose Logical; If TRUE, MCMC samples are printed for each \code{nprint}. Default is FALSE.
 #'
 #' @examples
 #' \donttest{

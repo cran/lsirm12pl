@@ -8,16 +8,18 @@
 #' @param pr_mean_gamma Numeric; mean of log normal prior for gamma. Default is 0.5.
 #' @param pr_sd_gamma Numeric; standard deviation of log normal prior for gamma. Default is 1.
 #' @param verbose Logical; If TRUE, MCMC samples are printed for each \code{nprint}. Default is FALSE.
-#' @param adapt List; optional adaptive MCMC control. If not \code{NULL}, proposal standard deviations are adapted during the burn-in period to reach a target acceptance rate and are held fixed during the main MCMC sampling.
+#' @param adapt List; optional adaptive MCMC control. If not \code{NULL}, proposal standard deviations are adapted during burn-in using a Robbins-Monro update on the log proposal SD and are held fixed during the main MCMC sampling.
 #'   When adaptation is enabled, the reported acceptance ratios in the output (\code{accept_beta}, \code{accept_theta}, \code{accept_alpha}, etc.) are computed only from iterations after burn-in, reflecting the performance of the adapted proposal distributions.
+#'   The defaults are tuning heuristics for random-walk Metropolis proposals: scalar parameters use a target acceptance rate of \code{0.44}, while latent position block proposals use \code{0.234}. The \code{0.44} target is commonly used for one-dimensional random-walk proposals, and \code{0.234} is the high-dimensional optimal-scaling benchmark discussed by Roberts, Gelman and Gilks (1997) and Roberts and Rosenthal (2001). These values are proposal-tuning targets, not convergence diagnostics.
 #'   Elements of the list can include:
 #'   \itemize{
 #'     \item \code{use_adapt}: Logical; if \code{TRUE}, adaptive MCMC is used. Default is \code{FALSE}.
-#'     \item \code{adapt_interval}: Integer; the number of iterations between each update of the proposal SDs. Default is \code{100}.
-#'     \item \code{adapt_rate}: Numeric; Robbins-Monro scaling constant (c) in step size formula: adapt_rate / iteration^decay_rate. Default is \code{1.0}. Valid range: any positive value. Recommended: 0.5-2.0.
-#'     \item \code{decay_rate}: Numeric; Robbins-Monro decay exponent (alpha) in step size formula. Default is \code{0.5}. Valid range: (0.5, 1]. Recommended: 0.5-0.8.
-#'     \item \code{target_accept}: Numeric; target acceptance rate for scalar parameters (beta, theta, gamma, alpha). Default is \code{0.44}.
-#'     \item \code{target_accept_zw}: Numeric; target acceptance rate for multi-dimensional latent positions z and w. Default is \code{0.234}.
+#'     \item \code{adapt_interval}: Integer; the number of iterations between proposal SD updates. Smaller values react more quickly but can be noisy; larger values are smoother but adapt more slowly. Default is \code{100}.
+#'     \item \code{adapt_rate}: Numeric; Robbins-Monro scaling constant \eqn{c} in the step-size formula \eqn{c / t^\alpha}. Larger values adapt faster but can oscillate; smaller values are more conservative. Default is \code{1.0}. Recommended starting range is \code{0.5}--\code{2.0}.
+#'     \item \code{decay_rate}: Numeric; Robbins-Monro decay exponent \eqn{\alpha} in \eqn{c / t^\alpha}. Values above \code{0.5} give diminishing adaptation consistent with the usual stochastic-approximation square-summability condition. Default is \code{0.6}; recommended range is \code{0.6}--\code{0.8}.
+#'     \item \code{jump_min}, \code{jump_max}: Numeric; advanced lower and upper bounds for adapted proposal SDs, used to prevent proposal scales from collapsing to zero or becoming excessively large. These are normally left unchanged.
+#'     \item \code{target_accept}: Numeric; default target acceptance rate for scalar random-walk updates (beta, theta, gamma, alpha). Default is \code{0.44}.
+#'     \item \code{target_accept_zw}: Numeric; target acceptance rate for latent position block updates z and w. Default is \code{0.234}.
 #'     \item \code{target_accept_beta/theta/alpha/gamma}: Numeric; (optional) parameter-specific target acceptance rates to override \code{target_accept}.
 #'   }
 #'
@@ -66,10 +68,11 @@ lsirm2pl_o = function(data, ndim = 2, niter = 15000, nburn = 2500, nthin = 5, np
                       jump_beta = 0.4, jump_theta = 1, jump_alpha = 1, jump_gamma = 0.2, jump_z = 0.5, jump_w = 0.5,
                       pr_mean_beta = 0, pr_sd_beta = 1, pr_mean_theta = 0, pr_sd_theta = 1, pr_mean_gamma = 0.5, pr_sd_gamma = 1,
                       pr_mean_alpha = 0.5, pr_sd_alpha = 1, pr_a_theta = 0.001, pr_b_theta = 0.001, verbose=FALSE, fix_theta_sd=FALSE, fix_alpha_1=TRUE,
-                      adapt = NULL){
-  if(niter < nburn){
+                      adapt = NULL) {
+  if(niter <= nburn){
     stop("niter must be greater than burn-in process.")
   }
+  adapt <- normalize_adapt(adapt)
   if(is.data.frame(data)){
     cname = colnames(data)
   }else{
@@ -91,8 +94,9 @@ lsirm2pl_o = function(data, ndim = 2, niter = 15000, nburn = 2500, nthin = 5, np
   nitem <- ncol(data)
 
   nmcmc = as.integer((niter - nburn) / nthin)
-  max.address = min(which.max(output$map))
-  map.inf = data.frame(value = output$map[which.max(output$map)], iter = which.max(output$map))
+  map.info <- get_map_info(output$map)
+  max.address <- map.info$address
+  map.inf <- map.info$info
   w.star = output$w[max.address,,]
   z.star = output$z[max.address,,]
   w.proc = array(0,dim=c(nmcmc,nitem,ndim))

@@ -6,3 +6,6 @@
 \description{
 #' Analysis of dichotomous, continuous, and ordinal response data using latent space models. It includes 1PL and 2PL Latent Space Item Response Models (LSIRM) for binary and continuous data, and Graded Response Models (GRM) for ordinal data, as described in Jeon et al. (2021) <doi:10.1007/s11336-021-09762-5>. Bayesian model selection with spike-and-slab prior and method for dealing data with missing value under missing at random (MAR), missing completely at random (MCAR) are also supported. Various diagnostic plots are available to inspect the latent space and summary of estimated parameters.
 }
+\references{
+Jeon, M., Jin, I. H., Schweinberger, M., & Baugh, S. (2021). Mapping unobserved item-respondent interactions: A latent space item response model with interaction map. \emph{Psychometrika}, 86(2), 378--403. \url{https://link.springer.com/article/10.1007/s11336-021-09762-5}
+}

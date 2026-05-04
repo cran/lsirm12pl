@@ -50,8 +50,9 @@ each column represents an item. Values can be either \code{0:(K-1)} or \code{1:K
 
 \item{ncat}{Integer; number of categories \eqn{K}. If \code{NULL}, it is inferred from the observed data.}
 
-\item{missing_data}{Character; the type of missing data assumed. Options are \code{NA}, \code{"mar"}, or
-\code{"mcar"}. If \code{NA} and \code{data} contains missing values, it is set to \code{"mcar"} internally.}
+\item{missing_data}{Character; the type of missing data assumed. Options are \code{NA} or \code{"mcar"}.
+For GRM models, missing values are currently supported only under MCAR. If \code{data} contains \code{NA}
+and \code{missing_data} is \code{NA}, it is set to \code{"mcar"} internally with a warning.}
 
 \item{missing.val}{Numeric; numeric code used to represent missing values in the C++ sampler. Default is 99.}
 
@@ -113,16 +114,18 @@ each column represents an item. Values can be either \code{0:(K-1)} or \code{1:K
 
 \item{pr_xi_b}{Numeric; Beta prior shape b for mixing weight \eqn{\xi}. Default is 1.}
 
-\item{adapt}{List; optional adaptive MCMC control. If not \code{NULL}, proposal standard deviations are adapted during the burn-in period to reach a target acceptance rate and are held fixed during the main MCMC sampling.
+\item{adapt}{List; optional adaptive MCMC control. If not \code{NULL}, proposal standard deviations are adapted during burn-in using a Robbins-Monro update on the log proposal SD and are held fixed during the main MCMC sampling.
 When adaptation is enabled, the reported acceptance ratios in the output (\code{accept_beta}, \code{accept_theta}, \code{accept_alpha}, etc.) are computed only from iterations after burn-in, reflecting the performance of the adapted proposal distributions.
+The defaults are tuning heuristics for random-walk Metropolis proposals: scalar parameters use a target acceptance rate of \code{0.44}, while latent position block proposals use \code{0.234}. The \code{0.44} target is commonly used for one-dimensional random-walk proposals, and \code{0.234} is the high-dimensional optimal-scaling benchmark discussed by Roberts, Gelman and Gilks (1997) and Roberts and Rosenthal (2001). These values are proposal-tuning targets, not convergence diagnostics.
 Elements of the list can include:
 \itemize{
   \item \code{use_adapt}: Logical; if \code{TRUE}, adaptive MCMC is used. Default is \code{FALSE}.
-  \item \code{adapt_interval}: Integer; the number of iterations between each update of the proposal SDs. Default is \code{100}.
-  \item \code{adapt_rate}: Numeric; Robbins-Monro scaling constant (c) in step size formula: adapt_rate / iteration^decay_rate. Default is \code{1.0}. Valid range: any positive value. Recommended: 0.5-2.0.
-  \item \code{decay_rate}: Numeric; Robbins-Monro decay exponent (alpha) in step size formula. Default is \code{0.5}. Valid range: (0.5, 1]. Recommended: 0.5-0.8.
-  \item \code{target_accept}: Numeric; target acceptance rate for scalar parameters (beta, theta, gamma, alpha). Default is \code{0.44}.
-  \item \code{target_accept_zw}: Numeric; target acceptance rate for multi-dimensional latent positions z and w. Default is \code{0.234}.
+  \item \code{adapt_interval}: Integer; the number of iterations between proposal SD updates. Smaller values react more quickly but can be noisy; larger values are smoother but adapt more slowly. Default is \code{100}.
+  \item \code{adapt_rate}: Numeric; Robbins-Monro scaling constant \eqn{c} in the step-size formula \eqn{c / t^\alpha}. Larger values adapt faster but can oscillate; smaller values are more conservative. Default is \code{1.0}. Recommended starting range is \code{0.5}--\code{2.0}.
+  \item \code{decay_rate}: Numeric; Robbins-Monro decay exponent \eqn{\alpha} in \eqn{c / t^\alpha}. Values above \code{0.5} give diminishing adaptation consistent with the usual stochastic-approximation square-summability condition. Default is \code{0.6}; recommended range is \code{0.6}--\code{0.8}.
+  \item \code{jump_min}, \code{jump_max}: Numeric; advanced lower and upper bounds for adapted proposal SDs, used to prevent proposal scales from collapsing to zero or becoming excessively large. These are normally left unchanged.
+  \item \code{target_accept}: Numeric; default target acceptance rate for scalar random-walk updates (beta, theta, gamma, alpha). Default is \code{0.44}.
+  \item \code{target_accept_zw}: Numeric; target acceptance rate for latent position block updates z and w. Default is \code{0.234}.
   \item \code{target_accept_beta/theta/alpha/gamma}: Numeric; (optional) parameter-specific target acceptance rates to override \code{target_accept}.
 }}
 
@@ -135,13 +138,12 @@ Elements of the list can include:
 \value{
 A list containing MCMC draws and posterior summaries, including:
 \itemize{
-  \item \code{beta}, \code{theta}, \code{gamma}, \code{alpha}, \code{z}, \code{w}: MCMC draws.
+  \item \code{beta}, \code{theta}, \code{gamma}, \code{alpha}: MCMC draws.
+  \item \code{z}, \code{w}: Procrustes-matched MCMC draws of respondent and item latent positions.
+  \item \code{z_raw}, \code{w_raw}: MCMC draws of respondent and item latent positions before Procrustes matching.
   \item \code{beta_estimate}, \code{theta_estimate}, \code{gamma_estimate}, \code{alpha_estimate}, \code{z_estimate},
-  \code{w_estimate}: posterior means.
+  \code{w_estimate}: posterior means, with \code{z_estimate} and \code{w_estimate} computed after Procrustes matching.
 }
-
-If \code{missing_data = "mar"}, the list additionally includes \code{imp} and \code{imp_estimate} for the imputed
-ordinal responses.
 }
 \description{
 Fit a single-chain ordinal LSIRM (GRM 2PL)

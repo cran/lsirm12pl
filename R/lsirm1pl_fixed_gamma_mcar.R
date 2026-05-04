@@ -54,10 +54,11 @@
 lsirm1pl_fixed_gamma_mcar = function(data, ndim = 2, niter = 15000, nburn = 2500, nthin = 5, nprint = 500,
                                     jump_beta = 0.4, jump_theta = 1.0, jump_z = 0.5, jump_w = 0.5,
                                     pr_mean_beta = 0, pr_sd_beta = 1.0, pr_mean_theta = 0, pr_sd_theta = 1.0,
-                                    pr_a_theta = 0.001, pr_b_theta = 0.001, missing.val = 99, verbose=FALSE, fix_theta_sd=FALSE){
-  if(niter < nburn){
+                                    pr_a_theta = 0.001, pr_b_theta = 0.001, missing.val = 99, verbose=FALSE, fix_theta_sd=FALSE, adapt = NULL) {
+  if(niter <= nburn){
     stop("niter must be greater than burn-in process.")
   }
+  adapt <- normalize_adapt(adapt)
   if(is.data.frame(data)){
     cname = colnames(data)
   }else{
@@ -65,23 +66,24 @@ lsirm1pl_fixed_gamma_mcar = function(data, ndim = 2, niter = 15000, nburn = 2500
   }
   
   # Convert NA to missing.val
-  data[is.na(data)] <- missing.val
+  data <- replace_na_with_missing(data, missing.val)
 
   # cat("\n\nFitting with MCMC algorithm\n")
 
 
   output <- lsirm1pl_fixed_gamma_mcar_cpp(data=as.matrix(data), ndim=ndim, niter=niter, nburn=nburn, nthin=nthin, nprint=nprint,
-                           jump_beta=jump_theta, jump_theta=jump_theta, jump_z=jump_z, jump_w=jump_w,
+                           jump_beta=jump_beta, jump_theta=jump_theta, jump_z=jump_z, jump_w=jump_w,
                            pr_mean_beta=pr_mean_beta, pr_sd_beta=pr_sd_beta, pr_mean_theta=pr_mean_theta,
-                           pr_sd_theta=pr_sd_theta, pr_a_theta=pr_a_theta, pr_b_theta=pr_b_theta, missing=missing.val, verbose=verbose, fix_theta_sd=fix_theta_sd)
+                           pr_sd_theta=pr_sd_theta, pr_a_theta=pr_a_theta, pr_b_theta=pr_b_theta, missing=missing.val, verbose=verbose, fix_theta_sd=fix_theta_sd, adapt=adapt)
 
   mcmc.inf = list(nburn=nburn, niter=niter, nthin=nthin)
   nsample <- nrow(data)
   nitem <- ncol(data)
 
   nmcmc = as.integer((niter - nburn) / nthin)
-  max.address = min(which.max(output$map))
-  map.inf = data.frame(value = output$map[which.max(output$map)], iter = which.max(output$map))
+  map.info <- get_map_info(output$map)
+  max.address <- map.info$address
+  map.inf <- map.info$info
   w.star = output$w[max.address,,]
   z.star = output$z[max.address,,]
   w.proc = array(0,dim=c(nmcmc,nitem,ndim))
@@ -143,6 +145,7 @@ cat("\n")
               w              = w.proc,
               z_raw          = output$z,
               w_raw          = output$w,
+                 tuning         = output$tuning,
               accept_beta    = output$accept_beta,
               accept_theta   = output$accept_theta,
               accept_w       = output$accept_w,

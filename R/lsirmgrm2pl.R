@@ -11,30 +11,40 @@
 #' De Carolis, L., Kang, I., & Jeon, M. (2025). A Latent Space Graded Response Model for Likert-Scale
 #' Psychological Assessments. \emph{Multivariate Behavioral Research}. \doi{10.1080/00273171.2025.2605678}
 #'
+#' Roberts, G. O., Gelman, A., & Gilks, W. R. (1997). Weak convergence and optimal scaling of random walk Metropolis algorithms. \emph{The Annals of Applied Probability}, 7(1), 110--120. \doi{10.1214/aoap/1034625254}
+#'
+#' Roberts, G. O., & Rosenthal, J. S. (2001). Optimal scaling for various Metropolis-Hastings algorithms. \emph{Statistical Science}, 16(4), 351--367. \doi{10.1214/ss/1015346320}
+#'
+#' Andrieu, C., & Thoms, J. (2008). A tutorial on adaptive MCMC. \emph{Statistics and Computing}, 18(4), 343--373. \doi{10.1007/s11222-008-9110-y}
+#'
 #' @inheritParams lsirmgrm
 #' @param jump_beta Numeric; proposal SD for GRM thresholds. Default is 0.4. During MCMC sampling, threshold proposals are constrained to maintain the ordering \eqn{\beta_{i,1} > \beta_{i,2} > \cdots > \beta_{i,K-1}} for each item.
 #' @param jump_alpha Numeric; proposal SD on log-scale for \eqn{\alpha}. Default is 1.
 #' @param pr_mean_alpha Numeric; log-normal prior mean for \eqn{\alpha}. Default is 0.5.
 #' @param pr_sd_alpha Numeric; log-normal prior SD for \eqn{\alpha}. Default is 1.
 #' @param fix_alpha_1 Logical; if TRUE, fixes \eqn{\alpha_1 = 1}. Default is TRUE.
-#' @param adapt List; optional adaptive MCMC control. If not \code{NULL}, proposal standard deviations are adapted during the burn-in period to reach a target acceptance rate and are held fixed during the main MCMC sampling.
+#' @param adapt List; optional adaptive MCMC control. If not \code{NULL}, proposal standard deviations are adapted during burn-in using a Robbins-Monro update on the log proposal SD and are held fixed during the main MCMC sampling.
 #'   When adaptation is enabled, the reported acceptance ratios in the output (\code{accept_beta}, \code{accept_theta}, \code{accept_alpha}, etc.) are computed only from iterations after burn-in, reflecting the performance of the adapted proposal distributions.
+#'   The defaults are tuning heuristics for random-walk Metropolis proposals: scalar parameters use a target acceptance rate of \code{0.44}, while latent position block proposals use \code{0.234}. The \code{0.44} target is commonly used for one-dimensional random-walk proposals, and \code{0.234} is the high-dimensional optimal-scaling benchmark discussed by Roberts, Gelman and Gilks (1997) and Roberts and Rosenthal (2001). These values are proposal-tuning targets, not convergence diagnostics.
 #'   Elements of the list can include:
 #'   \itemize{
 #'     \item \code{use_adapt}: Logical; if \code{TRUE}, adaptive MCMC is used. Default is \code{FALSE}.
-#'     \item \code{adapt_interval}: Integer; the number of iterations between each update of the proposal SDs. Default is \code{100}.
-#'     \item \code{adapt_rate}: Numeric; Robbins-Monro scaling constant (c) in step size formula: adapt_rate / iteration^decay_rate. Default is \code{1.0}. Valid range: any positive value. Recommended: 0.5-2.0.
-#'     \item \code{decay_rate}: Numeric; Robbins-Monro decay exponent (alpha) in step size formula. Default is \code{0.5}. Valid range: (0.5, 1]. Recommended: 0.5-0.8.
-#'     \item \code{target_accept}: Numeric; target acceptance rate for scalar parameters (beta, theta, gamma, alpha). Default is \code{0.44}.
-#'     \item \code{target_accept_zw}: Numeric; target acceptance rate for multi-dimensional latent positions z and w. Default is \code{0.234}.
+#'     \item \code{adapt_interval}: Integer; the number of iterations between proposal SD updates. Smaller values react more quickly but can be noisy; larger values are smoother but adapt more slowly. Default is \code{100}.
+#'     \item \code{adapt_rate}: Numeric; Robbins-Monro scaling constant \eqn{c} in the step-size formula \eqn{c / t^\alpha}. Larger values adapt faster but can oscillate; smaller values are more conservative. Default is \code{1.0}. Recommended starting range is \code{0.5}--\code{2.0}.
+#'     \item \code{decay_rate}: Numeric; Robbins-Monro decay exponent \eqn{\alpha} in \eqn{c / t^\alpha}. Values above \code{0.5} give diminishing adaptation consistent with the usual stochastic-approximation square-summability condition. Default is \code{0.6}; recommended range is \code{0.6}--\code{0.8}.
+#'     \item \code{jump_min}, \code{jump_max}: Numeric; advanced lower and upper bounds for adapted proposal SDs, used to prevent proposal scales from collapsing to zero or becoming excessively large. These are normally left unchanged.
+#'     \item \code{target_accept}: Numeric; default target acceptance rate for scalar random-walk updates (beta, theta, gamma, alpha). Default is \code{0.44}.
+#'     \item \code{target_accept_zw}: Numeric; target acceptance rate for latent position block updates z and w. Default is \code{0.234}.
 #'     \item \code{target_accept_beta/theta/alpha/gamma}: Numeric; (optional) parameter-specific target acceptance rates to override \code{target_accept}.
 #'   }
 
 #'
-#' @return An object of class \code{lsirm}. For multi-chain fits, a list where each element (\code{chain1}, \code{chain2}, etc.) is a single-chain fit of class \code{lsirm}.
-#'
-#' If \code{missing_data = "mar"}, the returned object additionally contains \code{imp} (MCMC draws of imputed
-#' responses for each missing cell) and \code{imp_estimate} (posterior mean imputation for each missing cell).
+#' @return An object of class \code{lsirm}. For multi-chain fits, a list where each element (\code{chain1}, \code{chain2}, etc.) is a single-chain fit of class \code{lsirm}. The single-chain fit contains posterior summaries and MCMC draws, including:
+#' \itemize{
+#'   \item \code{z}, \code{w}: Procrustes-matched posterior samples of respondent and item latent positions.
+#'   \item \code{z_raw}, \code{w_raw}: posterior samples of respondent and item latent positions before Procrustes matching.
+#'   \item \code{z_estimate}, \code{w_estimate}: posterior mean latent positions after Procrustes matching.
+#' }
 #'
 #' @details
 #' \code{lsirmgrm2pl} implements the 2PL extension of the Graded Response Model (GRM) in a latent space framework.
@@ -46,7 +56,6 @@
 #' Missing data handling:
 #' \itemize{
 #'   \item \code{"mcar"}: missing responses are excluded from the likelihood.
-#'   \item \code{"mar"}: missing responses are imputed by data augmentation within the MCMC.
 #' }
 #'
 #' @examples
@@ -60,10 +69,10 @@
 #' fit <- lsirmgrm2pl(data, niter = 1000, nburn = 500, nthin = 2)
 #' summary(fit)
 #'
-#' # Fit with missing data (MAR)
-#' data_mar <- data
-#' data_mar[sample(1:length(data), 20)] <- NA
-#' fit_mar <- lsirm(data_mar ~ lsirmgrm2pl(missing_data = "mar", niter = 1000, nburn = 500))
+#' # Fit with missing data under MCAR
+#' data_mcar <- data
+#' data_mcar[sample(length(data_mcar), 20)] <- NA
+#' fit_mcar <- lsirm(data_mcar ~ lsirmgrm2pl(niter = 1000, nburn = 500))
 #'
 #' # Fit with Spike-and-Slab prior for model selection
 #' fit_ss <- lsirm(data ~ lsirmgrm2pl(spikenslab = TRUE, niter = 1000, nburn = 500))
@@ -72,8 +81,8 @@
 #' fit_adapt <- lsirmgrm2pl(data, niter = 2000, nburn = 1000,
 #'                          adapt = list(use_adapt = TRUE, adapt_interval = 50))
 #' # Check adapted jump sizes and acceptance rates
-#' cat("Final jump_alpha:", fit_adapt$jump_alpha, "\n")
-#' cat("Acceptance rate (post-burnin):", fit_adapt$accept_alpha, "\n")
+#' cat("Final jump_alpha:", fit_adapt$tuning$jump_alpha_final, "\n")
+#' cat("Mean acceptance rate (post-burnin):", mean(fit_adapt$accept_alpha), "\n")
 #'
 #' @export
 lsirmgrm2pl <- function(data, ncat = NULL, missing_data = NA, missing.val = 99,
@@ -91,10 +100,20 @@ lsirmgrm2pl <- function(data, ncat = NULL, missing_data = NA, missing.val = 99,
                         adapt = NULL,
                         verbose = FALSE, fix_theta_sd = FALSE, fix_alpha_1 = TRUE) {
 
+  adapt <- normalize_adapt(adapt)
   if(!is.na(seed)){
     set.seed(seed)
   }
   cat("\n Fitting ordinal LSIRM (GRM 2PL) with MCMC algorithm\n")
+
+  if(anyNA(data) && is.na(missing_data)){
+    warning("NA values detected in GRM 2PL data; treating them as missing_data = 'mcar'.", call. = FALSE)
+    missing_data <- "mcar"
+  }
+
+  if(!is.na(missing_data) && !identical(missing_data, "mcar")){
+    stop("Only missing_data = 'mcar' is currently supported for GRM 2PL models.", call. = FALSE)
+  }
 
   if(isTRUE(fixed_gamma) && isTRUE(spikenslab)){
     stop("fixed_gamma and spikenslab cannot both be TRUE.")
@@ -188,13 +207,13 @@ lsirmgrm2pl <- function(data, ncat = NULL, missing_data = NA, missing.val = 99,
 #' @inheritParams lsirmgrm2pl
 #' @return A list containing MCMC draws and posterior summaries, including:
 #' \itemize{
-#'   \item \code{beta}, \code{theta}, \code{gamma}, \code{alpha}, \code{z}, \code{w}: MCMC draws.
+#'   \item \code{beta}, \code{theta}, \code{gamma}, \code{alpha}: MCMC draws.
+#'   \item \code{z}, \code{w}: Procrustes-matched MCMC draws of respondent and item latent positions.
+#'   \item \code{z_raw}, \code{w_raw}: MCMC draws of respondent and item latent positions before Procrustes matching.
 #'   \item \code{beta_estimate}, \code{theta_estimate}, \code{gamma_estimate}, \code{alpha_estimate}, \code{z_estimate},
-#'   \code{w_estimate}: posterior means.
+#'   \code{w_estimate}: posterior means, with \code{z_estimate} and \code{w_estimate} computed after Procrustes matching.
 #' }
 #'
-#' If \code{missing_data = "mar"}, the list additionally includes \code{imp} and \code{imp_estimate} for the imputed
-#' ordinal responses.
 #' @export
 lsirmgrm2pl_o <- function(data, ncat = NULL, missing_data = NA, missing.val = 99,
                           ndim = 2, niter = 15000, nburn = 2500, nthin = 5, nprint = 500,
@@ -212,8 +231,12 @@ lsirmgrm2pl_o <- function(data, ncat = NULL, missing_data = NA, missing.val = 99
                           adapt = NULL,
                           verbose = FALSE, fix_theta_sd = FALSE, fix_alpha_1 = TRUE){
 
-  if(niter < nburn){
+  if(niter <= nburn){
     stop("niter must be greater than burn-in process.")
+  }
+
+  if(!is.na(missing_data) && !identical(missing_data, "mcar")){
+    stop("Only missing_data = 'mcar' is currently supported for GRM 2PL models.", call. = FALSE)
   }
 
   if(is.data.frame(data)){
@@ -223,14 +246,13 @@ lsirmgrm2pl_o <- function(data, ncat = NULL, missing_data = NA, missing.val = 99
   }
 
   x <- as.matrix(data)
-  if(anyNA(x)){
-    x[is.na(x)] <- missing.val
+  if (anyNA(x)) {
+    x <- replace_na_with_missing(x, missing.val)
     if(is.na(missing_data)){
+      warning("NA values detected in GRM 2PL data; treating them as missing_data = 'mcar'.", call. = FALSE)
       missing_data <- "mcar"
     }
   }
-
-  is_mar <- identical(missing_data, "mar")
 
   obs <- as.numeric(x[x != missing.val])
   if(length(obs) == 0){
@@ -249,79 +271,39 @@ lsirmgrm2pl_o <- function(data, ncat = NULL, missing_data = NA, missing.val = 99
   }
 
   if(isTRUE(spikenslab)){
-    output <- if(is_mar){
-      lsirmgrm2pl_ss_mar_cpp(data = x, ndim = ndim, ncat = ncat,
-                             niter = niter, nburn = nburn, nthin = nthin, nprint = nprint,
-                             jump_beta = jump_beta, jump_theta = jump_theta, jump_alpha = jump_alpha, jump_gamma = jump_gamma, jump_z = jump_z, jump_w = jump_w,
-                             pr_mean_beta = pr_mean_beta, pr_sd_beta = pr_sd_beta,
-                             pr_a_theta = pr_a_theta, pr_b_theta = pr_b_theta,
-                             pr_mean_theta = pr_mean_theta, pr_sd_theta = pr_sd_theta,
-                             pr_mean_alpha = pr_mean_alpha, pr_sd_alpha = pr_sd_alpha,
-                             pr_spike_mean = pr_spike_mean, pr_spike_sd = pr_spike_sd,
-                             pr_slab_mean = pr_slab_mean, pr_slab_sd = pr_slab_sd,
-                             pr_beta_a = pr_xi_a, pr_beta_b = pr_xi_b,
-                             missing = missing.val, adapt = adapt, verbose = verbose, fix_theta_sd = fix_theta_sd,
-                             fix_alpha_1 = fix_alpha_1)
-    }else{
-      lsirmgrm2pl_ss_cpp(data = x, ndim = ndim, ncat = ncat,
-                         niter = niter, nburn = nburn, nthin = nthin, nprint = nprint,
-                         jump_beta = jump_beta, jump_theta = jump_theta, jump_alpha = jump_alpha, jump_gamma = jump_gamma, jump_z = jump_z, jump_w = jump_w,
-                         pr_mean_beta = pr_mean_beta, pr_sd_beta = pr_sd_beta,
-                         pr_a_theta = pr_a_theta, pr_b_theta = pr_b_theta,
-                         pr_mean_theta = pr_mean_theta, pr_sd_theta = pr_sd_theta,
-                         pr_mean_alpha = pr_mean_alpha, pr_sd_alpha = pr_sd_alpha,
-                         pr_spike_mean = pr_spike_mean, pr_spike_sd = pr_spike_sd,
-                         pr_slab_mean = pr_slab_mean, pr_slab_sd = pr_slab_sd,
-                         pr_beta_a = pr_xi_a, pr_beta_b = pr_xi_b,
-                         missing = missing.val, adapt = adapt, verbose = verbose, fix_theta_sd = fix_theta_sd,
-                         fix_alpha_1 = fix_alpha_1)
-    }
+    output <- lsirmgrm2pl_ss_cpp(data = x, ndim = ndim, ncat = ncat,
+                                 niter = niter, nburn = nburn, nthin = nthin, nprint = nprint,
+                                 jump_beta = jump_beta, jump_theta = jump_theta, jump_alpha = jump_alpha, jump_gamma = jump_gamma, jump_z = jump_z, jump_w = jump_w,
+                                 pr_mean_beta = pr_mean_beta, pr_sd_beta = pr_sd_beta,
+                                 pr_a_theta = pr_a_theta, pr_b_theta = pr_b_theta,
+                                 pr_mean_theta = pr_mean_theta, pr_sd_theta = pr_sd_theta,
+                                 pr_mean_alpha = pr_mean_alpha, pr_sd_alpha = pr_sd_alpha,
+                                 pr_spike_mean = pr_spike_mean, pr_spike_sd = pr_spike_sd,
+                                 pr_slab_mean = pr_slab_mean, pr_slab_sd = pr_slab_sd,
+                                 pr_beta_a = pr_xi_a, pr_beta_b = pr_xi_b,
+                                 missing = missing.val, adapt = adapt, verbose = verbose, fix_theta_sd = fix_theta_sd,
+                                 fix_alpha_1 = fix_alpha_1)
   } else if(isTRUE(fixed_gamma)){
-    output <- if(is_mar){
-      lsirmgrm2pl_fixed_gamma_mar_cpp(data = x, ndim = ndim, ncat = ncat,
-                                      niter = niter, nburn = nburn, nthin = nthin, nprint = nprint,
-                                      jump_beta = jump_beta, jump_theta = jump_theta, jump_alpha = jump_alpha, jump_z = jump_z, jump_w = jump_w,
-                                      pr_mean_beta = pr_mean_beta, pr_sd_beta = pr_sd_beta,
-                                      pr_a_theta = pr_a_theta, pr_b_theta = pr_b_theta,
-                                      pr_mean_theta = pr_mean_theta, pr_sd_theta = pr_sd_theta,
-                                      pr_mean_alpha = pr_mean_alpha, pr_sd_alpha = pr_sd_alpha,
-                                      missing = missing.val, adapt = adapt, verbose = verbose, fix_theta_sd = fix_theta_sd,
-                                      fix_alpha_1 = fix_alpha_1)
-    }else{
-      lsirmgrm2pl_fixed_gamma_cpp(data = x, ndim = ndim, ncat = ncat,
-                                  niter = niter, nburn = nburn, nthin = nthin, nprint = nprint,
-                                  jump_beta = jump_beta, jump_theta = jump_theta, jump_alpha = jump_alpha, jump_z = jump_z, jump_w = jump_w,
-                                  pr_mean_beta = pr_mean_beta, pr_sd_beta = pr_sd_beta,
-                                  pr_a_theta = pr_a_theta, pr_b_theta = pr_b_theta,
-                                  pr_mean_theta = pr_mean_theta, pr_sd_theta = pr_sd_theta,
-                                  pr_mean_alpha = pr_mean_alpha, pr_sd_alpha = pr_sd_alpha,
-                                  missing = missing.val, adapt = adapt, verbose = verbose, fix_theta_sd = fix_theta_sd,
-                                  fix_alpha_1 = fix_alpha_1)
-    }
+    output <- lsirmgrm2pl_fixed_gamma_cpp(data = x, ndim = ndim, ncat = ncat,
+                                          niter = niter, nburn = nburn, nthin = nthin, nprint = nprint,
+                                          jump_beta = jump_beta, jump_theta = jump_theta, jump_alpha = jump_alpha, jump_z = jump_z, jump_w = jump_w,
+                                          pr_mean_beta = pr_mean_beta, pr_sd_beta = pr_sd_beta,
+                                          pr_a_theta = pr_a_theta, pr_b_theta = pr_b_theta,
+                                          pr_mean_theta = pr_mean_theta, pr_sd_theta = pr_sd_theta,
+                                          pr_mean_alpha = pr_mean_alpha, pr_sd_alpha = pr_sd_alpha,
+                                          missing = missing.val, adapt = adapt, verbose = verbose, fix_theta_sd = fix_theta_sd,
+                                          fix_alpha_1 = fix_alpha_1)
   } else {
-    output <- if(is_mar){
-      lsirmgrm2pl_mar_cpp(data = x, ndim = ndim, ncat = ncat,
-                          niter = niter, nburn = nburn, nthin = nthin, nprint = nprint,
-                          jump_beta = jump_beta, jump_theta = jump_theta, jump_alpha = jump_alpha, jump_gamma = jump_gamma, jump_z = jump_z, jump_w = jump_w,
-                          pr_mean_beta = pr_mean_beta, pr_sd_beta = pr_sd_beta,
-                          pr_a_theta = pr_a_theta, pr_b_theta = pr_b_theta,
-                          pr_mean_theta = pr_mean_theta, pr_sd_theta = pr_sd_theta,
-                          pr_mean_alpha = pr_mean_alpha, pr_sd_alpha = pr_sd_alpha,
-                          pr_mean_gamma = pr_mean_gamma, pr_sd_gamma = pr_sd_gamma,
-                          missing = missing.val, adapt = adapt, verbose = verbose, fix_theta_sd = fix_theta_sd,
-                          fix_alpha_1 = fix_alpha_1)
-    }else{
-      lsirmgrm2pl_cpp(data = x, ndim = ndim, ncat = ncat,
-                      niter = niter, nburn = nburn, nthin = nthin, nprint = nprint,
-                      jump_beta = jump_beta, jump_theta = jump_theta, jump_alpha = jump_alpha, jump_gamma = jump_gamma, jump_z = jump_z, jump_w = jump_w,
-                      pr_mean_beta = pr_mean_beta, pr_sd_beta = pr_sd_beta,
-                      pr_a_theta = pr_a_theta, pr_b_theta = pr_b_theta,
-                      pr_mean_theta = pr_mean_theta, pr_sd_theta = pr_sd_theta,
-                      pr_mean_alpha = pr_mean_alpha, pr_sd_alpha = pr_sd_alpha,
-                      pr_mean_gamma = pr_mean_gamma, pr_sd_gamma = pr_sd_gamma,
-                      missing = missing.val, adapt = adapt, verbose = verbose, fix_theta_sd = fix_theta_sd,
-                      fix_alpha_1 = fix_alpha_1)
-    }
+    output <- lsirmgrm2pl_cpp(data = x, ndim = ndim, ncat = ncat,
+                              niter = niter, nburn = nburn, nthin = nthin, nprint = nprint,
+                              jump_beta = jump_beta, jump_theta = jump_theta, jump_alpha = jump_alpha, jump_gamma = jump_gamma, jump_z = jump_z, jump_w = jump_w,
+                              pr_mean_beta = pr_mean_beta, pr_sd_beta = pr_sd_beta,
+                              pr_a_theta = pr_a_theta, pr_b_theta = pr_b_theta,
+                              pr_mean_theta = pr_mean_theta, pr_sd_theta = pr_sd_theta,
+                              pr_mean_alpha = pr_mean_alpha, pr_sd_alpha = pr_sd_alpha,
+                              pr_mean_gamma = pr_mean_gamma, pr_sd_gamma = pr_sd_gamma,
+                              missing = missing.val, adapt = adapt, verbose = verbose, fix_theta_sd = fix_theta_sd,
+                              fix_alpha_1 = fix_alpha_1)
   }
 
   mcmc.inf <- list(nburn = nburn, niter = niter, nthin = nthin)
@@ -330,8 +312,9 @@ lsirmgrm2pl_o <- function(data, ncat = NULL, missing_data = NA, missing.val = 99
   Kminus1 <- ncat - 1
 
   nmcmc <- as.integer((niter - nburn) / nthin)
-  max.address <- min(which.max(output$map))
-  map.inf <- data.frame(value = output$map[which.max(output$map)], iter = which.max(output$map))
+  map.info <- get_map_info(output$map)
+  max.address <- map.info$address
+  map.inf <- map.info$info
 
   w.star <- output$w[max.address,,]
   z.star <- output$z[max.address,,]
@@ -394,22 +377,7 @@ lsirmgrm2pl_o <- function(data, ncat = NULL, missing_data = NA, missing.val = 99
   colnames(beta.summary) <- c("Estimate.mean", "2.5%", "97.5%")
   rownames(beta.summary) <- colnames(beta.mat)
 
-  miss_idx <- NULL
-  imp <- NULL
-  imp_estimate <- NULL
   x_bic <- x
-  if(is_mar){
-    miss_idx <- which(x == missing.val, arr.ind = TRUE)
-    imp <- output$impute
-    if(!is.null(imp) && nrow(miss_idx) > 0){
-      imp_estimate <- colMeans(imp)
-      imp_cat <- as.integer(round(imp_estimate))
-      min_cat <- y_base
-      max_cat <- y_base + ncat - 1
-      imp_cat <- pmin(pmax(imp_cat, min_cat), max_cat)
-      x_bic[miss_idx] <- imp_cat
-    }
-  }
 
   log_like <- log_likelihood_grm2pl_cpp(x_bic, ndim, ncat,
                                        beta_est = beta.estimate,
@@ -498,11 +466,6 @@ lsirmgrm2pl_o <- function(data, ncat = NULL, missing_data = NA, missing.val = 99
     result$xi <- as.numeric(output$xi)
     result$pi_estimate <- mean(result$pi)
     result$xi_estimate <- mean(result$xi)
-  }
-
-  if(is_mar){
-    result$imp_estimate <- imp_estimate
-    result$imp <- imp
   }
 
   result

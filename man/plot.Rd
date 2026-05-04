@@ -24,9 +24,9 @@ plot(
 
 \item{rotation}{Logical; If TRUE the latent positions are visualized after oblique (oblimin) rotation.}
 
-\item{cluster}{Character; If value is "neyman" the cluster result are visualized by Point Process Cluster Analysis. If value is "spectral", spectral clustering method applied. Default is NA.}
+\item{cluster}{Character; clustering method for the interaction map. Use \code{"neyman"} for Neyman-Scott/Thomas point-process clustering or \code{"spectral"} for spectral clustering. If \code{NA}, no clustering is applied. Default is \code{NA}.}
 
-\item{which.clust}{Character; Choose which values to clustering. "resp" is the option for respondent and "item" is the option for items. Default is "item".}
+\item{which.clust}{Character; latent positions to cluster when \code{cluster} is \code{"neyman"} or \code{"spectral"}. Use \code{"item"} to cluster item positions (\code{w_estimate}) or \code{"resp"} to cluster respondent positions (\code{z_estimate}). Default is \code{"item"}.}
 
 \item{interact}{Logical; If TRUE, draw the interaction map interactively.}
 
@@ -53,6 +53,7 @@ plot(lsirm_result, rotation = TRUE)
 plot(lsirm_result, interact = TRUE)
 
 # clustering the respondents or items
-plot(lsirm_result, cluster = TRUE)
+plot(lsirm_result, cluster = "spectral", which.clust = "item")
+plot(lsirm_result, cluster = "spectral", which.clust = "resp")
 }
 }

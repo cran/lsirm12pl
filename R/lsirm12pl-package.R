@@ -22,5 +22,7 @@
 #' @importFrom utils stack
 #' @import ggplot2 GPArotation dplyr pROC spatstat grid purrr parallel coda grid tidyr
 #' @useDynLib lsirm12pl, .registration = TRUE
+#' @references
+#' Jeon, M., Jin, I. H., Schweinberger, M., & Baugh, S. (2021). Mapping unobserved item-respondent interactions: A latent space item response model with interaction map. \emph{Psychometrika}, 86(2), 378--403. \url{https://link.springer.com/article/10.1007/s11336-021-09762-5}
 #'
 NULL

@@ -49,8 +49,9 @@ each column represents an item. Values can be either \code{0:(K-1)} or \code{1:K
 
 \item{ncat}{Integer; number of categories \eqn{K}. If \code{NULL}, it is inferred from the observed data.}
 
-\item{missing_data}{Character; the type of missing data assumed. Options are \code{NA}, \code{"mar"}, or
-\code{"mcar"}. If \code{NA} and \code{data} contains missing values, it is set to \code{"mcar"} internally.}
+\item{missing_data}{Character; the type of missing data assumed. Options are \code{NA} or \code{"mcar"}.
+For GRM models, missing values are currently supported only under MCAR. If \code{data} contains \code{NA}
+and \code{missing_data} is \code{NA}, it is set to \code{"mcar"} internally with a warning.}
 
 \item{missing.val}{Numeric; numeric code used to represent missing values in the C++ sampler. Default is 99.}
 
@@ -112,16 +113,18 @@ each column represents an item. Values can be either \code{0:(K-1)} or \code{1:K
 
 \item{pr_xi_b}{Numeric; Beta prior shape b for mixing weight \eqn{\xi}. Default is 1.}
 
-\item{adapt}{List; optional adaptive MCMC control. If not \code{NULL}, proposal standard deviations are adapted during the burn-in period to reach a target acceptance rate and are held fixed during the main MCMC sampling.
+\item{adapt}{List; optional adaptive MCMC control. If not \code{NULL}, proposal standard deviations are adapted during burn-in using a Robbins-Monro update on the log proposal SD and are held fixed during the main MCMC sampling.
 When adaptation is enabled, the reported acceptance ratios in the output (\code{accept_beta}, \code{accept_theta}, etc.) are computed only from iterations after burn-in, reflecting the performance of the adapted proposal distributions.
+The defaults are tuning heuristics for random-walk Metropolis proposals: scalar parameters use a target acceptance rate of \code{0.44}, while latent position block proposals use \code{0.234}. The \code{0.44} target is commonly used for one-dimensional random-walk proposals, and \code{0.234} is the high-dimensional optimal-scaling benchmark discussed by Roberts, Gelman and Gilks (1997) and Roberts and Rosenthal (2001). These values are proposal-tuning targets, not convergence diagnostics.
 Elements of the list can include:
 \itemize{
   \item \code{use_adapt}: Logical; if \code{TRUE}, adaptive MCMC is used. Default is \code{FALSE}.
-  \item \code{adapt_interval}: Integer; the number of iterations between each update of the proposal SDs. Default is \code{100}.
-  \item \code{adapt_rate}: Numeric; Robbins-Monro scaling constant (c) in step size formula: adapt_rate / iteration^decay_rate. Default is \code{1.0}. Valid range: any positive value. Recommended: 0.5-2.0.
-  \item \code{decay_rate}: Numeric; Robbins-Monro decay exponent (alpha) in step size formula. Default is \code{0.5}. Valid range: (0.5, 1]. Recommended: 0.5-0.8.
-  \item \code{target_accept}: Numeric; target acceptance rate for scalar parameters (beta, theta, gamma). Default is \code{0.44}.
-  \item \code{target_accept_zw}: Numeric; target acceptance rate for latent positions z and w. Default is \code{0.234}.
+  \item \code{adapt_interval}: Integer; the number of iterations between proposal SD updates. Smaller values react more quickly but can be noisy; larger values are smoother but adapt more slowly. Default is \code{100}.
+  \item \code{adapt_rate}: Numeric; Robbins-Monro scaling constant \eqn{c} in the step-size formula \eqn{c / t^\alpha}. Larger values adapt faster but can oscillate; smaller values are more conservative. Default is \code{1.0}. Recommended starting range is \code{0.5}--\code{2.0}.
+  \item \code{decay_rate}: Numeric; Robbins-Monro decay exponent \eqn{\alpha} in \eqn{c / t^\alpha}. Values above \code{0.5} give diminishing adaptation consistent with the usual stochastic-approximation square-summability condition. Default is \code{0.6}; recommended range is \code{0.6}--\code{0.8}.
+  \item \code{jump_min}, \code{jump_max}: Numeric; advanced lower and upper bounds for adapted proposal SDs, used to prevent proposal scales from collapsing to zero or becoming excessively large. These are normally left unchanged.
+  \item \code{target_accept}: Numeric; default target acceptance rate for scalar random-walk updates (beta, theta, gamma). Default is \code{0.44}.
+  \item \code{target_accept_zw}: Numeric; target acceptance rate for latent position block updates z and w. Default is \code{0.234}.
   \item \code{target_accept_beta/theta/gamma}: Numeric; (optional) parameter-specific target acceptance rates to override \code{target_accept}.
 }}
 
@@ -130,10 +133,12 @@ Elements of the list can include:
 \item{fix_theta_sd}{Logical; If TRUE, the standard deviation of the respondent latent positions \eqn{\theta} is fixed at 1 instead of being sampled. Default is FALSE.}
 }
 \value{
-An object of class \code{lsirm}. For multi-chain fits, it returns a list where each element (\code{chain1}, \code{chain2}, etc.) is a single-chain fit of class \code{lsirm}.
-
-If \code{missing_data = "mar"}, the returned object additionally contains \code{imp} (MCMC draws of imputed
-responses for each missing cell) and \code{imp_estimate} (posterior mean imputation for each missing cell).
+An object of class \code{lsirm}. For multi-chain fits, it returns a list where each element (\code{chain1}, \code{chain2}, etc.) is a single-chain fit of class \code{lsirm}. The single-chain fit contains posterior summaries and MCMC draws, including:
+\itemize{
+  \item \code{z}, \code{w}: Procrustes-matched posterior samples of respondent and item latent positions.
+  \item \code{z_raw}, \code{w_raw}: posterior samples of respondent and item latent positions before Procrustes matching.
+  \item \code{z_estimate}, \code{w_estimate}: posterior mean latent positions after Procrustes matching.
+}
 }
 \description{
 \code{\link{lsirmgrm}} fits an ordinal latent space item response model for Likert-scale (ordered categorical)
@@ -151,10 +156,9 @@ The model is defined via cumulative logits:
 \deqn{\Pr(Y_{j,i} \ge k | \theta_j, \beta_{i,k}, \gamma, z_j, w_i) = \text{logit}^{-1}(\theta_j + \beta_{i,k} - \gamma\,\|z_j-w_i\|)}
 for \eqn{k=1,\ldots,K-1}, where \eqn{\beta_{i,k}} are item-specific thresholds (difficulty levels) that satisfy the ordering constraint \eqn{\beta_{i,1} > \beta_{i,2} > \cdots > \beta_{i,K-1}} for identifiability.
 
-Missing data can be handled in two ways:
+Missing data can be handled as follows:
 \itemize{
   \item \code{"mcar"}: Missing responses are assumed to be Missing Completely At Random. They are ignored in the likelihood calculation.
-  \item \code{"mar"}: Missing responses are assumed to be Missing At Random. The model uses data augmentation to impute missing values at each MCMC iteration based on the current parameter estimates.
 }
 
 For models with \code{spikenslab = TRUE}, a spike-and-slab prior is placed on \eqn{\log(\gamma)} to perform model selection between a standard Rasch-type model (\eqn{\gamma \approx 0}) and a latent space model (\eqn{\gamma > 0}).
@@ -185,8 +189,10 @@ dat <- dat[complete.cases(dat), ]
 fit_bfpt <- lsirm(dat[1:50, 1:10] ~ lsirmgrm(niter = 1000, nburn = 500))
 summary(fit_bfpt)
 
-# Fit with missing data (MAR)
-fit_mar <- lsirm(data ~ lsirmgrm(missing_data = "mar", niter = 1000, nburn = 500))
+# Fit with missing data under MCAR
+data_mcar <- data
+data_mcar[sample(length(data_mcar), 20)] <- NA
+fit_mcar <- lsirm(data_mcar ~ lsirmgrm(niter = 1000, nburn = 500))
 
 # Fit with Spike-and-Slab prior for model selection
 fit_ss <- lsirm(data ~ lsirmgrm(spikenslab = TRUE, niter = 1000, nburn = 500))
@@ -195,12 +201,18 @@ fit_ss <- lsirm(data ~ lsirmgrm(spikenslab = TRUE, niter = 1000, nburn = 500))
 fit_adapt <- lsirmgrm(data, niter = 2000, nburn = 1000, 
                       adapt = list(use_adapt = TRUE, adapt_interval = 50))
 # Check adapted jump sizes and acceptance rates
-cat("Final jump_beta:", fit_adapt$jump_beta, "\n")
-cat("Acceptance rate (post-burnin):", fit_adapt$accept_beta, "\n")
+cat("Final jump_beta:", fit_adapt$tuning$jump_beta_final, "\n")
+cat("Mean acceptance rate (post-burnin):", mean(fit_adapt$accept_beta), "\n")
 }
 
 }
 \references{
 De Carolis, L., Kang, I., & Jeon, M. (2025). A Latent Space Graded Response Model for Likert-Scale
 Psychological Assessments. \emph{Multivariate Behavioral Research}. \doi{10.1080/00273171.2025.2605678}
+
+Roberts, G. O., Gelman, A., & Gilks, W. R. (1997). Weak convergence and optimal scaling of random walk Metropolis algorithms. \emph{The Annals of Applied Probability}, 7(1), 110--120. \doi{10.1214/aoap/1034625254}
+
+Roberts, G. O., & Rosenthal, J. S. (2001). Optimal scaling for various Metropolis-Hastings algorithms. \emph{Statistical Science}, 16(4), 351--367. \doi{10.1214/ss/1015346320}
+
+Andrieu, C., & Thoms, J. (2008). A tutorial on adaptive MCMC. \emph{Statistics and Computing}, 18(4), 343--373. \doi{10.1007/s11222-008-9110-y}
 }
