@@ -4,7 +4,16 @@
 \alias{summary.lsirm}
 \title{Summary the result of LSIRM}
 \usage{
-\method{summary}{lsirm}(object, chain.idx = 1, estimate = "mean", CI = 0.95, ...)
+\method{summary}{lsirm}(
+  object,
+  chain.idx = 1,
+  estimate = "mean",
+  CI = 0.95,
+  items = NULL,
+  respondents = NULL,
+  which = NULL,
+  ...
+)
 }
 \arguments{
 \item{object}{Object of class \code{lsirm}.}
@@ -14,6 +23,12 @@
 \item{estimate}{Character; Specifies the type of posterior estimate to provide for beta parameters. Options are \code{"mean"}, \code{"median"}, or \code{"mode"}. Default is \code{"mean"}.}
 
 \item{CI}{Numeric; The significance level for the highest posterior density interval (HPD) for the beta parameters. Default is 0.95.}
+
+\item{items}{Numeric or Character vector; the items to display in the parameter summaries. Either a vector of item indices (e.g. \code{1:5}) or item names (e.g. \code{c("item 1", "item 3")}). Default is \code{NULL} (displays all items).}
+
+\item{respondents}{Numeric or Character vector; the respondents to display in the respondent summaries (theta). Either a vector of respondent indices (e.g. \code{1:10}) or respondent names (e.g. \code{c("respondent 1", "respondent 2")}). Default is \code{NULL} (displays all respondents if theta is requested).}
+
+\item{which}{Character vector; specifies which parameters to print in the console. Options are \code{"beta"} (item difficulty/threshold), \code{"alpha"} (item discrimination), and \code{"theta"} (respondent ability). Or set to \code{"all"} to print all. Default is \code{NULL} (dynamically prints \code{"beta"} for 1PL models, and both \code{"beta"} and \code{"alpha"} for 2PL models).}
 
 \item{\dots}{Additional arguments.}
 }

@@ -66,7 +66,7 @@ lsirm2pl_mar = function(data, ndim = 2, niter = 15000, nburn = 2500, nthin = 5, 
                         jump_beta = 0.4, jump_theta = 1, jump_alpha = 1, jump_gamma = 0.2, jump_z = 0.5, jump_w = 0.5,
                         pr_mean_beta = 0, pr_sd_beta = 1, pr_mean_theta = 0, pr_sd_theta = 1, pr_mean_gamma = 0.5, pr_sd_gamma = 1,
                         pr_mean_alpha = 0.5, pr_sd_alpha = 1, pr_a_theta = 0.001, pr_b_theta = 0.001,
-                        missing.val = 99, verbose=FALSE, fix_theta_sd=FALSE, fix_alpha_1=TRUE, adapt = NULL) {
+                        missing.val = NA, verbose=FALSE, fix_theta_sd=FALSE, fix_alpha_1=TRUE, adapt = NULL) {
   if(niter <= nburn){
     stop("niter must be greater than burn-in process.")
   }
@@ -78,7 +78,9 @@ lsirm2pl_mar = function(data, ndim = 2, niter = 15000, nburn = 2500, nthin = 5, 
   }
   
   # Convert NA to missing.val
-  data <- replace_na_with_missing(data, missing.val)
+  if (!is.na(missing.val)) { data[data == missing.val] <- NA }
+  missing.val <- if (all(is.na(data))) -9999 else max(data, na.rm=TRUE) + 9999
+  data[is.na(data)] <- missing.val
 
   # cat("\n\nFitting with MCMC algorithm\n")
 

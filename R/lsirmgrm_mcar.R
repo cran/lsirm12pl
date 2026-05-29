@@ -22,7 +22,7 @@
 #' }
 #' 
 #' @export
-lsirmgrm_mcar <- function(data, ncat = NULL, missing.val = 99,
+lsirmgrm_mcar <- function(data, ncat = NULL, missing.val = NA,
                          chains = 1, multicore = 1, seed = NA,
                          ndim = 2, niter = 15000, nburn = 2500, nthin = 5, nprint = 500,
                          jump_beta = 0.4, jump_theta = 1, jump_gamma = 0.2, jump_z = 0.5, jump_w = 0.5,

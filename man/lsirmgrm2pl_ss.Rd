@@ -8,7 +8,7 @@ lsirmgrm2pl_ss(
   data,
   ncat = NULL,
   missing_data = NA,
-  missing.val = 99,
+  missing.val = NA,
   chains = 1,
   multicore = 1,
   seed = NA,

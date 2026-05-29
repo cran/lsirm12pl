@@ -31,7 +31,7 @@ lsirm2pl_mar_ss(
   pr_b_theta = 0.001,
   pr_xi_a = 1,
   pr_xi_b = 1,
-  missing.val = 99,
+  missing.val = NA,
   verbose = FALSE,
   fix_theta_sd = FALSE,
   fix_alpha_1 = TRUE,

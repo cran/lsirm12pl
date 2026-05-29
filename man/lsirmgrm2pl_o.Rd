@@ -8,7 +8,7 @@ lsirmgrm2pl_o(
   data,
   ncat = NULL,
   missing_data = NA,
-  missing.val = 99,
+  missing.val = NA,
   ndim = 2,
   niter = 15000,
   nburn = 2500,

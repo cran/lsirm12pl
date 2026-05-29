@@ -50,13 +50,13 @@
 #'
 #' # The code following can achieve the same result.
 #' lsirm_result <- lsirm(data ~ lsirm1pl(spikenslab = FALSE, fixed_gamma = TRUE,
-#' missing_data = "mar", missing.val = 99))
+#' missing_data = "mar", missing.val = NA))
 #' }
 #' @export
 lsirm1pl_fixed_gamma_mar = function(data, ndim = 2, niter = 15000, nburn = 2500, nthin = 5, nprint = 500,
                                jump_beta = 0.4, jump_theta = 1.0, jump_z = 0.5, jump_w = 0.5,
                                pr_mean_beta = 0, pr_sd_beta = 1.0, pr_mean_theta = 0, pr_sd_theta = 1.0, pr_a_theta = 0.001, pr_b_theta = 0.001,
-                               missing.val = 99, verbose=FALSE, fix_theta_sd=FALSE, adapt = NULL) {
+                               missing.val = NA, verbose=FALSE, fix_theta_sd=FALSE, adapt = NULL) {
   if(niter <= nburn){
     stop("niter must be greater than burn-in process.")
   }
@@ -68,7 +68,9 @@ lsirm1pl_fixed_gamma_mar = function(data, ndim = 2, niter = 15000, nburn = 2500,
   }
   # # cat("\n\nFitting with MCMC algorithm\n")
 
-  data <- replace_na_with_missing(data, missing.val)
+  if (!is.na(missing.val)) { data[data == missing.val] <- NA }
+  missing.val <- if (all(is.na(data))) -9999 else max(data, na.rm=TRUE) + 9999
+  data[is.na(data)] <- missing.val
 
   output <- lsirm1pl_fixed_gamma_mar_cpp(data=as.matrix(data), ndim=ndim, niter=niter, nburn=nburn, nthin=nthin, nprint=nprint,
                            jump_beta=jump_beta, jump_theta=jump_theta, jump_z=jump_z, jump_w=jump_w,

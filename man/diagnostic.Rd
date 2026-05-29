@@ -13,7 +13,12 @@ diagnostic(
 \arguments{
 \item{object}{Object of class \code{lsirm}.}
 
-\item{draw.item}{List; Each key in the list corresponds to a specific parameters such as "beta", "theta", "gamma", "alpha", "sigma", "theta_sd", "z", "w", and "zw.dist". The values of the list indicate the indices of these parameters. For the key "zw.dist", the value is a matrix with two columns: the first column represents the indices of respondents, and the second column represents the indices of items. For the keys "z" and "w", the value is a matrix with two columns: the first column represents the indices of respondents/items, and the second column represents the dimension indices.}
+\item{draw.item}{List or Character vector; specifies which parameters to diagnose. Can be:
+\itemize{
+  \item A character vector of parameter names to diagnose using default settings, e.g. \code{"gamma"} or \code{c("beta", "gamma")}.
+  \item A list combining named index vectors/matrices (e.g., \code{beta = c(1)}, \code{z = matrix(c(1,1), ncol=2)}) and unnamed string elements representing scalar parameters (e.g., \code{"gamma"}, \code{"sigma"}), or parameters mapped to \code{TRUE}/\code{NULL} (e.g., \code{gamma = TRUE}).
+}
+Supported parameters include: "beta" (item difficulty/threshold), "theta" (respondent ability), "gamma" (distance weight), "alpha" (item discrimination), "sigma" (error variance for continuous models), "theta_sd" (standard deviation of theta), "z" (respondent latent positions), "w" (item latent positions), and "zw.dist" (latent distances). Default is \code{list(beta = c(1), theta = c(1))}.}
 
 \item{gelman.diag}{Logical; If TRUE, the Gelman-Rubin convergence diagnostic will be printed. Default is FALSE.}
 }
@@ -40,5 +45,14 @@ diagnostic(lsirm_result)
 diagnostic(lsirm_result, draw.item = list(z = matrix(c(1,1, 2,1, 1,2), ncol=2, byrow=TRUE),
                                        w = matrix(c(1,1, 2,1), ncol=2, byrow=TRUE)))
 
+# Using flexible draw.item formats:
+# 1) Character string for a single parameter
+diagnostic(lsirm_result, draw.item = "gamma")
+
+# 2) Character vector for multiple parameters with default settings
+diagnostic(lsirm_result, draw.item = c("beta", "gamma"))
+
+# 3) List combining named indexes and unnamed strings
+diagnostic(lsirm_result, draw.item = list(beta = c(1), "gamma"))
 }
 }

@@ -26,7 +26,7 @@ lsirm2pl_normal_fixed_gamma_mar(
   pr_b_theta = 0.001,
   pr_a_eps = 0.001,
   pr_b_eps = 0.001,
-  missing.val = 99,
+  missing.val = NA,
   verbose = FALSE,
   fix_theta_sd = FALSE,
   fix_alpha_1 = TRUE,
@@ -148,10 +148,11 @@ missing_mat     <- matrix(rbinom(500, size = 1, prob = 0.2),ncol=10,nrow=50)
 # make missing value with missing indicator matrix
 data[missing_mat==1] <- 99
 
-lsirm_result <- lsirm2pl_normal_fixed_gamma_mar(data)
+lsirm_result <- lsirm2pl_normal_fixed_gamma_mar(data, niter = 1000, nburn = 500)
 
 # The code following can achieve the same result.
 lsirm_result <- lsirm(data ~ lsirm2pl(spikenslab = FALSE, fixed_gamma = TRUE,
+                      niter = 1000, nburn = 500,
                       missing_data = "mar"))
 
 }

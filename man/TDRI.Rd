@@ -8,7 +8,7 @@
 A binary matrix with 1,803 rows and 56 columns.
 }
 \source{
-\url{https://figshare.com/articles/dataset/TDRI_dataset_csv/3142321}
+\verb{https://figshare.com/articles/dataset/TDRI_dataset_csv/3142321}
 }
 \usage{
 data(TDRI)

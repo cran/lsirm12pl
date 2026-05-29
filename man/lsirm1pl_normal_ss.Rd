@@ -147,10 +147,11 @@ LSIRM factorizes continuous item response matrix into column-wise item effect, r
 # generate example (continuous) item response matrix
 data <- matrix(rnorm(500, mean = 0, sd = 1), ncol = 10, nrow = 50)
 
-lsirm_result <- lsirm1pl_normal_ss(data)
+lsirm_result <- lsirm1pl_normal_ss(data, niter = 1000, nburn = 500)
 
 # The code following can achieve the same result.
-lsirm_result <- lsirm(data ~ lsirm1pl(spikenslab = TRUE, fixed_gamma = FALSE))
+lsirm_result <- lsirm(data ~ lsirm1pl(spikenslab = TRUE, fixed_gamma = FALSE,
+                      niter = 1000, nburn = 500))
 }
 
 }

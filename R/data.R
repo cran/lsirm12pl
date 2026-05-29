@@ -24,7 +24,7 @@ NULL
 #' 
 #' @format A binary matrix with 1,803 rows and 56 columns.
 #' @details It presents data from 1,803 Brazilians (52.5\% female) with age varying from 5 to 85 years (M = 15.75; SD = 12.21) that answered to the Inductive Reasoning Developmental Test – IRDT, with 56 items designed to assess developmentally sequenced and hierarchically organized inductive reasoning.
-#' @source \url{https://figshare.com/articles/dataset/TDRI_dataset_csv/3142321}
+#' @source \verb{https://figshare.com/articles/dataset/TDRI_dataset_csv/3142321}
 #' 
 #' @name TDRI
 NULL

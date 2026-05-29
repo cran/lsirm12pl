@@ -69,23 +69,8 @@
 #' fit <- lsirmgrm2pl(data, niter = 1000, nburn = 500, nthin = 2)
 #' summary(fit)
 #'
-#' # Fit with missing data under MCAR
-#' data_mcar <- data
-#' data_mcar[sample(length(data_mcar), 20)] <- NA
-#' fit_mcar <- lsirm(data_mcar ~ lsirmgrm2pl(niter = 1000, nburn = 500))
-#'
-#' # Fit with Spike-and-Slab prior for model selection
-#' fit_ss <- lsirm(data ~ lsirmgrm2pl(spikenslab = TRUE, niter = 1000, nburn = 500))
-#'
-#' # Fit with adaptive MCMC for automatic tuning
-#' fit_adapt <- lsirmgrm2pl(data, niter = 2000, nburn = 1000,
-#'                          adapt = list(use_adapt = TRUE, adapt_interval = 50))
-#' # Check adapted jump sizes and acceptance rates
-#' cat("Final jump_alpha:", fit_adapt$tuning$jump_alpha_final, "\n")
-#' cat("Mean acceptance rate (post-burnin):", mean(fit_adapt$accept_alpha), "\n")
-#'
 #' @export
-lsirmgrm2pl <- function(data, ncat = NULL, missing_data = NA, missing.val = 99,
+lsirmgrm2pl <- function(data, ncat = NULL, missing_data = NA, missing.val = NA,
                         chains = 1, multicore = 1, seed = NA,
                         ndim = 2, niter = 15000, nburn = 2500, nthin = 5, nprint = 500,
                         jump_beta = 0.4, jump_theta = 1, jump_alpha = 1, jump_gamma = 0.2, jump_z = 0.5, jump_w = 0.5,
@@ -215,7 +200,7 @@ lsirmgrm2pl <- function(data, ncat = NULL, missing_data = NA, missing.val = 99,
 #' }
 #'
 #' @export
-lsirmgrm2pl_o <- function(data, ncat = NULL, missing_data = NA, missing.val = 99,
+lsirmgrm2pl_o <- function(data, ncat = NULL, missing_data = NA, missing.val = NA,
                           ndim = 2, niter = 15000, nburn = 2500, nthin = 5, nprint = 500,
                           jump_beta = 0.4, jump_theta = 1, jump_alpha = 1, jump_gamma = 0.2, jump_z = 0.5, jump_w = 0.5,
                           pr_mean_beta = 0, pr_sd_beta = 1,
@@ -246,8 +231,12 @@ lsirmgrm2pl_o <- function(data, ncat = NULL, missing_data = NA, missing.val = 99
   }
 
   x <- as.matrix(data)
+  if (is.na(missing.val)) {
+    missing.val <- if (all(is.na(x))) -9999 else max(x, na.rm=TRUE) + 9999
+  }
   if (anyNA(x)) {
-    x <- replace_na_with_missing(x, missing.val)
+    if (!is.na(missing.val)) { x[x == missing.val] <- NA }
+    x[is.na(x)] <- missing.val
     if(is.na(missing_data)){
       warning("NA values detected in GRM 2PL data; treating them as missing_data = 'mcar'.", call. = FALSE)
       missing_data <- "mcar"

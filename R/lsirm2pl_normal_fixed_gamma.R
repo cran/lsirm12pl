@@ -40,10 +40,11 @@
 #' # generate example (continuous) item response matrix
 #' data     <- matrix(rnorm(500, mean = 0, sd = 1),ncol=10,nrow=50)
 #'
-#' lsrm_result <- lsirm2pl_normal_fixed_gamma(data)
+#' lsrm_result <- lsirm2pl_normal_fixed_gamma(data, niter = 1000, nburn = 500)
 #'
 #' # The code following can achieve the same result.
-#' lsirm_result <- lsirm(data ~ lsirm2pl(spikenslab = FALSE, fixed_gamma = TRUE))
+#' lsirm_result <- lsirm(data ~ lsirm2pl(spikenslab = FALSE, fixed_gamma = TRUE,
+#'                       niter = 1000, nburn = 500))
 #'
 #' @export
 lsirm2pl_normal_fixed_gamma = function(data, ndim = 2, niter = 15000, nburn = 2500, nthin = 5, nprint = 500,

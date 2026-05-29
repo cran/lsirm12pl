@@ -54,10 +54,11 @@
 #' # generate example (continuous) item response matrix
 #' data     <- matrix(rnorm(500, mean = 0, sd = 1),ncol=10,nrow=50)
 #'
-#' lsirm_result <- lsirm2pl_normal_ss(data)
+#' lsirm_result <- lsirm2pl_normal_ss(data, niter = 1000, nburn = 500)
 #'
 #' # The code following can achieve the same result.
-#' lsirm_result <- lsirm(data ~ lsirm2pl(spikenslab = TRUE, fixed_gamma = FALSE))
+#' lsirm_result <- lsirm(data ~ lsirm2pl(spikenslab = TRUE, fixed_gamma = FALSE,
+#'                       niter = 1000, nburn = 500))
 #'
 #' @export
 lsirm2pl_normal_ss = function(data, ndim = 2, niter = 15000, nburn = 2500, nthin = 5, nprint = 500,

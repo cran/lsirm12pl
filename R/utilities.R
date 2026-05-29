@@ -1,5 +1,5 @@
 
-check.datatype <- function(data, missing.val = 99, ...){
+check.datatype <- function(data, missing.val = NA, ...){
   if(exists("missing.val")){ # If missing.var is imputed
     missing.temp = missing.val
   }else{missing.temp = 99}
@@ -20,15 +20,9 @@ check.datatype <- function(data, missing.val = 99, ...){
   # return(check.r)
 }
 
-replace_na_with_missing <- function(data, missing.val = 99) {
+replace_na_with_missing <- function(data, missing.val = NA) {
   n_missing <- sum(is.na(data))
   if (n_missing > 0) {
-    warning(sprintf(
-      "%d NA value%s detected and treated as missing.val (%s).",
-      n_missing,
-      ifelse(n_missing == 1, "", "s"),
-      missing.val
-    ), call. = FALSE)
     data[is.na(data)] <- missing.val
   }
   data

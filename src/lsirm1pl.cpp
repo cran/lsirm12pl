@@ -699,16 +699,20 @@ static Rcpp::List lsirm1pl_internal(
 
     // Sigma Update (Normal)
     if (normal_model) {
-      post_a_sigma = 2.0 * pr_a_eps + nsample * nitem;
+      int n_obs = 0;
       post_b_sigma = pr_b_eps;
       for (k = 0; k < nsample; k++) {
         for (i = 0; i < nitem; i++) {
-          post_b_sigma += std::pow(data(k, i) - oldbeta(i) - oldtheta(k) +
-                                       oldgamma * dist(k, i),
-                                   2.0) /
-                          2.0;
+          if (data(k, i) != missing) {
+            n_obs++;
+            post_b_sigma += std::pow(data(k, i) - oldbeta(i) - oldtheta(k) +
+                                         oldgamma * dist(k, i),
+                                     2.0) /
+                            2.0;
+          }
         }
       }
+      post_a_sigma = 2.0 * pr_a_eps + n_obs;
       pr_sd = std::sqrt(2.0 * post_b_sigma * (1.0 / R::rchisq(post_a_sigma)));
     }
 

@@ -21,7 +21,7 @@
 #' @return \code{lsirmgrm_fixed_gamma} returns an object of  list containing the same components as \code{\link{lsirmgrm}}.
 #'
 #' @export
-lsirmgrm_fixed_gamma <- function(data, ncat = NULL, missing_data = NA, missing.val = 99,
+lsirmgrm_fixed_gamma <- function(data, ncat = NULL, missing_data = NA, missing.val = NA,
                                 chains = 1, multicore = 1, seed = NA,
                                 ndim = 2, niter = 15000, nburn = 2500, nthin = 5, nprint = 500,
                                 jump_beta = 0.4, jump_theta = 1, jump_z = 0.5, jump_w = 0.5,

@@ -7,7 +7,7 @@
 lsirmgrm_mcar(
   data,
   ncat = NULL,
-  missing.val = 99,
+  missing.val = NA,
   chains = 1,
   multicore = 1,
   seed = NA,

@@ -94,7 +94,6 @@
 #' For models with \code{spikenslab = TRUE}, a spike-and-slab prior is placed on \eqn{\log(\gamma)} to perform model selection between a standard Rasch-type model (\eqn{\gamma \approx 0}) and a latent space model (\eqn{\gamma > 0}).
 #'
 #' @examples
-#' \donttest{
 #' # generate example ordinal item response matrix
 #' set.seed(123)
 #' nsample <- 50
@@ -105,38 +104,8 @@
 #' fit <- lsirmgrm(data, niter = 1000, nburn = 500, nthin = 2)
 #' summary(fit)
 #'
-#' # Realistic example with BFPT data
-#' data(BFPT)
-#' dat <- BFPT
-#' # Handle outliers or special codes
-#' dat[(dat == 0) | (dat == 6)] <- NA
-#' # Reverse code specific items
-#' reverse <- c(2, 4, 6, 8, 10, 11, 13, 15, 16, 17, 18, 19, 20, 21, 23, 25, 27, 32, 34, 36, 42, 44, 46)
-#' dat[, reverse] <- 6 - dat[, reverse]
-#' # Remove missing cases for simple demonstration
-#' dat <- dat[complete.cases(dat), ]
-#' # Fit model (subset for speed)
-#' fit_bfpt <- lsirm(dat[1:50, 1:10] ~ lsirmgrm(niter = 1000, nburn = 500))
-#' summary(fit_bfpt)
-#'
-#' # Fit with missing data under MCAR
-#' data_mcar <- data
-#' data_mcar[sample(length(data_mcar), 20)] <- NA
-#' fit_mcar <- lsirm(data_mcar ~ lsirmgrm(niter = 1000, nburn = 500))
-#' 
-#' # Fit with Spike-and-Slab prior for model selection
-#' fit_ss <- lsirm(data ~ lsirmgrm(spikenslab = TRUE, niter = 1000, nburn = 500))
-#' 
-#' # Fit with adaptive MCMC for automatic tuning
-#' fit_adapt <- lsirmgrm(data, niter = 2000, nburn = 1000, 
-#'                       adapt = list(use_adapt = TRUE, adapt_interval = 50))
-#' # Check adapted jump sizes and acceptance rates
-#' cat("Final jump_beta:", fit_adapt$tuning$jump_beta_final, "\n")
-#' cat("Mean acceptance rate (post-burnin):", mean(fit_adapt$accept_beta), "\n")
-#' }
-#'
 #' @export
-lsirmgrm <- function(data, ncat = NULL, missing_data = NA, missing.val = 99,
+lsirmgrm <- function(data, ncat = NULL, missing_data = NA, missing.val = NA,
                      chains = 1, multicore = 1, seed = NA,
                      ndim = 2, niter = 15000, nburn = 2500, nthin = 5, nprint = 500,
                      jump_beta = 0.4, jump_theta = 1, jump_gamma = 0.2, jump_z = 0.5, jump_w = 0.5,
@@ -266,7 +235,7 @@ lsirmgrm <- function(data, ncat = NULL, missing_data = NA, missing.val = 99,
 #' }
 #'
 #' @export
-lsirmgrm_o <- function(data, ncat = NULL, missing_data = NA, missing.val = 99,
+lsirmgrm_o <- function(data, ncat = NULL, missing_data = NA, missing.val = NA,
                        ndim = 2, niter = 15000, nburn = 2500, nthin = 5, nprint = 500,
                        jump_beta = 0.4, jump_theta = 1, jump_gamma = 0.2, jump_z = 0.5, jump_w = 0.5,
                        pr_mean_beta = 0, pr_sd_beta = 1,
@@ -296,8 +265,12 @@ lsirmgrm_o <- function(data, ncat = NULL, missing_data = NA, missing.val = 99,
   }
 
   x <- as.matrix(data)
+  if (is.na(missing.val)) {
+    missing.val <- if (all(is.na(x))) -9999 else max(x, na.rm=TRUE) + 9999
+  }
   if (anyNA(x)) {
-    x <- replace_na_with_missing(x, missing.val)
+    if (!is.na(missing.val)) { x[x == missing.val] <- NA }
+    x[is.na(x)] <- missing.val
     if(is.na(missing_data)){
       warning("NA values detected in GRM data; treating them as missing_data = 'mcar'.", call. = FALSE)
       missing_data <- "mcar"

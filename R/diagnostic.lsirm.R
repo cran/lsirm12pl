@@ -3,7 +3,12 @@
 #' @description \code{diagnostic} checks the convergence of MCMC for LSIRM parameters using various diagnostic tools, such as trace plots, posterior density distributions, autocorrelation functions (ACF), and Gelman-Rubin-Brooks plots.
 #'
 #' @param object Object of class \code{lsirm}.
-#' @param draw.item List; Each key in the list corresponds to a specific parameters such as "beta", "theta", "gamma", "alpha", "sigma", "theta_sd", "z", "w", and "zw.dist". The values of the list indicate the indices of these parameters. For the key "zw.dist", the value is a matrix with two columns: the first column represents the indices of respondents, and the second column represents the indices of items. For the keys "z" and "w", the value is a matrix with two columns: the first column represents the indices of respondents/items, and the second column represents the dimension indices.
+#' @param draw.item List or Character vector; specifies which parameters to diagnose. Can be:
+#'   \itemize{
+#'     \item A character vector of parameter names to diagnose using default settings, e.g. \code{"gamma"} or \code{c("beta", "gamma")}.
+#'     \item A list combining named index vectors/matrices (e.g., \code{beta = c(1)}, \code{z = matrix(c(1,1), ncol=2)}) and unnamed string elements representing scalar parameters (e.g., \code{"gamma"}, \code{"sigma"}), or parameters mapped to \code{TRUE}/\code{NULL} (e.g., \code{gamma = TRUE}).
+#'   }
+#'   Supported parameters include: "beta" (item difficulty/threshold), "theta" (respondent ability), "gamma" (distance weight), "alpha" (item discrimination), "sigma" (error variance for continuous models), "theta_sd" (standard deviation of theta), "z" (respondent latent positions), "w" (item latent positions), and "zw.dist" (latent distances). Default is \code{list(beta = c(1), theta = c(1))}.
 #' @param gelman.diag Logical; If TRUE, the Gelman-Rubin convergence diagnostic will be printed. Default is FALSE.
 #'
 #' @return \code{diagnostic} returns plots for checking MCMC convergence for selected parameters.
@@ -25,6 +30,15 @@
 #' diagnostic(lsirm_result, draw.item = list(z = matrix(c(1,1, 2,1, 1,2), ncol=2, byrow=TRUE),
 #'                                        w = matrix(c(1,1, 2,1), ncol=2, byrow=TRUE)))
 #'
+#' # Using flexible draw.item formats:
+#' # 1) Character string for a single parameter
+#' diagnostic(lsirm_result, draw.item = "gamma")
+#'
+#' # 2) Character vector for multiple parameters with default settings
+#' diagnostic(lsirm_result, draw.item = c("beta", "gamma"))
+#'
+#' # 3) List combining named indexes and unnamed strings
+#' diagnostic(lsirm_result, draw.item = list(beta = c(1), "gamma"))
 #' }
 #' @export diagnostic
 diagnostic <- function(object,
@@ -44,7 +58,40 @@ diagnostic.lsirm <- function(object,
   ACF <- Chain <- Iteration <- Lag <- PSRF <- Type <- iteration <- var1 <- NULL
   orders = data.frame(idx = c(1:9),
                       param = c("beta", "theta", "gamma", "alpha", "sigma", "theta_sd", "z", "w", "zw.dist"))
-  which.draw = names(draw.item)
+  if (is.character(draw.item)) {
+    which.draw <- draw.item
+    draw.item_list <- list()
+    for (param in which.draw) {
+      draw.item_list[[param]] <- switch(param,
+        "beta" = "first",
+        "theta" = "first",
+        "alpha" = 2,
+        "z" = matrix(c(1, 1), ncol = 2),
+        "w" = matrix(c(1, 1), ncol = 2),
+        "zw.dist" = matrix(c(1, 1), ncol = 2),
+        TRUE
+      )
+    }
+    draw.item <- draw.item_list
+  } else if (is.list(draw.item)) {
+    nms <- names(draw.item)
+    if (is.null(nms)) {
+      nms <- rep("", length(draw.item))
+    }
+    cleaned_draw.item <- list()
+    for (i in seq_along(draw.item)) {
+      if (nms[i] == "" && is.character(draw.item[[i]]) && length(draw.item[[i]]) == 1) {
+        param_name <- draw.item[[i]]
+        cleaned_draw.item[[param_name]] <- TRUE
+      } else if (nms[i] != "") {
+        cleaned_draw.item[[nms[i]]] <- draw.item[[i]]
+      }
+    }
+    draw.item <- cleaned_draw.item
+    which.draw <- names(draw.item)
+  } else {
+    which.draw <- names(draw.item)
+  }
   porder = orders[orders$param %in% which.draw,]
 
   if(object$chains > 1){
@@ -73,12 +120,15 @@ diagnostic.lsirm <- function(object,
 
   }
 
-  if(is.null(draw.item$beta)&("beta" %in% which.draw)) draw.item$beta = "first"
-  if(is.null(draw.item$theta)&("theta" %in% which.draw)) draw.item$theta = "first"
-  if(is.null(draw.item$alpha)&("alpha" %in% which.draw)) draw.item$alpha = 2
-  if(is.null(draw.item$z)&("z" %in% which.draw)) draw.item$z = matrix(c(1, 1), ncol = 2)
-  if(is.null(draw.item$w)&("w" %in% which.draw)) draw.item$w = matrix(c(1, 1), ncol = 2)
-  if(is.null(draw.item$zw.dist)&("zw.dist" %in% which.draw)) draw.item$zw.dist = matrix(c(1, 1), ncol = 2)
+  if((is.null(draw.item$beta) || isTRUE(draw.item$beta)) & ("beta" %in% which.draw)) draw.item$beta = "first"
+  if((is.null(draw.item$theta) || isTRUE(draw.item$theta)) & ("theta" %in% which.draw)) draw.item$theta = "first"
+  if((is.null(draw.item$alpha) || isTRUE(draw.item$alpha)) & ("alpha" %in% which.draw)) draw.item$alpha = 2
+  if((is.null(draw.item$z) || isTRUE(draw.item$z)) & ("z" %in% which.draw)) draw.item$z = matrix(c(1, 1), ncol = 2)
+  if((is.null(draw.item$w) || isTRUE(draw.item$w)) & ("w" %in% which.draw)) draw.item$w = matrix(c(1, 1), ncol = 2)
+  if((is.null(draw.item$zw.dist) || isTRUE(draw.item$zw.dist)) & ("zw.dist" %in% which.draw)) draw.item$zw.dist = matrix(c(1, 1), ncol = 2)
+  if((is.null(draw.item$gamma) || isTRUE(draw.item$gamma)) & ("gamma" %in% which.draw)) draw.item$gamma = 1
+  if((is.null(draw.item$sigma) || isTRUE(draw.item$sigma)) & ("sigma" %in% which.draw)) draw.item$sigma = 1
+  if((is.null(draw.item$theta_sd) || isTRUE(draw.item$theta_sd)) & ("theta_sd" %in% which.draw)) draw.item$theta_sd = 1
   chain_list_all <- vector("list", length = object$chains)
 
   .gelman_plot_safe <- function(mcmclist, param){

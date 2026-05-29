@@ -27,7 +27,7 @@ lsirm2pl_mcar(
   pr_sd_alpha = 1,
   pr_a_theta = 0.001,
   pr_b_theta = 0.001,
-  missing.val = 99,
+  missing.val = NA,
   verbose = FALSE,
   fix_theta_sd = FALSE,
   fix_alpha_1 = TRUE,

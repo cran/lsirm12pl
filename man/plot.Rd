@@ -12,7 +12,14 @@ plot(
   cluster = NA,
   which.clust = "item",
   interact = FALSE,
-  chain.idx = 1
+  chain.idx = 1,
+  xlim = NULL,
+  ylim = NULL,
+  resp.size = 0.7,
+  item.size = 4,
+  xlab = NULL,
+  ylab = NULL,
+  title = NULL
 )
 }
 \arguments{
@@ -31,6 +38,20 @@ plot(
 \item{interact}{Logical; If TRUE, draw the interaction map interactively.}
 
 \item{chain.idx}{Numeric; Index of MCMC chain. Default is 1.}
+
+\item{xlim}{Numeric vector of length 2; x-axis range for interaction plots. Default is NULL (auto).}
+
+\item{ylim}{Numeric vector of length 2; y-axis range for interaction plots. Default is NULL (auto).}
+
+\item{resp.size}{Numeric; respondent point size for interaction plots. Default is 0.7.}
+
+\item{item.size}{Numeric; item text size for interaction plots. Default is 4.}
+
+\item{xlab}{Character; x-axis label. Default is NULL.}
+
+\item{ylab}{Character; y-axis label. Default is NULL.}
+
+\item{title}{Character; plot title. Default is NULL.}
 }
 \value{
 \code{plot} returns the interaction map or boxplot for parameter estimate.

@@ -28,7 +28,7 @@ lsirm1pl_mcar_ss(
   pr_b_theta = 0.001,
   pr_xi_a = 1,
   pr_xi_b = 1,
-  missing.val = 99,
+  missing.val = NA,
   verbose = FALSE,
   fix_theta_sd = FALSE,
   adapt = NULL
@@ -152,7 +152,7 @@ lsirm_result <- lsirm1pl_mcar_ss(data)
 
 # The code following can achieve the same result.
 lsirm_result <- lsirm(data ~ lsirm1pl(spikenslab = TRUE, fixed_gamma = FALSE,
-missing_data ='mcar', missing.val = 99))
+missing_data ='mcar', missing.val = NA))
 }
 }
 \references{

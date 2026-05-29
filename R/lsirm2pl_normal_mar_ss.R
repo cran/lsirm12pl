@@ -66,10 +66,11 @@
 #' # make missing value with missing indicator matrix
 #' data[missing_mat==1] <- 99
 #'
-#' lsirm_result <- lsirm2pl_normal_mar_ss(data)
+#' lsirm_result <- lsirm2pl_normal_mar_ss(data, niter = 1000, nburn = 500)
 #'
 #' # The code following can achieve the same result.
 #' lsirm_result <- lsirm(data ~ lsirm2pl(spikenslab = TRUE, fixed_gamma = FALSE,
+#'                       niter = 1000, nburn = 500,
 #'                       missing_data = "mar"))
 #' @export
 lsirm2pl_normal_mar_ss = function(data, ndim = 2, niter = 15000, nburn = 2500, nthin = 5, nprint = 500,
@@ -78,7 +79,7 @@ lsirm2pl_normal_mar_ss = function(data, ndim = 2, niter = 15000, nburn = 2500, n
                                   pr_spike_mean = -3, pr_spike_sd = 1.0, pr_slab_mean = 0.5, pr_slab_sd = 1.0,
                                   pr_mean_alpha = 0.5, pr_sd_alpha = 1,
                                   pr_a_eps = 0.001, pr_b_eps = 0.001, pr_a_theta = 0.001, pr_b_theta = 0.001, pr_xi_a = 0.001, pr_xi_b = 0.001,
-                                  missing.val = 99, verbose=FALSE, fix_theta_sd=FALSE, fix_alpha_1=TRUE, adapt = NULL) {
+                                  missing.val = NA, verbose=FALSE, fix_theta_sd=FALSE, fix_alpha_1=TRUE, adapt = NULL) {
   if(niter <= nburn){
     stop("niter must be greater than burn-in process.")
   }
@@ -90,7 +91,9 @@ lsirm2pl_normal_mar_ss = function(data, ndim = 2, niter = 15000, nburn = 2500, n
   }
   
   # Convert NA to missing.val
-  data <- replace_na_with_missing(data, missing.val)
+  if (!is.na(missing.val)) { data[data == missing.val] <- NA }
+  missing.val <- if (all(is.na(data))) -9999 else max(data, na.rm=TRUE) + 9999
+  data[is.na(data)] <- missing.val
 
   # cat("\n\nFitting with MCMC algorithm\n")
 

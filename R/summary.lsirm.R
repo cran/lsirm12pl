@@ -6,6 +6,9 @@
 #' @param chain.idx Numeric; Index of MCMC chain. Default is 1.
 #' @param estimate Character; Specifies the type of posterior estimate to provide for beta parameters. Options are \code{"mean"}, \code{"median"}, or \code{"mode"}. Default is \code{"mean"}.
 #' @param CI Numeric; The significance level for the highest posterior density interval (HPD) for the beta parameters. Default is 0.95.
+#' @param items Numeric or Character vector; the items to display in the parameter summaries. Either a vector of item indices (e.g. \code{1:5}) or item names (e.g. \code{c("item 1", "item 3")}). Default is \code{NULL} (displays all items).
+#' @param respondents Numeric or Character vector; the respondents to display in the respondent summaries (theta). Either a vector of respondent indices (e.g. \code{1:10}) or respondent names (e.g. \code{c("respondent 1", "respondent 2")}). Default is \code{NULL} (displays all respondents if theta is requested).
+#' @param which Character vector; specifies which parameters to print in the console. Options are \code{"beta"} (item difficulty/threshold), \code{"alpha"} (item discrimination), and \code{"theta"} (respondent ability). Or set to \code{"all"} to print all. Default is \code{NULL} (dynamically prints \code{"beta"} for 1PL models, and both \code{"beta"} and \code{"alpha"} for 2PL models).
 #' @param \dots Additional arguments.
 #'
 #' @return \code{summary.lsirm} contains following elements. A print method is available.
@@ -30,7 +33,7 @@
 #' }
 #' @rdname summary.lsirm
 #' @export
-summary.lsirm <- function(object, chain.idx = 1, estimate = 'mean', CI = 0.95, ...)
+summary.lsirm <- function(object, chain.idx = 1, estimate = 'mean', CI = 0.95, items = NULL, respondents = NULL, which = NULL, ...)
 {
   if(object$method == "lsirm1pl") method = "lpl LSIRM"
   if(object$method == "lsirm2pl") method = "2pl LSIRM"
@@ -100,8 +103,73 @@ summary.lsirm <- function(object, chain.idx = 1, estimate = 'mean', CI = 0.95, .
 
     rownames(beta.summary) <- cname
 
+    alpha.summary <- NULL
+    if(object$method %in% c("lsirm2pl", "lsirmgrm2pl")){
+      alpha_samples <- object$alpha
+      if(is.data.frame(object$data)){
+        alpha_cname = colnames(object$data)
+      }else{
+        alpha_cname = paste("item", 1:ncol(object$data), sep=" ")
+      }
+
+      if(estimate == 'mean'){
+        alpha_est = apply(alpha_samples, 2, mean)
+      }else if(estimate == 'median'){
+        alpha_est = apply(alpha_samples, 2, median)
+      }else if(estimate == 'mode'){
+        alpha_est = apply(alpha_samples, 2, function(x) {
+          d <- density(x)
+          d$x[which.max(d$y)]
+        })
+      }
+
+      if(length(CI) == 1){
+        if (CI < 0.5) {
+          alpha_quant <- t(apply(alpha_samples, 2, function(x) quantile(x, probs = c(0.025, 0.975))))
+        }else{
+          alpha_quant <- t(apply(alpha_samples, 2, function(x) quantile(x, probs = c((1 - CI)/2, 1-(1 - CI)/2))))
+        }
+      }else if(length(CI) == 2){
+        alpha_quant <- t(apply(alpha_samples, 2, function(x) quantile(x, probs = c(CI[1],CI[2]))))
+      }
+      alpha.summary = data.frame(cbind(alpha_est, alpha_quant))
+      colnames(alpha.summary) <- c(paste0("Estimate.", estimate),
+                                  paste0(ci.temp[1]*100, '%'),
+                                  paste0(ci.temp[2]*100, '%'))
+      rownames(alpha.summary) <- alpha_cname
+    }
+
+    theta_samples <- object$theta
+    if(estimate == 'mean'){
+      theta_est = apply(theta_samples, 2, mean)
+    }else if(estimate == 'median'){
+      theta_est = apply(theta_samples, 2, median)
+    }else if(estimate == 'mode'){
+      theta_est = apply(theta_samples, 2, function(x) {
+        d <- density(x)
+        d$x[which.max(d$y)]
+      })
+    }
+
+    if(length(CI) == 1){
+      if (CI < 0.5) {
+        theta_quant <- t(apply(theta_samples, 2, function(x) quantile(x, probs = c(0.025, 0.975))))
+      }else{
+        theta_quant <- t(apply(theta_samples, 2, function(x) quantile(x, probs = c((1 - CI)/2, 1-(1 - CI)/2))))
+      }
+    }else if(length(CI) == 2){
+      theta_quant <- t(apply(theta_samples, 2, function(x) quantile(x, probs = c(CI[1],CI[2]))))
+    }
+    theta.summary = data.frame(cbind(theta_est, theta_quant))
+    colnames(theta.summary) <- c(paste0("Estimate.", estimate),
+                                 paste0(ci.temp[1]*100, '%'),
+                                 paste0(ci.temp[2]*100, '%'))
+    rownames(theta.summary) <- paste("respondent", 1:ncol(theta_samples))
+
     res <- list(call = object$call,
                 coef = beta.summary,
+                alpha.coef = alpha.summary,
+                theta.coef = theta.summary,
                 mcmc.opt = object$mcmc_inf,
                 map.inf = object$map_inf,
                 BIC = object$bic,
@@ -110,7 +178,10 @@ summary.lsirm <- function(object, chain.idx = 1, estimate = 'mean', CI = 0.95, .
                 dtype = object$dtype,
                 ss = object$varselect,
                 tuning = object$tuning,
-                n.chains = 1)
+                n.chains = 1,
+                items = items,
+                respondents = respondents,
+                which = which)
   }else{
 
     object.chain = object[[chain.idx]]
@@ -169,8 +240,73 @@ summary.lsirm <- function(object, chain.idx = 1, estimate = 'mean', CI = 0.95, .
                                 paste0(ci.temp[2]*100, '%'))
     rownames(beta.summary) <- cname
 
+    alpha.summary <- NULL
+    if(object.chain$method %in% c("lsirm2pl", "lsirmgrm2pl")){
+      alpha_samples <- object.chain$alpha
+      if(is.data.frame(object.chain$data)){
+        alpha_cname = colnames(object.chain$data)
+      }else{
+        alpha_cname = paste("item", 1:ncol(object.chain$data), sep=" ")
+      }
+
+      if(estimate == 'mean'){
+        alpha_est = apply(alpha_samples, 2, mean)
+      }else if(estimate == 'median'){
+        alpha_est = apply(alpha_samples, 2, median)
+      }else if(estimate == 'mode'){
+        alpha_est = apply(alpha_samples, 2, function(x) {
+          d <- density(x)
+          d$x[which.max(d$y)]
+        })
+      }
+
+      if(length(CI) == 1){
+        if (CI < 0.5) {
+          alpha_quant <- t(apply(alpha_samples, 2, function(x) quantile(x, probs = c(0.025, 0.975))))
+        }else{
+          alpha_quant <- t(apply(alpha_samples, 2, function(x) quantile(x, probs = c((1 - CI)/2, 1-(1 - CI)/2))))
+        }
+      }else if(length(CI) == 2){
+        alpha_quant <- t(apply(alpha_samples, 2, function(x) quantile(x, probs = c(CI[1],CI[2]))))
+      }
+      alpha.summary = data.frame(cbind(alpha_est, alpha_quant))
+      colnames(alpha.summary) <- c(paste0("Estimate.", estimate),
+                                  paste0(ci.temp[1]*100, '%'),
+                                  paste0(ci.temp[2]*100, '%'))
+      rownames(alpha.summary) <- alpha_cname
+    }
+
+    theta_samples <- object.chain$theta
+    if(estimate == 'mean'){
+      theta_est = apply(theta_samples, 2, mean)
+    }else if(estimate == 'median'){
+      theta_est = apply(theta_samples, 2, median)
+    }else if(estimate == 'mode'){
+      theta_est = apply(theta_samples, 2, function(x) {
+        d <- density(x)
+        d$x[which.max(d$y)]
+      })
+    }
+
+    if(length(CI) == 1){
+      if (CI < 0.5) {
+        theta_quant <- t(apply(theta_samples, 2, function(x) quantile(x, probs = c(0.025, 0.975))))
+      }else{
+        theta_quant <- t(apply(theta_samples, 2, function(x) quantile(x, probs = c((1 - CI)/2, 1-(1 - CI)/2))))
+      }
+    }else if(length(CI) == 2){
+      theta_quant <- t(apply(theta_samples, 2, function(x) quantile(x, probs = c(CI[1],CI[2]))))
+    }
+    theta.summary = data.frame(cbind(theta_est, theta_quant))
+    colnames(theta.summary) <- c(paste0("Estimate.", estimate),
+                                 paste0(ci.temp[1]*100, '%'),
+                                 paste0(ci.temp[2]*100, '%'))
+    rownames(theta.summary) <- paste("respondent", 1:ncol(theta_samples))
+
     res <- list(call = object.chain$call,
                 coef = beta.summary,
+                alpha.coef = alpha.summary,
+                theta.coef = theta.summary,
                 mcmc.opt = object.chain$mcmc_inf,
                 map.inf = object.chain$map_inf,
                 BIC = object.chain$bic,
@@ -180,7 +316,10 @@ summary.lsirm <- function(object, chain.idx = 1, estimate = 'mean', CI = 0.95, .
                 ss = object.chain$varselect,
                 tuning = object.chain$tuning,
                 n.chains = object$chains,
-                chain = chain.idx)
+                chain = chain.idx,
+                items = items,
+                respondents = respondents,
+                which = which)
   }
 
   class(res) <- "summary.lsirm"

@@ -8,7 +8,7 @@ lsirmgrm2pl(
   data,
   ncat = NULL,
   missing_data = NA,
-  missing.val = 99,
+  missing.val = NA,
   chains = 1,
   multicore = 1,
   seed = NA,
@@ -181,21 +181,6 @@ data <- matrix(sample(1:5, nsample * nitem, replace = TRUE), nrow = nsample)
 # Fit 2PL GRM LSIRM using direct function call
 fit <- lsirmgrm2pl(data, niter = 1000, nburn = 500, nthin = 2)
 summary(fit)
-
-# Fit with missing data under MCAR
-data_mcar <- data
-data_mcar[sample(length(data_mcar), 20)] <- NA
-fit_mcar <- lsirm(data_mcar ~ lsirmgrm2pl(niter = 1000, nburn = 500))
-
-# Fit with Spike-and-Slab prior for model selection
-fit_ss <- lsirm(data ~ lsirmgrm2pl(spikenslab = TRUE, niter = 1000, nburn = 500))
-
-# Fit with adaptive MCMC for automatic tuning
-fit_adapt <- lsirmgrm2pl(data, niter = 2000, nburn = 1000,
-                         adapt = list(use_adapt = TRUE, adapt_interval = 50))
-# Check adapted jump sizes and acceptance rates
-cat("Final jump_alpha:", fit_adapt$tuning$jump_alpha_final, "\n")
-cat("Mean acceptance rate (post-burnin):", mean(fit_adapt$accept_alpha), "\n")
 
 }
 \references{

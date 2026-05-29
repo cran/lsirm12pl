@@ -132,9 +132,10 @@ Elements of the list can include:
 # generate example (continuous) item response matrix
 data     <- matrix(rnorm(500, mean = 0, sd = 1),ncol=10,nrow=50)
 
-lsirm_result <- lsirm1pl_normal_o(data)
+lsirm_result <- lsirm1pl_normal_o(data, niter = 1000, nburn = 500)
 
 # The code following can achieve the same result.
-lsirm_result <- lsirm(data ~ lsirm1pl(spikenslab = FALSE, fixed_gamma = FALSE))
+lsirm_result <- lsirm(data ~ lsirm1pl(spikenslab = FALSE, fixed_gamma = FALSE,
+                      niter = 1000, nburn = 500))
 
 }

@@ -9,6 +9,13 @@
 #' @param which.clust Character; latent positions to cluster when \code{cluster} is \code{"neyman"} or \code{"spectral"}. Use \code{"item"} to cluster item positions (\code{w_estimate}) or \code{"resp"} to cluster respondent positions (\code{z_estimate}). Default is \code{"item"}.
 #' @param interact Logical; If TRUE, draw the interaction map interactively.
 #' @param chain.idx Numeric; Index of MCMC chain. Default is 1.
+#' @param xlim Numeric vector of length 2; x-axis range for interaction plots. Default is NULL (auto).
+#' @param ylim Numeric vector of length 2; y-axis range for interaction plots. Default is NULL (auto).
+#' @param resp.size Numeric; respondent point size for interaction plots. Default is 0.7.
+#' @param item.size Numeric; item text size for interaction plots. Default is 4.
+#' @param xlab Character; x-axis label. Default is NULL.
+#' @param ylab Character; y-axis label. Default is NULL.
+#' @param title Character; plot title. Default is NULL.
 #' @param ... Additional arguments for the corresponding function.
 #'
 #' @return \code{plot} returns the interaction map or boxplot for parameter estimate.
@@ -32,13 +39,17 @@
 #' }
 #' @export
 plot <- function(object, ..., option = "interaction", rotation=FALSE, cluster=NA,
-                 which.clust="item", interact=FALSE, chain.idx = 1){
+                 which.clust="item", interact=FALSE, chain.idx = 1,
+                 xlim = NULL, ylim = NULL, resp.size = 0.7, item.size = 4,
+                 xlab = NULL, ylab = NULL, title = NULL){
   UseMethod("plot")
 }
 
 #' @export
 plot.lsirm <- function(object, ..., option = "interaction", rotation=FALSE, cluster=NA,
-                       which.clust="item", interact=FALSE, chain.idx = 1){
+                       which.clust="item", interact=FALSE, chain.idx = 1,
+                       xlim = NULL, ylim = NULL, resp.size = 0.7, item.size = 4,
+                       xlab = NULL, ylab = NULL, title = NULL){
 
   group <- NULL
   type <- NULL
@@ -62,6 +73,9 @@ plot.lsirm <- function(object, ..., option = "interaction", rotation=FALSE, clus
 
   if(option == "interaction"){
 
+    item_text_size <- max(1, item.size * 4)
+    cluster_text_size <- max(1, (item.size + 1.5) * 4)
+
     item_position = x$w_estimate
     resp_position = x$z_estimate
     notation = c('w','z')
@@ -69,6 +83,13 @@ plot.lsirm <- function(object, ..., option = "interaction", rotation=FALSE, clus
     if((dim(item_position)[2]!=2)|(dim(resp_position)[2]!=2)){
       stop('\"interaction \" option is implemented for two-dimensional latent space.')
     }
+
+    ax_x <- if (is.null(xlab)) "Dimension 1" else xlab
+    ax_y <- if (is.null(ylab)) "Dimension 2" else ylab
+    ax_title <- if (is.null(title)) "Interaction Map" else title
+
+    axis_title_x_theme <- if (is.null(ax_x) || ax_x == "") element_blank() else element_text(size = 14, face = "bold")
+    axis_title_y_theme <- if (is.null(ax_y) || ax_y == "") element_blank() else element_text(size = 14, face = "bold")
 
     if(is.na(cluster)){
       axis1 <- NULL; axis2 <- NULL
@@ -94,6 +115,10 @@ plot.lsirm <- function(object, ..., option = "interaction", rotation=FALSE, clus
       min_coordinate = sapply(df[,c(1,2)], min, na.rm = TRUE)
       axis_value = max(abs(c(max_coordinate,min_coordinate)))
       axis_range = c(-axis_value,axis_value)*1.1
+      axis_range_x <- axis_range
+      axis_range_y <- axis_range
+      if(!is.null(xlim)) axis_range_x = xlim
+      if(!is.null(ylim)) axis_range_y = ylim
 
 
       # plotly
@@ -113,39 +138,41 @@ plot.lsirm <- function(object, ..., option = "interaction", rotation=FALSE, clus
                               text=paste0("x.axis: ",round(axis1,3), "<br>",
                                           "y.axis: ",round(axis2,3), "<br>")))+
           geom_point(size = ifelse(df.interact$type=="item",
-                                   1e-06,1)) +
+                                   1e-06,resp.size)) +
           geom_text(data = df.interact, aes(x=axis1, y=axis2, label=item))+
           scale_color_manual(values=c("res"="black","item"="red"))+
-          xlim(axis_range) +
-          ylim(axis_range) +
+          xlim(axis_range_x) +
+          ylim(axis_range_y) +
           coord_cartesian(expand = FALSE) + theme_bw() +
           theme(plot.margin = unit(c(1,1,1,1), "cm"),
                 axis.text=element_text(size=16),
                 axis.title=element_text(size=14,face="bold"),
-                axis.title.x=element_blank(),
-                axis.title.y=element_blank(),
+                axis.title.x=axis_title_x_theme,
+                axis.title.y=axis_title_y_theme,
                 legend.title=element_blank(),
                 # legend.position.inside = c(0.9,0.9),
                 legend.text = element_text(size=10),
                 plot.title = element_text(hjust = 0.5, size = 20, face = "bold"))+
-          ggtitle("Interaction Map")
+          labs(x = ax_x, y = ax_y) +
+          ggtitle(ax_title)
         ggplotly(interact, tooltip = c("text","lb"))
       }else{
         ggplot() +
-          geom_point(data = df2, aes(x = axis1, y = axis2), size = 0.7) +
+          geom_point(data = df2, aes(x = axis1, y = axis2), size = resp.size) +
           geom_text(data = df1, aes(x = axis1, y = axis2, label=1:nrow(df1)),
-                    color = "red", size = 4, fontface = "bold") +
-          xlim(axis_range)+ylim(axis_range) + coord_cartesian(expand = FALSE) + theme_bw() +
+                    color = "red", size = item.size, fontface = "bold") +
+          xlim(axis_range_x)+ylim(axis_range_y) + coord_cartesian(expand = FALSE) + theme_bw() +
           theme(plot.margin = unit(c(1,1,1,1), "cm"),
                 axis.text=element_text(size=16),
                 axis.title=element_text(size=14,face="bold"),
-                axis.title.x=element_blank(),
-                axis.title.y=element_blank(),
+                axis.title.x=axis_title_x_theme,
+                axis.title.y=axis_title_y_theme,
                 legend.title=element_blank(),
                 # legend.position.inside = c(0.9,0.9),
                 legend.text = element_text(size=16),
                 plot.title = element_text(hjust = 0.5, size = 20, face = "bold"))+
-          ggtitle("Interaction Map")
+          labs(x = ax_x, y = ax_y) +
+          ggtitle(ax_title)
       }
     }else{
 
@@ -304,21 +331,22 @@ plot.lsirm <- function(object, ..., option = "interaction", rotation=FALSE, clus
         # plotly
         if(interact){
           temp <- (ggplot(w.post1, aes(x, y)) +
-                     geom_point(data=z.post1, aes(x, y), col="grey", cex=1.0) +
+                     geom_point(data=z.post1, aes(x, y), col="grey", cex=resp.size) +
                      stat_density_2d(data=cc, aes(x, y), color="gray80") + #density
                      geom_text(data=g_fin, aes(x, y), label=rownames(g_fin),
-                               color=ggcolor[g_fin$group], cex=4, fontface="bold") + # number of item
-                     geom_text(data=par5, aes(x, y), label=alphabet[1:ind], col="gray30", cex=5.5, fontface="bold") + #alphabet
+                               color=ggcolor[g_fin$group], cex=item.size, fontface="bold") + # number of item
+                     geom_text(data=par5, aes(x, y), label=alphabet[1:ind], col="gray30", cex=item.size+1.5, fontface="bold") + #alphabet
                      theme_bw() +
                      theme(plot.margin = unit(c(1,1,1,1), "cm"),
                            axis.text=element_text(size=16),
                            axis.title=element_text(size=14,face="bold"),
-                           axis.title.x=element_blank(),
-                           axis.title.y=element_blank(),
+                           axis.title.x=axis_title_x_theme,
+                           axis.title.y=axis_title_y_theme,
                            legend.title=element_blank(),
                            legend.text = element_text(size=16),
                            plot.title = element_text(hjust = 0.5, size = 20, face = "bold"))+
-                     ggtitle("Interaction Map"))
+                     labs(x = ax_x, y = ax_y) +
+                     ggtitle(ax_title))
           if(which.clust == "item"){
             int.plot = ggplotly(temp) %>%
               add_markers(x = z.post1$x, y = z.post1$y,
@@ -330,11 +358,11 @@ plot.lsirm <- function(object, ..., option = "interaction", rotation=FALSE, clus
               add_text(x = g_fin$x, y = g_fin$y, type = 'scatter',
                        name = "Item",
                        text = 1:nrow(w.post1),
-                       textfont = list(family="Arial Black",size=16, weight="bold", color = ggcolor[g_fin$group])) %>%
+                       textfont = list(family="Arial Black",size=item_text_size, weight="bold", color = ggcolor[g_fin$group])) %>%
               add_text(x = par5$x, y = par5$y, type = 'scatter',
                        name = "Cluster",
                        text = alphabet[1:ind],
-                       textfont = list(size=19, color = "black"))
+                       textfont = list(size=cluster_text_size, color = "black"))
           }else if(which.clust == "resp"){
             int.plot = ggplotly(temp) %>%
               add_markers(x = z.post1$x, y = z.post1$y,
@@ -346,11 +374,11 @@ plot.lsirm <- function(object, ..., option = "interaction", rotation=FALSE, clus
               add_text(x = g_fin$x, y = g_fin$y, type = 'scatter',
                        name = "Respondent",
                        text = 1:nrow(w.post1),
-                       textfont = list(family="Arial Black",size=16, weight="bold", color = ggcolor[g_fin$group])) %>%
+                       textfont = list(family="Arial Black",size=item_text_size, weight="bold", color = ggcolor[g_fin$group])) %>%
               add_text(x = par5$x, y = par5$y, type = 'scatter',
                        name = "Cluster",
                        text = alphabet[1:ind],
-                       textfont = list(size=19, color = "black"))
+                       textfont = list(size=cluster_text_size, color = "black"))
           }else{
             stop("Not supported")
           }
@@ -359,21 +387,22 @@ plot.lsirm <- function(object, ..., option = "interaction", rotation=FALSE, clus
 
         }else{
           # Draw plot using ggplot
-          print(ggplot(w.post1, aes(x, y)) +
-                  geom_point(data=z.post1, aes(x, y), col="grey", cex=1.0) +
-                  stat_density_2d(data=cc, aes(x, y), color="gray80") + #density
-                  geom_text(data=g_fin, aes(x, y), label=rownames(g_fin), color=ggcolor[g_fin$group], cex=4, fontface="bold") + # number of item
-                  geom_text(data=par5, aes(x, y), label=alphabet[1:ind], col="gray30", cex=5.5, fontface="bold") + #alphabet
+            print(ggplot(w.post1, aes(x, y)) +
+              geom_point(data=z.post1, aes(x, y), col="grey", cex=resp.size) +
+              stat_density_2d(data=cc, aes(x, y), color="gray80") + #density
+              geom_text(data=g_fin, aes(x, y), label=rownames(g_fin), color=ggcolor[g_fin$group], cex=item.size, fontface="bold") + # number of item
+              geom_text(data=par5, aes(x, y), label=alphabet[1:ind], col="gray30", cex=item.size+1.5, fontface="bold") + #alphabet
                   theme_bw() +
                   theme(plot.margin = unit(c(1,1,1,1), "cm"),
                         axis.text=element_text(size=16),
                         axis.title=element_text(size=14,face="bold"),
-                        axis.title.x=element_blank(),
-                        axis.title.y=element_blank(),
+                        axis.title.x=axis_title_x_theme,
+                        axis.title.y=axis_title_y_theme,
                         legend.title=element_blank(),
                         legend.text = element_text(size=16),
                         plot.title = element_text(hjust = 0.5, size = 20, face = "bold"))+
-                  ggtitle("Interaction Map"))
+                  labs(x = ax_x, y = ax_y) +
+                  ggtitle(ax_title))
         }
 
         # print the cluster information
@@ -443,6 +472,10 @@ plot.lsirm <- function(object, ..., option = "interaction", rotation=FALSE, clus
         min_coordinate = sapply(df[,c(1,2)], min, na.rm = TRUE)
         axis_value = max(abs(c(max_coordinate,min_coordinate)))
         axis_range = c(-axis_value,axis_value)*1.1
+        axis_range_x <- axis_range
+        axis_range_y <- axis_range
+        if(!is.null(xlim)) axis_range_x = xlim
+        if(!is.null(ylim)) axis_range_y = ylim
 
         g_fin <- cbind(df1, spectral_result)
         ind <- max(spectral_result$group)
@@ -465,19 +498,20 @@ plot.lsirm <- function(object, ..., option = "interaction", rotation=FALSE, clus
         # plotly
         if(interact){
           temp <- (ggplot(data=df, aes(x, y)) +
-                     geom_point(data=df2, aes(x, y), col="grey", cex=1.0) +
+                     geom_point(data=df2, aes(x, y), col="grey", cex=resp.size) +
                      geom_text(data=g_fin, aes(x, y), label=g_fin$item,
-                               color=ggcolor[g_fin$group], cex=4, fontface="bold") + # number of item
+                               color=ggcolor[g_fin$group], cex=item.size, fontface="bold") + # number of item
                      theme_bw() +
                      theme(plot.margin = unit(c(1,1,1,1), "cm"),
                            axis.text=element_text(size=16),
                            axis.title=element_text(size=14,face="bold"),
-                           axis.title.x=element_blank(),
-                           axis.title.y=element_blank(),
+                           axis.title.x=axis_title_x_theme,
+                           axis.title.y=axis_title_y_theme,
                            legend.title=element_blank(),
                            legend.text = element_text(size=16),
                            plot.title = element_text(hjust = 0.5, size = 20, face = "bold"))+
-                     ggtitle("Interaction Map"))
+                     labs(x = ax_x, y = ax_y) +
+                     ggtitle(ax_title))
           if(which.clust == "item"){
             int.plot = ggplotly(temp) %>%
               add_markers(x = df2$x, y = df2$y,
@@ -489,7 +523,7 @@ plot.lsirm <- function(object, ..., option = "interaction", rotation=FALSE, clus
               add_text(x = g_fin$x, y = g_fin$y, type = 'scatter',
                        name = "Item",
                        text = 1:nrow(g_fin),
-                       textfont = list(family="Arial Black",size=16, weight="bold", color = ggcolor[g_fin$group]))
+                       textfont = list(family="Arial Black",size=item_text_size, weight="bold", color = ggcolor[g_fin$group]))
           }else if(which.clust == "resp"){
             int.plot = ggplotly(temp) %>%
               add_markers(x = df2$x, y = df2$y,
@@ -501,26 +535,27 @@ plot.lsirm <- function(object, ..., option = "interaction", rotation=FALSE, clus
               add_text(x = g_fin$x, y = g_fin$y, type = 'scatter',
                        name = "Respondent",
                        text = 1:nrow(g_fin),
-                       textfont = list(family="Arial Black",size=16, weight="bold", color = ggcolor[g_fin$group]))
+                       textfont = list(family="Arial Black",size=item_text_size, weight="bold", color = ggcolor[g_fin$group]))
           }else{
             stop("Not supported")
           }
           print(int.plot)
         }else{
           temp <- (ggplot(data=df, aes(x, y)) +
-                     geom_point(data=df2, aes(x, y), col="grey", cex=1.0) +
+                     geom_point(data=df2, aes(x, y), col="grey", cex=resp.size) +
                      geom_text(data=g_fin, aes(x, y), label=g_fin$item,
-                               color=ggcolor[g_fin$group], cex=4, fontface="bold") + # number of item
+                               color=ggcolor[g_fin$group], cex=item.size, fontface="bold") + # number of item
                      theme_bw() +
                      theme(plot.margin = unit(c(1,1,1,1), "cm"),
                            axis.text=element_text(size=16),
                            axis.title=element_text(size=14,face="bold"),
-                           axis.title.x=element_blank(),
-                           axis.title.y=element_blank(),
+                           axis.title.x=axis_title_x_theme,
+                           axis.title.y=axis_title_y_theme,
                            legend.title=element_blank(),
                            legend.text = element_text(size=16),
                            plot.title = element_text(hjust = 0.5, size = 20, face = "bold"))+
-                     ggtitle("Interaction Map"))
+                     labs(x = ax_x, y = ax_y) +
+                     ggtitle(ax_title))
           print(temp)
         }
         # print the cluster information
@@ -550,14 +585,16 @@ plot.lsirm <- function(object, ..., option = "interaction", rotation=FALSE, clus
         value = as.vector(beta_array)
       )
 
-      return(ggplot(beta_dataframe, aes(x = factor(threshold), y = value, group = threshold)) +
+      p <- ggplot(beta_dataframe, aes(x = factor(threshold), y = value, group = threshold)) +
         geom_boxplot(outlier.shape = NA) +
         facet_wrap(~ item, ncol = 5) +
-        xlab("Threshold") +
-        ylab("Beta estimates") +
+        xlab(if (is.null(xlab)) "Threshold" else xlab) +
+        ylab(if (is.null(ylab)) "Beta estimates" else ylab) +
         theme(axis.text.x = element_text(face = "bold", size = 10),
               axis.text.y = element_text(face = "bold", size = 12),
-          axis.title = element_text(size = 13, face = 'bold')))
+          axis.title = element_text(size = 13, face = 'bold'))
+      if (!is.null(title)) p <- p + ggtitle(title)
+      return(p)
     }
 
     beta_dataframe <- data.frame(x = rep(1:ncol(x$beta), each= nrow(x$beta)),
@@ -572,22 +609,26 @@ plot.lsirm <- function(object, ..., option = "interaction", rotation=FALSE, clus
     ylim1 = c(lower, upper)
 
     if(!is.null(data) && ncol(data) > 30){
-      ggplot(data=beta_dataframe, aes(x=x,y=value, group=x)) + geom_boxplot(outlier.shape = NA) +
+      p <- ggplot(data=beta_dataframe, aes(x=x,y=value, group=x)) + geom_boxplot(outlier.shape = NA) +
         coord_cartesian(ylim = ylim1*1.05) +
         scale_x_continuous(breaks = round(seq(from = 0, to = ncol(x$beta), length.out = 10))) +
-        xlab("Item number") + ylab("Beta estimates")+
+        xlab(if (is.null(xlab)) "Item number" else xlab) + 
+        ylab(if (is.null(ylab)) "Beta estimates" else ylab) +
         theme(axis.text.x = element_text(face="bold",size=13),
               axis.text.y = element_text( face="bold",size=15),
               axis.title=element_text(size=15, face='bold'))
     }else{
-      ggplot(data=beta_dataframe, aes(x=x,y=value, group=x))+ geom_boxplot(outlier.shape = NA) +
+      p <- ggplot(data=beta_dataframe, aes(x=x,y=value, group=x))+ geom_boxplot(outlier.shape = NA) +
         coord_cartesian(ylim = ylim1*1.05) +
         scale_x_continuous(breaks = 0:ncol(x$beta)) +
-        xlab("Item number") + ylab("Beta estimates")+
+        xlab(if (is.null(xlab)) "Item number" else xlab) + 
+        ylab(if (is.null(ylab)) "Beta estimates" else ylab) +
         theme(axis.text.x = element_text(face="bold",size=13),
               axis.text.y = element_text( face="bold",size=15),
               axis.title=element_text(size=15, face='bold'))
     }
+    if (!is.null(title)) p <- p + ggtitle(title)
+    return(p)
   }else if(option == "theta"){
   if(is.null(data)) stop("The original response data is not available in this object.")
 
@@ -613,8 +654,9 @@ plot.lsirm <- function(object, ..., option = "interaction", rotation=FALSE, clus
       # null_level <- levels(binning)[table(binning) == 0]
       # if(length(null_level) != 0) theta_temp <- rbind(theta_temp, data.frame(x = null_level, value = NA))
 
-      ggplot(data=theta_temp, aes(x=x,y=value, group=x))+ geom_boxplot() +
-        xlab("Sum score") + ylab("Theta estimates")+
+      p <- ggplot(data=theta_temp, aes(x=x,y=value, group=x))+ geom_boxplot() +
+        xlab(if (is.null(xlab)) "Sum score" else xlab) + 
+        ylab(if (is.null(ylab)) "Theta estimates" else ylab) +
         theme(axis.text.x = element_text(face="bold",size=8),
               axis.text.y = element_text( face="bold",size=15),
               axis.title=element_text(size=15, face='bold'))
@@ -622,21 +664,25 @@ plot.lsirm <- function(object, ..., option = "interaction", rotation=FALSE, clus
       # Binary Data
       theta_temp <- data.frame(x = total_score, value = x$theta_estimate)
       if(ncol(data) > 30){
-        ggplot(data=theta_temp, aes(x=x,y=value, group=x))+ geom_boxplot() +
-          xlab("Sum score") + ylab("Theta estimates")+
+        p <- ggplot(data=theta_temp, aes(x=x,y=value, group=x))+ geom_boxplot() +
+          xlab(if (is.null(xlab)) "Sum score" else xlab) + 
+          ylab(if (is.null(ylab)) "Theta estimates" else ylab) +
           scale_x_continuous(breaks = round(seq(from = 0, to = ncol(x$beta), length.out = 10))) +
           theme(axis.text.x = element_text(face="bold",size=13),
                 axis.text.y = element_text( face="bold",size=15),
                 axis.title=element_text(size=15, face='bold'))
       }else{
-        ggplot(data=theta_temp, aes(x=x, y=value, group = x))+ geom_boxplot() +
-          xlab("Sum score") + ylab("Theta estimates")+
+        p <- ggplot(data=theta_temp, aes(x=x, y=value, group = x))+ geom_boxplot() +
+          xlab(if (is.null(xlab)) "Sum score" else xlab) + 
+          ylab(if (is.null(ylab)) "Theta estimates" else ylab) +
           scale_x_continuous(breaks = 0:ncol(x$beta)) +
           theme(axis.text.x = element_text(face="bold",size=13),
                 axis.text.y = element_text( face="bold",size=15),
                 axis.title=element_text(size=15, face='bold'))
       }
     }
+    if (!is.null(title)) p <- p + ggtitle(title)
+    return(p)
   }else if(option == "alpha"){
 
     if(is.null(x$alpha) == TRUE){
@@ -657,22 +703,26 @@ plot.lsirm <- function(object, ..., option = "interaction", rotation=FALSE, clus
       ylim1 = c(lower, upper)
 
       if(!is.null(data) && ncol(data) > 30){
-        ggplot(data=alpha_dataframe, aes(x=x,y=value, group=x)) + geom_boxplot(outlier.shape = NA) +
+        p <- ggplot(data=alpha_dataframe, aes(x=x,y=value, group=x)) + geom_boxplot(outlier.shape = NA) +
           coord_cartesian(ylim = ylim1*1.05) +
           scale_x_continuous(breaks = round(seq(from = 0, to = ncol(x$alpha), length.out = 10))) +
-          xlab("Item number") + ylab("Alpha estimates")+
+          xlab(if (is.null(xlab)) "Item number" else xlab) + 
+          ylab(if (is.null(ylab)) "Alpha estimates" else ylab) +
           theme(axis.text.x = element_text(face="bold",size=13),
                 axis.text.y = element_text( face="bold",size=15),
                 axis.title=element_text(size=15, face='bold'))
       }else{
-        ggplot(data=alpha_dataframe, aes(x=x,y=value, group=x))+ geom_boxplot(outlier.shape = NA) +
+        p <- ggplot(data=alpha_dataframe, aes(x=x,y=value, group=x))+ geom_boxplot(outlier.shape = NA) +
           coord_cartesian(ylim = ylim1*1.05) +
           scale_x_continuous(breaks = 0:ncol(x$alpha)) +
-          xlab("Item number") + ylab("Alpha estimates")+
+          xlab(if (is.null(xlab)) "Item number" else xlab) + 
+          ylab(if (is.null(ylab)) "Alpha estimates" else ylab) +
           theme(axis.text.x = element_text(face="bold",size=13),
                 axis.text.y = element_text( face="bold",size=15),
                 axis.title=element_text(size=15, face='bold'))
       }
+      if (!is.null(title)) p <- p + ggtitle(title)
+      return(p)
     }
   }
 }

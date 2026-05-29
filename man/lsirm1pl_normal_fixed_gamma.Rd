@@ -126,9 +126,10 @@ missing_mat     <- matrix(rbinom(500, size = 1, prob = 0.2),ncol=10,nrow=50)
 # make missing value with missing indicator matrix
 data[missing_mat==1] <- 99
 
-lsirm_result <- lsirm1pl_normal_fixed_gamma(data)
+lsirm_result <- lsirm1pl_normal_fixed_gamma(data, niter = 1000, nburn = 500)
 
 # The code following can achieve the same result.
-lsirm_result <- lsirm(data ~ lsirm1pl(spikenslab = FALSE, fixed_gamma = TRUE))
+lsirm_result <- lsirm(data ~ lsirm1pl(spikenslab = FALSE, fixed_gamma = TRUE,
+                      niter = 1000, nburn = 500))
 
 }

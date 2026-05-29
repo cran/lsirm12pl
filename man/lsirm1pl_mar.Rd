@@ -24,7 +24,7 @@ lsirm1pl_mar(
   pr_sd_gamma = 1,
   pr_a_theta = 0.001,
   pr_b_theta = 0.001,
-  missing.val = 99,
+  missing.val = NA,
   verbose = FALSE,
   fix_theta_sd = FALSE,
   adapt = NULL
@@ -141,7 +141,7 @@ lsirm_result <- lsirm1pl_mar(data)
 
 # The code following can achieve the same result.
 lsirm_result <- lsirm(data ~ lsirm1pl(spikenslab = FALSE, fixed_gamma = FALSE,
-missing_data ='mar', missing.val = 99))
+missing_data ='mar', missing.val = NA))
 }
 }
 \references{
