@@ -186,9 +186,11 @@ gof.lsirm = function(object, chain.idx=1){
 }
 
 make_prob_ordinal = function(niter, beta_array, theta, gamma, alpha = NULL, item, res, ncat, y_base = 0){
-  cat("\nSimulation Start\n\n")
-  pb <- txtProgressBar(title = "progress bar", min = 0, max = niter,
-                       style = 3, width = 50)
+  if(interactive()){
+    cat("\nSimulation Start\n\n")
+    pb <- txtProgressBar(title = "progress bar", min = 0, max = niter,
+                         style = 3, width = 50)
+  }
 
   n.i = dim(item)[2]
   n.r = dim(res)[2]
@@ -220,16 +222,18 @@ make_prob_ordinal = function(niter, beta_array, theta, gamma, alpha = NULL, item
 
       S[k, i] <- mean(y_base + cum_sum)
     }
-    setTxtProgressBar(pb, k, label = paste( round(k/niter * 100, 0), "% done"))
+    if(interactive()) setTxtProgressBar(pb, k, label = paste( round(k/niter * 100, 0), "% done"))
   }
 
   return(S)
 }
 
 make_prob = function(niter,beta,theta,gamma,sigma,item,res,type="continuous"){
-  cat("\nSimulation Start\n\n")
-  pb <- txtProgressBar(title = "progress bar", min = 0, max = niter,
-                       style = 3, width = 50)
+  if(interactive()){
+    cat("\nSimulation Start\n\n")
+    pb <- txtProgressBar(title = "progress bar", min = 0, max = niter,
+                         style = 3, width = 50)
+  }
   n.i = dim(item)[2]
   n.r = dim(res)[2]
   S = matrix(nrow=niter,ncol=n.i)
@@ -243,7 +247,7 @@ make_prob = function(niter,beta,theta,gamma,sigma,item,res,type="continuous"){
           P[j,i] = exp(beta[k, i]+theta[k, j]-gamma[k]*d)/(1+exp(beta[k, i]+theta[k, j]-gamma[k]*d))
         }
       }
-      setTxtProgressBar(pb, k, label = paste( round(k/niter * 100, 0), "% done"))
+      if(interactive()) setTxtProgressBar(pb, k, label = paste( round(k/niter * 100, 0), "% done"))
       S[k,] = colMeans(matrix(rbinom(n.r*n.i,1,P),nrow=n.r,ncol=n.i))
     }
   }else if(type=="continuous"){
@@ -254,7 +258,7 @@ make_prob = function(niter,beta,theta,gamma,sigma,item,res,type="continuous"){
           P[j,i] = beta[k, i]+theta[k, j]-gamma[k]*d
         }
       }
-      setTxtProgressBar(pb, k, label = paste( round(k/niter * 100, 0), "% done"))
+      if(interactive()) setTxtProgressBar(pb, k, label = paste( round(k/niter * 100, 0), "% done"))
       S[k,] = colMeans(P + matrix(rnorm(n.i*n.r, 0, sigma[k]),nrow=n.r,ncol=n.i))
     }
   }

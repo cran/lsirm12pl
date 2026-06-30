@@ -89,7 +89,7 @@ lsirmgrm2pl <- function(data, ncat = NULL, missing_data = NA, missing.val = NA,
   if(!is.na(seed)){
     set.seed(seed)
   }
-  cat("\n Fitting ordinal LSIRM (GRM 2PL) with MCMC algorithm\n")
+  if(interactive()) cat("\n Fitting ordinal LSIRM (GRM 2PL) with MCMC algorithm\n")
 
   if(anyNA(data) && is.na(missing_data)){
     warning("NA values detected in GRM 2PL data; treating them as missing_data = 'mcar'.", call. = FALSE)
@@ -128,7 +128,7 @@ lsirmgrm2pl <- function(data, ncat = NULL, missing_data = NA, missing.val = NA,
       for(i in 1:chains){
         output[[i]] <- fit_one()
         output[[i]]$dtype <- "ordinal"
-        cat(sprintf("Chain %d / %d completed\n", i, chains))
+        if(interactive()) cat(sprintf("Chain %d / %d completed\n", i, chains))
       }
     }else{
       if(chains < multicore){
@@ -310,7 +310,7 @@ lsirmgrm2pl_o <- function(data, ncat = NULL, missing_data = NA, missing.val = NA
   w.proc <- array(0, dim = c(nmcmc, nitem, ndim))
   z.proc <- array(0, dim = c(nmcmc, nsample, ndim))
 
-  cat("\n")
+  if(interactive()) cat("\n")
 
   for(iter in 1:nmcmc){
     z.iter <- output$z[iter,,]

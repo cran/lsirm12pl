@@ -85,7 +85,7 @@ lsirm2pl_normal_fixed_gamma = function(data, ndim = 2, niter = 15000, nburn = 25
   z.proc = array(0,dim=c(nmcmc,nsample,ndim))
 
   # cat("\n\nProcrustes Matching Analysis\n")
-cat("\n")
+if(interactive()) cat("\n")
 
   for(iter in 1:nmcmc){
     z.iter = output$z[iter,,]

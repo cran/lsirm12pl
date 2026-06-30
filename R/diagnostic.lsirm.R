@@ -54,6 +54,10 @@ diagnostic.lsirm <- function(object,
                                               theta=c(1)),
                              gelman.diag = FALSE)
 {
+  if(!interactive()){
+    message("diagnostic() produces plots and is only available in interactive mode.")
+    return(invisible(NULL))
+  }
 
   ACF <- Chain <- Iteration <- Lag <- PSRF <- Type <- iteration <- var1 <- NULL
   orders = data.frame(idx = c(1:9),

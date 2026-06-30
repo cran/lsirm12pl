@@ -4,6 +4,13 @@
 #include <RcppArmadillo.h>
 using namespace arma;
 
+static int lsm_interactive = -1;
+static inline bool lsm_is_interactive() {
+  if (lsm_interactive == -1)
+    lsm_interactive = Rcpp::as<bool>(Rcpp::Function("interactive")()) ? 1 : 0;
+  return lsm_interactive == 1;
+}
+
 // This is a simple example of exporting a C++ function to R. You can
 // source this function into an R session using the Rcpp::sourceCpp
 // function (or via the Source button on the editor toolbar). Learn
@@ -115,7 +122,7 @@ Rcpp::List onepl_cpp(arma::mat data, const int niter, const int nburn, const int
       count++;
     }
 
-    if(iter % nprint == 0){
+    if(iter % nprint == 0 && lsm_is_interactive()){
       Rprintf("Iteration: %.5u", iter);
       for(i = 0 ; i < 6 ; i++ ) {
         Rprintf("% .3f ", oldbeta(i));
@@ -278,7 +285,7 @@ Rcpp::List two_pl(arma::mat data, const int niter, const int nburn, const int nt
       count++;
     }
 
-    if(iter % nprint == 0){
+    if(iter % nprint == 0 && lsm_is_interactive()){
       Rprintf("Iteration: %.5u ", iter);
       for(i = 0 ; i < nitem ; i++ ) {
         Rprintf("% .3f ", oldbeta(i));

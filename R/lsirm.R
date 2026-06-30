@@ -205,7 +205,7 @@ lsirm1pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
   if (!is.na(seed)) {
     set.seed(seed)
   }
-  cat("\n Fitting LSIRM with MCMC algorithm\n")
+  if(interactive()) cat("\n Fitting LSIRM with MCMC algorithm\n")
   if (anyNA(data) && is.na(missing_data)) {
     warning("NA values detected; treating them as missing_data = 'mcar'.", call. = FALSE)
     missing_data <- "mcar"
@@ -224,7 +224,7 @@ lsirm1pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               pr_mean_gamma = pr_mean_gamma, pr_sd_gamma = pr_sd_gamma, pr_a_theta = pr_a_theta, pr_b_theta = pr_b_theta, verbose = verbose, fix_theta_sd = fix_theta_sd, adapt = adapt, ...
             )
             output[[i]]$dtype <- "binary"
-            cat(sprintf("Chain %d / %d completed\n", i, chains))
+            if(interactive()) cat(sprintf("Chain %d / %d completed\n", i, chains))
           }
         } else {
           if (chains < multicore) {
@@ -257,7 +257,7 @@ lsirm1pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               },
               data = data, ..., simplify = F
               )
-              cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
+              if(interactive()) cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
               # cat(sprintf("\n Core %d / %d finished",c,length(chunks)),"\n")
             },
             error = function(e) {
@@ -294,7 +294,7 @@ lsirm1pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               pr_mean_gamma = pr_mean_gamma, pr_sd_gamma = pr_sd_gamma, pr_a_theta = pr_a_theta, pr_b_theta = pr_b_theta, verbose = verbose, fix_theta_sd = fix_theta_sd, adapt = adapt, ...
             )
             output[[i]]$dtype <- "continuous"
-            cat(sprintf("Chain %d / %d completed \n", i, chains))
+            if(interactive()) cat(sprintf("Chain %d / %d completed \n", i, chains))
           }
         } else {
           if (chains < multicore) {
@@ -331,7 +331,7 @@ lsirm1pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               },
               data = data, ..., simplify = F
               )
-              cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
+              if(interactive()) cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
               # cat(sprintf("\n Core %d / %d finished",c,length(chunks)),"\n")
             },
             error = function(e) {
@@ -373,7 +373,7 @@ lsirm1pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               pr_a_theta = pr_a_theta, pr_b_theta = pr_b_theta, fix_theta_sd = fix_theta_sd, adapt = adapt, ...
             )
             output[[i]]$dtype <- "binary"
-            cat(sprintf("\n\n Chain %d / %d completed \n\n", i, chains))
+            if(interactive()) cat(sprintf("\n\n Chain %d / %d completed \n\n", i, chains))
           }
         } else {
           if (chains < multicore) {
@@ -410,7 +410,7 @@ lsirm1pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               },
               data = data, ..., simplify = F
               )
-              cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
+              if(interactive()) cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
             },
             error = function(e) {
               parallel::stopCluster(cl)
@@ -450,7 +450,7 @@ lsirm1pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               pr_a_theta = pr_a_theta, pr_b_theta = pr_b_theta, adapt = adapt, ...
             )
             output[[i]]$dtype <- "continuous"
-            cat(sprintf("Chain %d / %d completed \n", i, chains))
+            if(interactive()) cat(sprintf("Chain %d / %d completed \n", i, chains))
           }
         } else {
           if (chains < multicore) {
@@ -488,7 +488,7 @@ lsirm1pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               },
               data = data, ..., simplify = F
               )
-              cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
+              if(interactive()) cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
               # cat(sprintf("\n Core %d / %d finished",c,length(chunks)),"\n")
             },
             error = function(e) {
@@ -532,7 +532,7 @@ lsirm1pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               pr_a_theta = pr_a_theta, pr_b_theta = pr_b_theta, adapt = adapt, ...
             )
             output[[i]]$dtype <- "binary"
-            cat(sprintf("Chain %d / %d completed\n", i, chains))
+            if(interactive()) cat(sprintf("Chain %d / %d completed\n", i, chains))
           }
         } else {
           if (chains < multicore) {
@@ -571,7 +571,7 @@ lsirm1pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               },
               data = data, ..., simplify = F
               )
-              cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
+              if(interactive()) cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
               # cat(sprintf("\n Core %d / %d finished",c,length(chunks)),"\n")
             },
             error = function(e) {
@@ -614,7 +614,7 @@ lsirm1pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               pr_a_theta = pr_a_theta, pr_b_theta = pr_b_theta, adapt = adapt, ...
             )
             output[[i]]$dtype <- "continuous"
-            cat(sprintf("Chain %d / %d completed \n", i, chains))
+            if(interactive()) cat(sprintf("Chain %d / %d completed \n", i, chains))
           }
         } else {
           if (chains < multicore) {
@@ -652,7 +652,7 @@ lsirm1pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               },
               data = data, ..., simplify = F
               )
-              cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
+              if(interactive()) cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
               # cat(sprintf("\n Core %d / %d finished",c,length(chunks)),"\n")
             },
             error = function(e) {
@@ -696,7 +696,7 @@ lsirm1pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               pr_a_theta = pr_a_theta, pr_b_theta = pr_b_theta, adapt = adapt, ...
             )
             output[[i]]$dtype <- "binary"
-            cat(sprintf("Chain %d / %d completed\n", i, chains))
+            if(interactive()) cat(sprintf("Chain %d / %d completed\n", i, chains))
           }
         } else {
           if (chains < multicore) {
@@ -736,7 +736,7 @@ lsirm1pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               },
               data = data, ..., simplify = F
               )
-              cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
+              if(interactive()) cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
               # cat(sprintf("\n Core %d / %d finished",c,length(chunks)),"\n")
             },
             # output <- parallel::parSapply(cl, X, function(X,data,...){lsirm1pl_o(..., data)},
@@ -781,7 +781,7 @@ lsirm1pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               pr_a_theta = pr_a_theta, pr_b_theta = pr_b_theta, adapt = adapt, ...
             )
             output[[i]]$dtype <- "continuous"
-            cat(sprintf("Chain %d / %d completed \n", i, chains))
+            if(interactive()) cat(sprintf("Chain %d / %d completed \n", i, chains))
           }
         } else {
           if (chains < multicore) {
@@ -819,7 +819,7 @@ lsirm1pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               },
               data = data, ..., simplify = F
               )
-              cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
+              if(interactive()) cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
               # cat(sprintf("\n Core %d / %d finished",c,length(chunks)),"\n")
             },
             error = function(e) {
@@ -863,7 +863,7 @@ lsirm1pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               pr_a_theta = pr_a_theta, pr_b_theta = pr_b_theta, adapt = adapt, ...
             )
             output[[i]]$dtype <- "binary"
-            cat(sprintf("Chain %d / %d completed\n", i, chains))
+            if(interactive()) cat(sprintf("Chain %d / %d completed\n", i, chains))
           }
         } else {
           if (chains < multicore) {
@@ -903,7 +903,7 @@ lsirm1pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               },
               data = data, ..., simplify = F
               )
-              cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
+              if(interactive()) cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
               # cat(sprintf("\n Core %d / %d finished",c,length(chunks)),"\n")
             },
             # output <- parallel::parSapply(cl, X, function(X,data,...){lsirm1pl_o(..., data)},
@@ -948,7 +948,7 @@ lsirm1pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               pr_a_theta = pr_a_theta, pr_b_theta = pr_b_theta, adapt = adapt, ...
             )
             output[[i]]$dtype <- "continuous"
-            cat(sprintf("Chain %d / %d completed \n", i, chains))
+            if(interactive()) cat(sprintf("Chain %d / %d completed \n", i, chains))
           }
         } else {
           if (chains < multicore) {
@@ -1003,7 +1003,7 @@ lsirm1pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               },
               data = data, ..., simplify = F
               )
-              cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
+              if(interactive()) cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
               # cat(sprintf("\n Core %d / %d finished",c,length(chunks)),"\n")
             },
             error = function(e) {
@@ -1047,7 +1047,7 @@ lsirm1pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               pr_a_theta = pr_a_theta, pr_b_theta = pr_b_theta, adapt = adapt, ...
             )
             output[[i]]$dtype <- "binary"
-            cat(sprintf("Chain %d / %d completed\n", i, chains))
+            if(interactive()) cat(sprintf("Chain %d / %d completed\n", i, chains))
           }
         } else {
           if (chains < multicore) {
@@ -1087,7 +1087,7 @@ lsirm1pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               },
               data = data, ..., simplify = F
               )
-              cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
+              if(interactive()) cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
               # cat(sprintf("\n Core %d / %d finished",c,length(chunks)),"\n")
             },
             # output <- parallel::parSapply(cl, X, function(X,data,...){lsirm1pl_o(..., data)},
@@ -1132,7 +1132,7 @@ lsirm1pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               pr_a_theta = pr_a_theta, pr_b_theta = pr_b_theta, adapt = adapt, ...
             )
             output[[i]]$dtype <- "continuous"
-            cat(sprintf("Chain %d / %d completed \n", i, chains))
+            if(interactive()) cat(sprintf("Chain %d / %d completed \n", i, chains))
           }
         } else {
           if (chains < multicore) {
@@ -1170,7 +1170,7 @@ lsirm1pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               },
               data = data, ..., simplify = F
               )
-              cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
+              if(interactive()) cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
               # cat(sprintf("\n Core %d / %d finished",c,length(chunks)),"\n")
             },
             error = function(e) {
@@ -1214,7 +1214,7 @@ lsirm1pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               pr_a_theta = pr_a_theta, pr_b_theta = pr_b_theta, adapt = adapt, ...
             )
             output[[i]]$dtype <- "binary"
-            cat(sprintf("Chain %d / %d completed\n", i, chains))
+            if(interactive()) cat(sprintf("Chain %d / %d completed\n", i, chains))
           }
         } else {
           if (chains < multicore) {
@@ -1254,7 +1254,7 @@ lsirm1pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               },
               data = data, ..., simplify = F
               )
-              cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
+              if(interactive()) cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
               # cat(sprintf("\n Core %d / %d finished",c,length(chunks)),"\n")
             },
             # output <- parallel::parSapply(cl, X, function(X,data,...){lsirm1pl_o(..., data)},
@@ -1299,7 +1299,7 @@ lsirm1pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               pr_a_theta = pr_a_theta, pr_b_theta = pr_b_theta, adapt = adapt, ...
             )
             output[[i]]$dtype <- "continuous"
-            cat(sprintf("Chain %d / %d completed \n", i, chains))
+            if(interactive()) cat(sprintf("Chain %d / %d completed \n", i, chains))
           }
         } else {
           if (chains < multicore) {
@@ -1337,7 +1337,7 @@ lsirm1pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               },
               data = data, ..., simplify = F
               )
-              cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
+              if(interactive()) cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
               # cat(sprintf("\n Core %d / %d finished",c,length(chunks)),"\n")
             },
             error = function(e) {
@@ -1381,7 +1381,7 @@ lsirm1pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               pr_a_theta = pr_a_theta, pr_b_theta = pr_b_theta, adapt = adapt, ...
             )
             output[[i]]$dtype <- "binary"
-            cat(sprintf("Chain %d / %d completed\n", i, chains))
+            if(interactive()) cat(sprintf("Chain %d / %d completed\n", i, chains))
           }
         } else {
           if (chains < multicore) {
@@ -1421,7 +1421,7 @@ lsirm1pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               },
               data = data, ..., simplify = F
               )
-              cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
+              if(interactive()) cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
               # cat(sprintf("\n Core %d / %d finished",c,length(chunks)),"\n")
             },
             # output <- parallel::parSapply(cl, X, function(X,data,...){lsirm1pl_o(..., data)},
@@ -1466,7 +1466,7 @@ lsirm1pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               pr_a_theta = pr_a_theta, pr_b_theta = pr_b_theta, adapt = adapt, ...
             )
             output[[i]]$dtype <- "continuous"
-            cat(sprintf("Chain %d / %d completed \n", i, chains))
+            if(interactive()) cat(sprintf("Chain %d / %d completed \n", i, chains))
           }
         } else {
           if (chains < multicore) {
@@ -1504,7 +1504,7 @@ lsirm1pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               },
               data = data, ..., simplify = F
               )
-              cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
+              if(interactive()) cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
               # cat(sprintf("\n Core %d / %d finished",c,length(chunks)),"\n")
             },
             error = function(e) {
@@ -1548,7 +1548,7 @@ lsirm1pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               pr_a_theta = pr_a_theta, pr_b_theta = pr_b_theta, adapt = adapt, ...
             )
             output[[i]]$dtype <- "binary"
-            cat(sprintf("Chain %d / %d completed\n", i, chains))
+            if(interactive()) cat(sprintf("Chain %d / %d completed\n", i, chains))
           }
         } else {
           if (chains < multicore) {
@@ -1588,7 +1588,7 @@ lsirm1pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               },
               data = data, ..., simplify = F
               )
-              cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
+              if(interactive()) cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
               # cat(sprintf("\n Core %d / %d finished",c,length(chunks)),"\n")
             },
             # output <- parallel::parSapply(cl, X, function(X,data,...){lsirm1pl_o(..., data)},
@@ -1633,7 +1633,7 @@ lsirm1pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               pr_a_theta = pr_a_theta, pr_b_theta = pr_b_theta, adapt = adapt, ...
             )
             output[[i]]$dtype <- "continuous"
-            cat(sprintf("Chain %d / %d completed \n", i, chains))
+            if(interactive()) cat(sprintf("Chain %d / %d completed \n", i, chains))
           }
         } else {
           if (chains < multicore) {
@@ -1671,7 +1671,7 @@ lsirm1pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               },
               data = data, ..., simplify = F
               )
-              cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
+              if(interactive()) cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
               # cat(sprintf("\n Core %d / %d finished",c,length(chunks)),"\n")
             },
             error = function(e) {
@@ -1870,7 +1870,7 @@ lsirm2pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
   if (!is.na(seed)) {
     set.seed(seed)
   }
-  cat("\n Fitting LSIRM with MCMC algorithm\n")
+  if(interactive()) cat("\n Fitting LSIRM with MCMC algorithm\n")
   if (anyNA(data) && is.na(missing_data)) {
     warning("NA values detected; treating them as missing_data = 'mcar'.", call. = FALSE)
     missing_data <- "mcar"
@@ -1889,7 +1889,7 @@ lsirm2pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               pr_mean_alpha = pr_mean_alpha, pr_sd_alpha = pr_sd_alpha, pr_a_theta = pr_a_theta, pr_b_theta = pr_b_theta, fix_theta_sd = fix_theta_sd, fix_alpha_1 = fix_alpha_1, adapt = adapt, ...
             )
             output[[i]]$dtype <- "binary"
-            cat(sprintf("Chain %d / %d completed\n", i, chains))
+            if(interactive()) cat(sprintf("Chain %d / %d completed\n", i, chains))
           }
         } else {
           if (chains < multicore) {
@@ -1929,7 +1929,7 @@ lsirm2pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               },
               data = data, ..., simplify = F
               )
-              cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
+              if(interactive()) cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
               # cat(sprintf("\n Core %d / %d finished",c,length(chunks)),"\n")
             },
             # output <- parallel::parSapply(cl, X, function(X,data,...){lsirm2pl_o(..., data)},
@@ -1974,7 +1974,7 @@ lsirm2pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               pr_mean_alpha = pr_mean_alpha, pr_sd_alpha = pr_sd_alpha, pr_a_theta = pr_a_theta, pr_b_theta = pr_b_theta, fix_alpha_1 = fix_alpha_1, adapt = adapt, ...
             )
             output[[i]]$dtype <- "continuous"
-            cat(sprintf("Chain %d / %d completed \n", i, chains))
+            if(interactive()) cat(sprintf("Chain %d / %d completed \n", i, chains))
           }
         } else {
           if (chains < multicore) {
@@ -2012,7 +2012,7 @@ lsirm2pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               },
               data = data, ..., simplify = F
               )
-              cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
+              if(interactive()) cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
               # cat(sprintf("\n Core %d / %d finished",c,length(chunks)),"\n")
             },
             error = function(e) {
@@ -2056,7 +2056,7 @@ lsirm2pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               pr_a_theta = pr_a_theta, pr_b_theta = pr_b_theta, adapt = adapt, ...
             )
             output[[i]]$dtype <- "binary"
-            cat(sprintf("Chain %d / %d completed\n", i, chains))
+            if(interactive()) cat(sprintf("Chain %d / %d completed\n", i, chains))
           }
         } else {
           if (chains < multicore) {
@@ -2094,7 +2094,7 @@ lsirm2pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               },
               data = data, ..., simplify = F
               )
-              cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
+              if(interactive()) cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
             },
             error = function(e) {
               parallel::stopCluster(cl)
@@ -2136,7 +2136,7 @@ lsirm2pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               pr_a_theta = pr_a_theta, pr_b_theta = pr_b_theta, adapt = adapt, ...
             )
             output[[i]]$dtype <- "continuous"
-            cat(sprintf("Chain %d / %d completed \n", i, chains))
+            if(interactive()) cat(sprintf("Chain %d / %d completed \n", i, chains))
           }
         } else {
           if (chains < multicore) {
@@ -2174,7 +2174,7 @@ lsirm2pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               },
               data = data, ..., simplify = F
               )
-              cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
+              if(interactive()) cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
               # cat(sprintf("\n Core %d / %d finished",c,length(chunks)),"\n")
             },
             error = function(e) {
@@ -2218,7 +2218,7 @@ lsirm2pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               pr_a_theta = pr_a_theta, pr_b_theta = pr_b_theta, adapt = adapt, ...
             )
             output[[i]]$dtype <- "binary"
-            cat(sprintf("Chain %d / %d completed\n", i, chains))
+            if(interactive()) cat(sprintf("Chain %d / %d completed\n", i, chains))
           }
         } else {
           if (chains < multicore) {
@@ -2257,7 +2257,7 @@ lsirm2pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               },
               data = data, ..., simplify = F
               )
-              cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
+              if(interactive()) cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
               # cat(sprintf("\n Core %d / %d finished",c,length(chunks)),"\n")
             },
             error = function(e) {
@@ -2300,7 +2300,7 @@ lsirm2pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               pr_a_theta = pr_a_theta, pr_b_theta = pr_b_theta, adapt = adapt, ...
             )
             output[[i]]$dtype <- "continuous"
-            cat(sprintf("Chain %d / %d completed \n", i, chains))
+            if(interactive()) cat(sprintf("Chain %d / %d completed \n", i, chains))
           }
         } else {
           if (chains < multicore) {
@@ -2338,7 +2338,7 @@ lsirm2pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               },
               data = data, ..., simplify = F
               )
-              cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
+              if(interactive()) cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
               # cat(sprintf("\n Core %d / %d finished",c,length(chunks)),"\n")
             },
             error = function(e) {
@@ -2382,7 +2382,7 @@ lsirm2pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               pr_a_theta = pr_a_theta, pr_b_theta = pr_b_theta, adapt = adapt, ...
             )
             output[[i]]$dtype <- "binary"
-            cat(sprintf("Chain %d / %d completed\n", i, chains))
+            if(interactive()) cat(sprintf("Chain %d / %d completed\n", i, chains))
           }
         } else {
           if (chains < multicore) {
@@ -2422,7 +2422,7 @@ lsirm2pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               },
               data = data, ..., simplify = F
               )
-              cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
+              if(interactive()) cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
               # cat(sprintf("\n Core %d / %d finished",c,length(chunks)),"\n")
             },
             # output <- parallel::parSapply(cl, X, function(X,data,...){lsirm2pl_o(..., data)},
@@ -2467,7 +2467,7 @@ lsirm2pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               pr_a_theta = pr_a_theta, pr_b_theta = pr_b_theta, adapt = adapt, ...
             )
             output[[i]]$dtype <- "continuous"
-            cat(sprintf("Chain %d / %d completed \n", i, chains))
+            if(interactive()) cat(sprintf("Chain %d / %d completed \n", i, chains))
           }
         } else {
           if (chains < multicore) {
@@ -2505,7 +2505,7 @@ lsirm2pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               },
               data = data, ..., simplify = F
               )
-              cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
+              if(interactive()) cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
               # cat(sprintf("\n Core %d / %d finished",c,length(chunks)),"\n")
             },
             error = function(e) {
@@ -2549,7 +2549,7 @@ lsirm2pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               pr_a_theta = pr_a_theta, pr_b_theta = pr_b_theta, adapt = adapt, ...
             )
             output[[i]]$dtype <- "binary"
-            cat(sprintf("Chain %d / %d completed\n", i, chains))
+            if(interactive()) cat(sprintf("Chain %d / %d completed\n", i, chains))
           }
         } else {
           if (chains < multicore) {
@@ -2589,7 +2589,7 @@ lsirm2pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               },
               data = data, ..., simplify = F
               )
-              cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
+              if(interactive()) cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
               # cat(sprintf("\n Core %d / %d finished",c,length(chunks)),"\n")
             },
             # output <- parallel::parSapply(cl, X, function(X,data,...){lsirm2pl_o(..., data)},
@@ -2634,7 +2634,7 @@ lsirm2pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               pr_a_theta = pr_a_theta, pr_b_theta = pr_b_theta, adapt = adapt, ...
             )
             output[[i]]$dtype <- "continuous"
-            cat(sprintf("Chain %d / %d completed \n", i, chains))
+            if(interactive()) cat(sprintf("Chain %d / %d completed \n", i, chains))
           }
         } else {
           if (chains < multicore) {
@@ -2672,7 +2672,7 @@ lsirm2pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               },
               data = data, ..., simplify = F
               )
-              cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
+              if(interactive()) cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
               # cat(sprintf("\n Core %d / %d finished",c,length(chunks)),"\n")
             },
             error = function(e) {
@@ -2716,7 +2716,7 @@ lsirm2pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               pr_a_theta = pr_a_theta, pr_b_theta = pr_b_theta, adapt = adapt, ...
             )
             output[[i]]$dtype <- "binary"
-            cat(sprintf("Chain %d / %d completed\n", i, chains))
+            if(interactive()) cat(sprintf("Chain %d / %d completed\n", i, chains))
           }
         } else {
           if (chains < multicore) {
@@ -2756,7 +2756,7 @@ lsirm2pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               },
               data = data, ..., simplify = F
               )
-              cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
+              if(interactive()) cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
               # cat(sprintf("\n Core %d / %d finished",c,length(chunks)),"\n")
             },
             # output <- parallel::parSapply(cl, X, function(X,data,...){lsirm2pl_o(..., data)},
@@ -2801,7 +2801,7 @@ lsirm2pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               pr_a_theta = pr_a_theta, pr_b_theta = pr_b_theta, adapt = adapt, ...
             )
             output[[i]]$dtype <- "continuous"
-            cat(sprintf("Chain %d / %d completed \n", i, chains))
+            if(interactive()) cat(sprintf("Chain %d / %d completed \n", i, chains))
           }
         } else {
           if (chains < multicore) {
@@ -2839,7 +2839,7 @@ lsirm2pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               },
               data = data, ..., simplify = F
               )
-              cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
+              if(interactive()) cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
               # cat(sprintf("\n Core %d / %d finished",c,length(chunks)),"\n")
             },
             error = function(e) {
@@ -2883,7 +2883,7 @@ lsirm2pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               pr_a_theta = pr_a_theta, pr_b_theta = pr_b_theta, adapt = adapt, ...
             )
             output[[i]]$dtype <- "binary"
-            cat(sprintf("Chain %d / %d completed\n", i, chains))
+            if(interactive()) cat(sprintf("Chain %d / %d completed\n", i, chains))
           }
         } else {
           if (chains < multicore) {
@@ -2923,7 +2923,7 @@ lsirm2pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               },
               data = data, ..., simplify = F
               )
-              cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
+              if(interactive()) cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
               # cat(sprintf("\n Core %d / %d finished",c,length(chunks)),"\n")
             },
             # output <- parallel::parSapply(cl, X, function(X,data,...){lsirm2pl_o(..., data)},
@@ -2968,7 +2968,7 @@ lsirm2pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               pr_a_theta = pr_a_theta, pr_b_theta = pr_b_theta, adapt = adapt, ...
             )
             output[[i]]$dtype <- "continuous"
-            cat(sprintf("Chain %d / %d completed \n", i, chains))
+            if(interactive()) cat(sprintf("Chain %d / %d completed \n", i, chains))
           }
         } else {
           if (chains < multicore) {
@@ -3006,7 +3006,7 @@ lsirm2pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               },
               data = data, ..., simplify = F
               )
-              cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
+              if(interactive()) cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
               # cat(sprintf("\n Core %d / %d finished",c,length(chunks)),"\n")
             },
             error = function(e) {
@@ -3050,7 +3050,7 @@ lsirm2pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               pr_a_theta = pr_a_theta, pr_b_theta = pr_b_theta, adapt = adapt, ...
             )
             output[[i]]$dtype <- "binary"
-            cat(sprintf("Chain %d / %d completed\n", i, chains))
+            if(interactive()) cat(sprintf("Chain %d / %d completed\n", i, chains))
           }
         } else {
           if (chains < multicore) {
@@ -3090,7 +3090,7 @@ lsirm2pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               },
               data = data, ..., simplify = F
               )
-              cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
+              if(interactive()) cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
               # cat(sprintf("\n Core %d / %d finished",c,length(chunks)),"\n")
             },
             # output <- parallel::parSapply(cl, X, function(X,data,...){lsirm2pl_o(..., data)},
@@ -3135,7 +3135,7 @@ lsirm2pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               pr_a_theta = pr_a_theta, pr_b_theta = pr_b_theta, adapt = adapt, ...
             )
             output[[i]]$dtype <- "continuous"
-            cat(sprintf("Chain %d / %d completed \n", i, chains))
+            if(interactive()) cat(sprintf("Chain %d / %d completed \n", i, chains))
           }
         } else {
           if (chains < multicore) {
@@ -3173,7 +3173,7 @@ lsirm2pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               },
               data = data, ..., simplify = F
               )
-              cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
+              if(interactive()) cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
               # cat(sprintf("\n Core %d / %d finished",c,length(chunks)),"\n")
             },
             error = function(e) {
@@ -3217,7 +3217,7 @@ lsirm2pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               pr_a_theta = pr_a_theta, pr_b_theta = pr_b_theta, adapt = adapt, ...
             )
             output[[i]]$dtype <- "binary"
-            cat(sprintf("Chain %d / %d completed\n", i, chains))
+            if(interactive()) cat(sprintf("Chain %d / %d completed\n", i, chains))
           }
         } else {
           if (chains < multicore) {
@@ -3257,7 +3257,7 @@ lsirm2pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               },
               data = data, ..., simplify = F
               )
-              cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
+              if(interactive()) cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
               # cat(sprintf("\n Core %d / %d finished",c,length(chunks)),"\n")
             },
             # output <- parallel::parSapply(cl, X, function(X,data,...){lsirm2pl_o(..., data)},
@@ -3302,7 +3302,7 @@ lsirm2pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               pr_a_theta = pr_a_theta, pr_b_theta = pr_b_theta, adapt = adapt, ...
             )
             output[[i]]$dtype <- "continuous"
-            cat(sprintf("Chain %d / %d completed \n", i, chains))
+            if(interactive()) cat(sprintf("Chain %d / %d completed \n", i, chains))
           }
         } else {
           if (chains < multicore) {
@@ -3340,7 +3340,7 @@ lsirm2pl <- function(data, spikenslab = FALSE, fixed_gamma = FALSE, missing_data
               },
               data = data, ..., simplify = F
               )
-              cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
+              if(interactive()) cat(sprintf("\n Chunk %d / %d processed \n", c, length(chunks)))
               # cat(sprintf("\n Core %d / %d finished",c,length(chunks)),"\n")
             },
             error = function(e) {

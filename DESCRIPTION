@@ -1,8 +1,8 @@
 Package: lsirm12pl
 Type: Package
 Title: Latent Space Item Response Model
-Version: 2.0.2
-Date: 2026-05-28
+Version: 2.0.3
+Date: 2026-06-29
 Authors@R: c(person("Dongyoung", "Go", role = c("aut"),
                      email = "dongyoung.gr@yonsei.ac.kr"),
 	       person("Gwanghee", "Kim", role = c("aut", "cre"),
@@ -27,11 +27,11 @@ Suggests: knitr
 Depends: R (>= 4.0.0)
 LazyData: true
 NeedsCompilation: yes
-Packaged: 2026-05-29 14:13:05 UTC; gwangheekim
+Packaged: 2026-06-30 14:23:26 UTC; ghk
 Author: Dongyoung Go [aut],
   Gwanghee Kim [aut, cre],
   Jina Park [aut],
   Ickhoon Jin [ctb],
   Minjeong Jeon [ctb]
 Repository: CRAN
-Date/Publication: 2026-05-29 14:40:02 UTC
+Date/Publication: 2026-06-30 16:30:02 UTC

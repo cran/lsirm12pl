@@ -51,6 +51,11 @@ plot.lsirm <- function(object, ..., option = "interaction", rotation=FALSE, clus
                        xlim = NULL, ylim = NULL, resp.size = 0.7, item.size = 4,
                        xlab = NULL, ylab = NULL, title = NULL){
 
+  if(!interactive()){
+    message("plot.lsirm() produces plots and is only available in interactive mode.")
+    return(invisible(NULL))
+  }
+
   group <- NULL
   type <- NULL
   value <- NULL
@@ -96,17 +101,12 @@ plot.lsirm <- function(object, ..., option = "interaction", rotation=FALSE, clus
 
       if(rotation){
         rot <- oblimin(item_position)
-        item_position = rot$loadings
+        item_position <- matrix(as.numeric(rot$loadings), nrow=nrow(item_position), ncol=2)
         resp_position <- resp_position %*% t(solve(rot$Th))
       }
 
-      df1=as.data.frame(item_position)
-      df2=as.data.frame(resp_position)
-      df1[,3]=notation[1]
-      df2[,3]=notation[2]
-
-      colnames(df1)=c('axis1','axis2','source')
-      colnames(df2)=c('axis1','axis2','source')
+      df1 <- data.frame(axis1=item_position[,1], axis2=item_position[,2], source=notation[1], stringsAsFactors=FALSE)
+      df2 <- data.frame(axis1=resp_position[,1], axis2=resp_position[,2], source=notation[2], stringsAsFactors=FALSE)
 
       df=rbind(df2,df1)
       colnames(df)=c('axis1','axis2','source')
@@ -232,13 +232,14 @@ plot.lsirm <- function(object, ..., option = "interaction", rotation=FALSE, clus
         kappalist <- list()
         omegalist <- list()
 
-        pb <- txtProgressBar(title = "progress bar", min = 0, max = Niter,
-                             style = 3, width = 50)
-
+        if(interactive()){
+          pb <- txtProgressBar(title = "progress bar", min = 0, max = Niter,
+                               style = 3, width = 50)
+        }
 
         # To calculate the BIC repeat 100 times
         for (i in 1:Niter){
-          setTxtProgressBar(pb, i, label = paste( round(i/Niter * 100, 0), "% done"))
+          if(interactive()) setTxtProgressBar(pb, i, label = paste( round(i/Niter * 100, 0), "% done"))
 
           # Update the alpha, omega, CC (Thomas process fitting procedures)
           Thomas<-MCMCestThomas(X, xlim, ylim, NStep=25000, DiscardStep=5000, Jump=5)

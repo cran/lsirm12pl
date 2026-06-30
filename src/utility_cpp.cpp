@@ -347,9 +347,14 @@ using namespace Rcpp;
 
 void progressbar(int step, int total)
 {
+  static int show = -1;
+  if (show == -1)
+    show = Rcpp::as<bool>(Rcpp::Function("interactive")()) ? 1 : 0;
+  if (!show) return;
+
   // progress width
   const int pwidth = 72;
-  
+
   // Prevent division by zero or incorrect display at the very beginning
   if (step <= 0 || total <= 0) return;
   if (step > total) step = total; // Ensure step doesn't exceed total

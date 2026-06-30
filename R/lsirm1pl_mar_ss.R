@@ -108,7 +108,7 @@ lsirm1pl_mar_ss = function(data, ndim = 2, niter = 15000, nburn = 2500, nthin = 
   w.proc = array(0,dim=c(nmcmc,nitem,ndim))
   z.proc = array(0,dim=c(nmcmc,nsample,ndim))
   # cat("\n\nProcrustes Matching Analysis\n")
-cat("\n")
+if(interactive()) cat("\n")
   for(iter in 1:nmcmc){
     z.iter = output$z[iter,,]
     w.iter = output$w[iter,,]
